@@ -1,0 +1,461 @@
+
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Junoon Perfumes | Luxury E-commerce</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&amp;family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/styles/user.css">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af37",
+                        "gold-metallic": "#c5a059",
+                        "background-light": "#fbfaf9",
+                        "background-dark": "#121212",
+                        "luxury-black": "#0a0a0a",
+                        "luxury-ivory": "#fbfaf9",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<!-- <style type="text/tailwindcss">
+        :root {
+            --primary-gold: #d4af37;
+            --deep-black: #050505;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .luxury-gradient {
+            background: linear-gradient(180deg, rgba(10, 10, 10, 0.9) 0%, rgba(10, 10, 10, 0.4) 100%);
+        }
+        .gold-text-effect {
+            background: linear-gradient(to bottom, #f9f295, #e0aa3e, #b8860b, #5d4a1f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0px 1px 1px rgba(0,0,0,0.3);
+        }
+        .gold-icon-effect {
+             filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.5));
+             color: #d4af37;
+        }
+    </style> -->
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-luxury-black dark:text-luxury-ivory transition-colors duration-300">
+<header class="sticky top-0 z-50 w-full bg-[var(--deep-black)] border-b border-primary/20 px-6 md:px-16 py-3 flex items-center justify-between">
+<div class="flex items-center gap-12">
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="relative w-10 h-12 flex flex-col items-center justify-center">
+<div class="w-6 h-1 bg-primary mb-[1px]"></div>
+<div class="w-3 h-3 border-2 border-primary rounded-full mb-[1px]"></div>
+<div class="w-8 h-8 border-r-4 border-b-4 border-l-4 border-primary rounded-b-sm flex items-end justify-start p-1">
+<div class="w-3 h-4 border-l-4 border-t-4 border-primary"></div>
+</div>
+</div>
+<div class="flex flex-col leading-none">
+<h1 class="text-primary font-serif text-3xl font-bold tracking-[0.1em] uppercase gold-text-effect">JUNOON</h1>
+<div class="flex flex-col">
+<span class="text-primary font-serif text-[10px] tracking-[0.4em] uppercase ml-1 opacity-90">Perfumes</span>
+<span class="text-primary font-serif italic text-[8px] tracking-[0.15em] ml-1 opacity-80 mt-0.5">Anussatti smrti</span>
+</div>
+</div>
+</div>
+<nav class="hidden lg:flex items-center gap-8 ml-4">
+<a class="text-xs font-bold tracking-[0.2em] text-luxury-ivory hover:text-primary transition-colors" href="#">HOME</a>
+<a class="text-xs font-bold tracking-[0.2em] text-luxury-ivory hover:text-primary transition-colors" href="#">BEST SELLER</a>
+<a class="text-xs font-bold tracking-[0.2em] text-luxury-ivory hover:text-primary transition-colors" href="#">ALL FRAGRANCE</a>
+<div class="relative group">
+<button class="flex items-center gap-1 text-xs font-bold tracking-[0.2em] text-luxury-ivory hover:text-primary transition-colors">
+                    SHOP <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<div class="absolute top-full left-0 mt-4 hidden group-hover:block w-48 bg-luxury-black border border-primary/20 p-4 rounded shadow-2xl">
+<ul class="space-y-3">
+<li><a class="text-[10px] tracking-widest text-luxury-ivory hover:text-primary" href="#">EAU DE PARFUM</a></li>
+<li><a class="text-[10px] tracking-widest text-luxury-ivory hover:text-primary" href="#">ATTAR OILS</a></li>
+<li><a class="text-[10px] tracking-widest text-luxury-ivory hover:text-primary" href="#">GIFT SETS</a></li>
+</ul>
+</div>
+</div>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center border-b border-primary/30 py-1">
+<span class="material-symbols-outlined text-primary text-xl">search</span>
+<input class="bg-transparent border-none text-[10px] tracking-widest text-luxury-ivory focus:ring-0 placeholder:text-gray-500 w-32 uppercase" placeholder="SEARCH SCENT" type="text"/>
+</div>
+
+<% if (session && session.user) { %>
+
+  <!-- Avatar --> 
+  <a href="/profile"
+     class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold uppercase">
+     
+
+    <%= session.user.name.charAt(0) %>
+
+  </a>
+
+<% } else { %>
+
+  <!-- Show Sign In button if not logged in -->
+  <a href="/signup"
+  class="px-5 py-2 border border-primary text-primary font-semibold text-sm rounded-full hover:bg-primary hover:text-white transition">
+     Sign UP
+  </a>
+
+<% } %>
+
+<div class="flex items-center gap-5">
+<% if (session && session.user) { %>
+  <!-- Wishlist -->
+  <a href="/user/wishlist"
+     class="text-luxury-ivory hover:text-primary transition-colors relative">
+
+    <span class="material-symbols-outlined">favorite_border</span>
+
+    
+  </a>
+
+  <!-- Cart -->
+  <a href="/user/cart"
+     class="text-luxury-ivory hover:text-primary transition-colors relative">
+
+    <span class="material-symbols-outlined">shopping_bag</span>
+
+    
+    </a>
+    <% } %>
+
+
+
+<!-- <button class="text-luxury-ivory hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined">shopping_bag</span>
+<span class="absolute -top-1 -right-1 bg-primary text-luxury-black text-[8px] font-bold h-4 w-4 rounded-full flex items-center justify-center">2</span>
+</button>
+<button class="text-luxury-ivory hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined">wishlist</span>
+<span class="absolute -top-1 -right-1 bg-primary text-luxury-black text-[8px] font-bold h-4 w-4 rounded-full flex items-center justify-center">2</span>
+</button> -->
+</div>
+</header>
+<section class="relative h-[85vh] w-full overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 bg-luxury-black">
+<div class="absolute inset-0 bg-cover bg-center opacity-60" data-alt="Dark luxury perfume bottle on black marble" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCtdwlhKMcKN0Sr7ckkYgobs5GXbctMT2Jq9hfuhrCKgzUO4pMe16nNUabWUVqygXn9YLalkcxMU3crLYWfKsYdtEFmscumuL34JFEHcNo-adFQa62VIPCm24cU4n0pCaFVCvprEDpQvIVhs0D4-BN4TtP1VcnKpuW_hJlB91uapcXUJru6a_WQWavPQpEPkFEWpg4uGGgkkcqonPZfGADvXXNeLDVn7YxfIBAkARU9Gw8gSipMX0889dnjlaYFGt3CXWhPsdF8G1k");'></div>
+<div class="absolute inset-0 luxury-gradient"></div>
+</div>
+<div class="relative z-10 text-center px-4 max-w-4xl">
+<p class="text-primary font-serif italic text-lg md:text-xl mb-4 tracking-wide">Anussatti Smrti</p>
+<h1 class="text-white font-serif text-5xl md:text-8xl font-light leading-tight mb-6">
+            Find your <span class="italic">signature.</span>
+</h1>
+<p class="text-luxury-ivory/80 text-sm md:text-lg tracking-widest uppercase mb-10 font-light max-w-xl mx-auto">
+            A scent that speaks before you do. Handcrafted essence from the house of Junoon.
+        </p>
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+<button class="bg-primary hover:bg-primary/90 text-luxury-black font-bold text-xs tracking-[0.3em] uppercase py-4 px-10 rounded transition-all transform hover:scale-105">
+                Shop Collection
+            </button>
+<button class="border border-primary text-primary hover:bg-primary hover:text-luxury-black font-bold text-xs tracking-[0.3em] uppercase py-4 px-10 rounded transition-all">
+                Discover Notes
+            </button>
+</div>
+</div>
+</section>
+<section class="py-24 px-6 md:px-16 max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-16 px-4">
+<div>
+<p class="text-primary text-xs font-bold tracking-[0.4em] uppercase mb-2">Exquisite Selections</p>
+<h2 class="text-luxury-black dark:text-luxury-ivory text-4xl md:text-5xl font-serif">Featured Fragrances</h2>
+</div>
+<a class="mt-4 md:mt-0 text-luxury-black/60 dark:text-luxury-ivory/60 hover:text-primary text-xs font-bold tracking-widest uppercase flex items-center gap-2 transition-colors" href="#">
+            View All <span class="material-symbols-outlined text-sm">trending_flat</span>
+</a>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
+<div class="group cursor-pointer">
+<div class="relative aspect-[3/4] overflow-hidden bg-[#eee] rounded-lg mb-6 shadow-sm">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Junoon Noir luxury perfume bottle" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDXeTasNyv2V9iKg86b5lV5qmVQCxLON3_Fg7DwXoC4FJ8l9V0nKgbemuwEBq92D3iKAaeYG7XNcFT2yqTHiyDw4caMCJGOPEJEk2DYKM0p2w7J3ez3L64Nm5VmNsM_q7kxEHPOY1o_2bHKoFD6T9jthTHEvDs2s8IPpzZeio35-WXpnx7xCOEua2cQvwe9686zyDPddVc1pz4n1Lds86mYEBoc1r39jSFC3W9g6FBFrh0LrV1F-3ycFiykF8Cstseu87kEaOIyz1U");'></div>
+<div class="absolute inset-0 bg-luxury-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white/90 text-luxury-black px-6 py-3 text-[10px] font-bold tracking-[0.2em] uppercase rounded hover:bg-primary hover:text-white transition-all">Quick Add</button>
+</div>
+<div class="absolute top-4 left-4">
+<span class="bg-luxury-black text-primary text-[8px] font-bold tracking-[0.2em] px-2 py-1 uppercase">Best Seller</span>
+</div>
+</div>
+<div class="text-center">
+<h3 class="font-serif text-xl mb-1">Junoon Noir</h3>
+<p class="text-gray-500 text-xs tracking-widest uppercase mb-2">Luxury Eau de Parfum</p>
+<p class="text-primary font-bold text-sm">$120.00</p>
+</div>
+</div>
+<div class="group cursor-pointer">
+<div class="relative aspect-[3/4] overflow-hidden bg-[#eee] rounded-lg mb-6 shadow-sm">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Junoon Velvet perfume bottle gold details" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAKwxfRYHKgun_idTfm0HScyhaL_Xcg2-29dW6RQaQbcuRk6P1y_5mC62mpEo1618gAASr0wGtFjUaPZ1RE0s9fTtU3XnxJfyZaBfaAn5D6lPq-ltcBZbPb5Pr0XDxGL6uVGRqucpbCNQBcJanAmGtzgEeTghw2JxroI7gaRB5cUqSsrOBuEr_OczfldfM6WVZG2yuVcvX5TuarmjLcg7q3vgyJm6h65YuI1AmEZYGaBvireT9QrnpdJYWQ9iaPUnJp9ottatK6QOM");'></div>
+<div class="absolute inset-0 bg-luxury-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white/90 text-luxury-black px-6 py-3 text-[10px] font-bold tracking-[0.2em] uppercase rounded hover:bg-primary hover:text-white transition-all">Quick Add</button>
+</div>
+</div>
+<div class="text-center">
+<h3 class="font-serif text-xl mb-1">Junoon Velvet</h3>
+<p class="text-gray-500 text-xs tracking-widest uppercase mb-2">Luxury Eau de Parfum</p>
+<p class="text-primary font-bold text-sm">$135.00</p>
+</div>
+</div>
+<div class="group cursor-pointer">
+<div class="relative aspect-[3/4] overflow-hidden bg-[#eee] rounded-lg mb-6 shadow-sm">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Junoon Rose perfume bottle elegant glass" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCwbovR_yWvY2Ov_IueFRPYz79r5ogyVTUN9etgLqAdh-3GXiI4FcbHRJNrsgSxhwcKb58cvfwS38bDrVQkmD9Se9ldWGk4laoGDqcyCqwv38Skw_JgFBIk3HondcJBDjD8os3XI-03XK4MLNXy8Yoi9CywaisIexL9_2bzuUQcZndA0WLe2atATtaCD03brDlTGWx4yszpv7KjC9z5t-gV8z99vcQNAYxZnWIT1niNRVwdaO2vY6V_tYd-Uea76iTnwqctx5SLt2c");'></div>
+<div class="absolute inset-0 bg-luxury-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white/90 text-luxury-black px-6 py-3 text-[10px] font-bold tracking-[0.2em] uppercase rounded hover:bg-primary hover:text-white transition-all">Quick Add</button>
+</div>
+</div>
+<div class="text-center">
+<h3 class="font-serif text-xl mb-1">Junoon Rose</h3>
+<p class="text-gray-500 text-xs tracking-widest uppercase mb-2">Luxury Eau de Parfum</p>
+<p class="text-primary font-bold text-sm">$115.00</p>
+</div>
+</div>
+<div class="group cursor-pointer">
+<div class="relative aspect-[3/4] overflow-hidden bg-[#eee] rounded-lg mb-6 shadow-sm">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Junoon Oud deep wooden aesthetic perfume" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuACWQSGNPtmhPrJRWJYInSHMNfMK91H0qQvnaM8j2-DYV2kDwHq9OWK8tzJd23JvEktAg9PdGFNcLqyJiJfMjTBSShDmVihDFaay-qrM7xM2SYf8v1pSkeA-K6VBewcFx-zeWnQA-mPVQqxnzmwokFujWpQ8peIrCYWv6HkuJWn92nYLTOM9U2LjMF6_J01R1lNsH-gLcxtbrxaA_luksvVgDmu5fEIu6udcfF7FolYm_yBVQk82jZSQ4Jo5PU4pWNwWs70XFfYJus");'></div>
+<div class="absolute inset-0 bg-luxury-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white/90 text-luxury-black px-6 py-3 text-[10px] font-bold tracking-[0.2em] uppercase rounded hover:bg-primary hover:text-white transition-all">Quick Add</button>
+</div>
+</div>
+<div class="text-center">
+<h3 class="font-serif text-xl mb-1">Junoon Oud</h3>
+<p class="text-gray-500 text-xs tracking-widest uppercase mb-2">Luxury Eau de Parfum</p>
+<p class="text-primary font-bold text-sm">$150.00</p>
+</div>
+</div>
+<div class="group cursor-pointer">
+<div class="relative aspect-[3/4] overflow-hidden bg-[#eee] rounded-lg mb-6 shadow-sm">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Junoon Blanc clean white aesthetic perfume" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBaIL1wyP6fLEXzj9dgpPOr8IvvbYJp0bOJMlct2k_EZhq_KLpDi8vJ0DvIOM1hPEMYPM6mhp6Y0ViVB9Pk_tAmZP-OZmZ9FN8M33C-R54m1sc5jsu2w5HUupxUGg1YSLOIuu2YR0tbLwgUr4Le5eqcWNhn0iPhUxGkbadYUQC7t8hxNw30D5b15bMbMp1K_fOXWRjIBEHrWfLuaHazFXNPZGNU58Nn2PutKGQl2Uk2btIs_JRfcauCENv-CIeTz0d3HjSKo8moV2M");'></div>
+<div class="absolute inset-0 bg-luxury-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white/90 text-luxury-black px-6 py-3 text-[10px] font-bold tracking-[0.2em] uppercase rounded hover:bg-primary hover:text-white transition-all">Quick Add</button>
+</div>
+</div>
+<div class="text-center">
+<h3 class="font-serif text-xl mb-1">Junoon Blanc</h3>
+<p class="text-gray-500 text-xs tracking-widest uppercase mb-2">Luxury Eau de Parfum</p>
+<p class="text-primary font-bold text-sm">$110.00</p>
+</div>
+</div>
+<div class="group cursor-pointer">
+<div class="relative aspect-[3/4] overflow-hidden bg-[#eee] rounded-lg mb-6 shadow-sm">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Junoon Gold sparkling gold luxury perfume" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD5gxFZAe1zsHv9H5nCUBHMYIG-XQdMHuMKVBAuaRCqd7FN0h0OioBfAyIjeeo20lL3i6VBh0VEOkHR_Br4MTFjovw5pU6g-7iSwpvqhk9FWryH_ggcGdWyGheiqMAMU0zV2vXUpuE5iCnYMeOmzofHDBejWndVqmxppKrI69T_uzxJeWkkwbBFa_RKoO-4uG4lHOyxNO-_BnyMY44blZPkTdWF1vBt3ESJ_7f9ITSAGWiTC8RRT7a4SM9R4WVoGsrMmJQhPsVGAP0");'></div>
+<div class="absolute inset-0 bg-luxury-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white/90 text-luxury-black px-6 py-3 text-[10px] font-bold tracking-[0.2em] uppercase rounded hover:bg-primary hover:text-white transition-all">Quick Add</button>
+</div>
+</div>
+<div class="text-center">
+<h3 class="font-serif text-xl mb-1">Junoon Gold</h3>
+<p class="text-gray-500 text-xs tracking-widest uppercase mb-2">Luxury Eau de Parfum</p>
+<p class="text-primary font-bold text-sm">$140.00</p>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-luxury-black py-24 px-6 md:px-16">
+<div class="max-w-7xl mx-auto">
+<div class="text-center mb-16">
+<p class="text-primary text-xs font-bold tracking-[0.4em] uppercase mb-2">Olfactory Journeys</p>
+<h2 class="text-white text-4xl md:text-5xl font-serif">Shop by Note</h2>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+<div class="group relative aspect-square overflow-hidden rounded-lg cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Floral garden macro photography" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAsGVY-kh5j0r-8MZFBGWErg4t9mTtRxPXfH1KBGjAN0Z2jPvkopCGe7VsEbcsK9pciUsOn1zIw4koooNMfG-E249kTZLpQbFfCrzhi565Ow4yTw984-Z9FoqqHQFWJx5oMiWgv5nHfLYMWCtdkTe8F45qj5Q9KRL9GDCaOF2tzIny60LV8n45yZsSHadlx7h4dR05_oomPAG5z8vjxvxOw8HwHHW80fv6mN1r-Ou2HiAC46Ms3LDAtsuh4ru94Q6R7rRybdj24pXQ");'></div>
+<div class="absolute inset-0 bg-luxury-black/40 group-hover:bg-luxury-black/20 transition-colors"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-white text-xs font-bold tracking-[0.3em] uppercase group-hover:scale-110 transition-transform">Floral</span>
+</div>
+</div>
+<div class="group relative aspect-square overflow-hidden rounded-lg cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Dense forest with wood textures" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCmiKSRLzLKg6XElewZ91ZfhC3CV1igYg6sbwsq53Km6TYX0R83VPUV_0Hx95qhQURZlczI7cvt8PLSo-lEIDKRgJmt1pkgabrPvJHHS02TOSTC9VLR7PqjJPkiGCuRptRSepEDLrLBa8tXx5lLRlCpD6Sc3dmogGWBmqmkvJmCEfzkQpEBEftDTgZXDHK-6wjQsnOyTrTdKnZtnWlt9QevlUzuQ8A6D04RsxtQWe0NeSCXOGBj4qiCVuKEQK9uQYBB_mZ2dv8rTR0");'></div>
+<div class="absolute inset-0 bg-luxury-black/40 group-hover:bg-luxury-black/20 transition-colors"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-white text-xs font-bold tracking-[0.3em] uppercase group-hover:scale-110 transition-transform">Woody</span>
+</div>
+</div>
+<div class="group relative aspect-square overflow-hidden rounded-lg cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Citrus fruits and morning dew" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAPqyM339Yv2nw3nfDW_FmF5H5m_toVgdqbMpWklmeHTl8E1q4XSZ36UrfSosh3XaI637wihGFFP7tCSAqk2dJ_v5DRCTOyEc8aM3l3czygqtDkvhxBDHDCbI3ZEHFG5PIaJPqm6Oo8kqQp9nuPsp0UdbPwIM0Uk0oeavPx5asPDHTjy5uOhmuwMqwMfrwT25gxcZAVXhGwSxc7jSNUII54LUc1x3VWK4diXXaXgkyHpgSAYwzEh6rhzdxn1SokE7FS54M31vVav8o");'></div>
+<div class="absolute inset-0 bg-luxury-black/40 group-hover:bg-luxury-black/20 transition-colors"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-white text-xs font-bold tracking-[0.3em] uppercase group-hover:scale-110 transition-transform">Fresh</span>
+</div>
+</div>
+<div class="group relative aspect-square overflow-hidden rounded-lg cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Spices and warm light" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDeVXfB9cyzwgVw3zhSrFeW9ZD-ItiC5hsRruDlxJ6Rp04XLqJmpC-h4nZZIbM1iNyHhUIsJ3LwH1M75zOXhwaPhAFYr4TX8xYOJWc-C-x6jCf7KyFHpg2FR4JgqKdUE5Lx9m4VMevSDxNHalallFZBbGp1intdbfS3TX8jBo2AianUt4wmc0_Ft9TKI9V7Sbf0oW7eVz-JKLNZB-gltsOMfpug0iNgvYuq-0tM0GJDISSlC62Fzqu3qp4CyXKGRKK_k94hgq-PAOU");'></div>
+<div class="absolute inset-0 bg-luxury-black/40 group-hover:bg-luxury-black/20 transition-colors"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-white text-xs font-bold tracking-[0.3em] uppercase group-hover:scale-110 transition-transform">Oriental</span>
+</div>
+</div>
+<div class="group relative aspect-square overflow-hidden rounded-lg cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Soft silk textures and light" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAX-kUmd9ifhC0ZMbHDrbA9U8_vz1JByl7Rw9kWWV13PLPMQ_UCyhLZjlYdaqpEVrs7mhlVoIH7jq1iM9tW88ypMogkN_deLoRq_o-2LQBleedGi0IbHy4JwxCEw8KUGSYJHZdbOHIEYl80o3VmhReIwO2pt5xkj1yODxLdzuGy5XUe6JxfgorpPoBvFDl2mxdIjIlYJIw0FM5tL7iN8XSwZ8Pe1Km9N4nUEN_netFviRpQ0IKMZIdeuS-yJ-UIKWy59DZbs6H1Fio");'></div>
+<div class="absolute inset-0 bg-luxury-black/40 group-hover:bg-luxury-black/20 transition-colors"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-white text-xs font-bold tracking-[0.3em] uppercase group-hover:scale-110 transition-transform">Musky</span>
+</div>
+</div>
+<div class="group relative aspect-square overflow-hidden rounded-lg cursor-pointer">
+<div class="absolute inset-0 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Star anise and spicy peppercorns" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD4-WHHIYE6HTMpCIvZeEuQcKPZT877Fi6CLUMfNRtU6DcAg3hKBQOCwy_O4zgpvRt2umPfJJHCTruHOqwN45lz_CqZkDd6qp44BxLgceNz73Fo7E4Z_O-71mWsndJlewAQ_Rzq0j1_jUZCgi_zUvgNd0uvhla6NIaiObLMm0cpreVAt6hCrXjphg8Ys1drX3_m4qDLcZ4dejlqf9AcxnwPiJhF7S7uGtIOWjpnHcSj4HywpoNV5q6i6AJEWzS6qTkUXdXrHa4uaps");'></div>
+<div class="absolute inset-0 bg-luxury-black/40 group-hover:bg-luxury-black/20 transition-colors"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-white text-xs font-bold tracking-[0.3em] uppercase group-hover:scale-110 transition-transform">Spicy</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-24 px-6 md:px-16 max-w-3xl mx-auto">
+<h2 class="text-3xl font-serif text-center mb-16">Frequently Asked Questions</h2>
+<div class="space-y-4">
+<div class="border border-primary/20 rounded-lg p-6 bg-luxury-ivory/50">
+<button class="flex items-center justify-between w-full text-left">
+<span class="text-sm font-bold tracking-widest uppercase">Shipping Policy</span>
+<span class="material-symbols-outlined text-primary">add</span>
+</button>
+</div>
+<div class="border border-primary/20 rounded-lg p-6 bg-luxury-ivory/50">
+<button class="flex items-center justify-between w-full text-left">
+<span class="text-sm font-bold tracking-widest uppercase">Signature Ingredients</span>
+<span class="material-symbols-outlined text-primary">add</span>
+</button>
+</div>
+<div class="border border-primary/20 rounded-lg p-6 bg-luxury-ivory/50">
+<button class="flex items-center justify-between w-full text-left">
+<span class="text-sm font-bold tracking-widest uppercase">Perfume Longevity Tips</span>
+<span class="material-symbols-outlined text-primary">remove</span>
+</button>
+<div class="mt-4 text-sm leading-relaxed text-luxury-black/70">
+                To ensure your signature scent lasts all day, apply to pulse points like wrists, neck, and behind the ears. Our extrait de parfum concentration typically maintains its profile for 12-16 hours.
+            </div>
+</div>
+<div class="border border-primary/20 rounded-lg p-6 bg-luxury-ivory/50">
+<button class="flex items-center justify-between w-full text-left">
+<span class="text-sm font-bold tracking-widest uppercase">Returns &amp; Exchanges</span>
+<span class="material-symbols-outlined text-primary">add</span>
+</button>
+</div>
+</div>
+</section>
+<aside class="py-12 border-t border-b border-primary/10 bg-luxury-ivory/30">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-center gap-12">
+<div class="flex flex-col items-center">
+<p class="text-[10px] tracking-widest text-primary font-bold mb-4 uppercase">Palette</p>
+<div class="flex gap-2">
+<div class="w-10 h-10 rounded-full bg-luxury-black border border-primary/20 shadow-inner"></div>
+<div class="w-10 h-10 rounded-full bg-primary shadow-inner"></div>
+<div class="w-10 h-10 rounded-full bg-luxury-ivory border border-gray-200 shadow-inner"></div>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<p class="text-[10px] tracking-widest text-primary font-bold mb-4 uppercase">Typography</p>
+<div class="flex gap-6 items-center">
+<span class="font-serif text-2xl italic">Playfair</span>
+<span class="font-display font-black text-xl tracking-tighter uppercase">Inter</span>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<p class="text-[10px] tracking-widest text-primary font-bold mb-4 uppercase">Brand Icon</p>
+<div class="relative w-8 h-10 flex flex-col items-center justify-center">
+<div class="w-4 h-1 bg-primary mb-[1px]"></div>
+<div class="w-2 h-2 border-2 border-primary rounded-full mb-[1px]"></div>
+<div class="w-6 h-6 border-r-2 border-b-2 border-l-2 border-primary rounded-b-sm flex items-end justify-start p-0.5">
+<div class="w-2 h-2 border-l-2 border-t-2 border-primary"></div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<footer class="bg-luxury-black text-luxury-ivory pt-24 pb-12 px-6 md:px-16">
+<div class="max-w-7xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
+<div>
+<div class="flex items-center gap-4 mb-8">
+<div class="relative w-8 h-10 flex flex-col items-center justify-center">
+<div class="w-4 h-1 bg-primary mb-[1px]"></div>
+<div class="w-2 h-2 border-2 border-primary rounded-full mb-[1px]"></div>
+<div class="w-6 h-6 border-r-2 border-b-2 border-l-2 border-primary rounded-b-sm flex items-end justify-start p-0.5">
+<div class="w-2 h-2 border-l-2 border-t-2 border-primary"></div>
+</div>
+</div>
+<div class="flex flex-col leading-none">
+<h2 class="text-primary font-serif text-xl font-bold tracking-[0.1em] uppercase gold-text-effect">JUNOON</h2>
+<span class="text-primary font-serif text-[8px] tracking-[0.4em] uppercase ml-1">Perfumes</span>
+</div>
+</div>
+<p class="text-sm text-luxury-ivory/60 leading-relaxed mb-6">
+                    Anussatti Smrti. The memory of smell. Our house is dedicated to the ancient art of perfumery, reimagined for the modern connoisseur.
+                </p>
+<div class="flex gap-4">
+<a class="w-10 h-10 border border-primary/30 rounded-full flex items-center justify-center hover:bg-primary hover:text-luxury-black transition-all" href="#">
+<span class="material-symbols-outlined text-lg">public</span>
+</a>
+<a class="w-10 h-10 border border-primary/30 rounded-full flex items-center justify-center hover:bg-primary hover:text-luxury-black transition-all" href="#">
+<span class="material-symbols-outlined text-lg">movie</span>
+</a>
+<a class="w-10 h-10 border border-primary/30 rounded-full flex items-center justify-center hover:bg-primary hover:text-luxury-black transition-all" href="#">
+<span class="material-symbols-outlined text-lg">camera</span>
+</a>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-bold tracking-[0.4em] uppercase mb-8 text-primary">The House</h3>
+<ul class="space-y-4">
+<li><a class="text-xs tracking-widest text-luxury-ivory/70 hover:text-primary transition-colors" href="#">OUR STORY</a></li>
+<li><a class="text-xs tracking-widest text-luxury-ivory/70 hover:text-primary transition-colors" href="#">THE CRAFT</a></li>
+<li><a class="text-xs tracking-widest text-luxury-ivory/70 hover:text-primary transition-colors" href="#">BOUTIQUE LOCATOR</a></li>
+<li><a class="text-xs tracking-widest text-luxury-ivory/70 hover:text-primary transition-colors" href="#">CAREERS</a></li>
+</ul>
+</div>
+<div>
+<h3 class="text-xs font-bold tracking-[0.4em] uppercase mb-8 text-primary">Support</h3>
+<ul class="space-y-4">
+<li><a class="text-xs tracking-widest text-luxury-ivory/70 hover:text-primary transition-colors" href="#">CONTACT US</a></li>
+<li><a class="text-xs tracking-widest text-luxury-ivory/70 hover:text-primary transition-colors" href="#">SHIPPING &amp; RETURNS</a></li>
+<li><a class="text-xs tracking-widest text-luxury-ivory/70 hover:text-primary transition-colors" href="#">PRIVACY POLICY</a></li>
+<li><a class="text-xs tracking-widest text-luxury-ivory/70 hover:text-primary transition-colors" href="#">TERMS OF SERVICE</a></li>
+</ul>
+</div>
+<div>
+<h3 class="text-xs font-bold tracking-[0.4em] uppercase mb-8 text-primary">Newsletter</h3>
+<p class="text-xs text-luxury-ivory/60 mb-6">Receive early access to new collection launches.</p>
+<div class="flex border-b border-primary/50 pb-2">
+<input class="bg-transparent border-none p-0 text-[10px] tracking-widest focus:ring-0 placeholder:text-gray-600 uppercase flex-grow" placeholder="EMAIL ADDRESS" type="email"/>
+<button class="text-primary">
+<span class="material-symbols-outlined">trending_flat</span>
+</button>
+</div>
+</div>
+</div>
+<div class="pt-12 border-t border-primary/10 flex flex-col md:flex-row justify-between items-center gap-6">
+<p class="text-[10px] tracking-widest text-luxury-ivory/40 uppercase">© 2024 JUNOON PERFUMES. ALL RIGHTS RESERVED.</p>
+<div class="flex gap-6">
+<span class="material-symbols-outlined text-luxury-ivory/40 text-3xl">payments</span>
+<span class="material-symbols-outlined text-luxury-ivory/40 text-3xl">universal_currency</span>
+<span class="material-symbols-outlined text-luxury-ivory/40 text-3xl">local_mall</span>
+</div>
+</div>
+</div>
+</footer>
+
+</body></html>

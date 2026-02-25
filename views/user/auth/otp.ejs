@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OTP Verification - Junoon Perfumes</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@300;400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#D4AF37", // Metallic Gold
+                        "background-light": "#FDFCFB", // Premium Ivory
+                        "background-dark": "#121212",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1E1E1E",
+                    },
+                    fontFamily: {
+                        display: ["Playfair Display", "serif"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                        'xl': "16px",
+                        '2xl': "24px",
+                    },
+                },
+            },
+        };
+    </script>
+<style type="text/tailwindcss">
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .serif-title {
+            font-family: 'Playfair Display', serif;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        .gold-glow:focus {
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 min-h-screen flex items-center justify-center p-6">
+     <input type="text" id="message" value="<%= message %>" name="message" hidden>
+<main class="w-full max-w-md">
+<div class="bg-card-light dark:bg-card-dark rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] overflow-hidden border border-gray-100 dark:border-gray-800">
+<div class="p-8 md:p-12">
+<button class="mb-8 flex items-center text-gray-400 hover:text-primary transition-colors group">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+<span class="ml-2 text-sm font-medium">Back</span>
+</button>
+<div class="text-center mb-10">
+<h1 class="serif-title text-3xl font-bold mb-4">OTP Verification</h1>
+<p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-[280px] mx-auto">
+                        We have sent the verification code to your email address
+                    </p>
+</div>
+<!-- <form class="space-y-8" id="otp-form" action="/user/verify-otp" method="POST"> -->
+<form action="/<%= otpRoute %>" method="POST" id="otp-form">
+<!-- <div id="otpData" data-remaining="<%= remainingTime %>"></div> -->
+<div class="flex justify-between gap-4">
+<input class="w-16 h-16 md:w-20 md:h-20 text-center text-2xl font-bold rounded-xl border-gray-200 dark:border-gray-700 bg-transparent focus:border-primary dark:focus:border-primary focus:ring-0 gold-glow transition-all" maxlength="1" type="text" name="d1" value=""/>
+<input class="w-16 h-16 md:w-20 md:h-20 text-center text-2xl font-bold rounded-xl border-gray-200 dark:border-gray-700 bg-transparent focus:border-primary dark:focus:border-primary focus:ring-0 gold-glow transition-all" maxlength="1" type="text" name="d2" value=""/>
+<input class="w-16 h-16 md:w-20 md:h-20 text-center text-2xl font-bold rounded-xl border-gray-200 dark:border-gray-700 bg-transparent focus:border-primary dark:focus:border-primary focus:ring-0 gold-glow transition-all" maxlength="1" type="text" name="d3" value=""/>
+<input class="w-16 h-16 md:w-20 md:h-20 text-center text-2xl font-bold rounded-xl border-gray-200 dark:border-gray-700 bg-transparent focus:border-primary dark:focus:border-primary focus:ring-0 gold-glow transition-all" maxlength="1" type="text" name="d4" value=""/>
+<input type="hidden" name="otp" id="fullotp">
+</div>
+<div class="text-center">
+<p id="timerWrapper" class="text-primary/80 text-sm font-medium">
+                            Code expires in <span id="timer">01:00</span>
+</p>
+</div>
+<button class="w-full py-4 bg-primary hover:bg-[#C5A028] text-white rounded-full font-bold uppercase tracking-widest text-sm shadow-lg shadow-primary/20 transition-all transform active:scale-[0.98]" type="submit">
+                        Confirm
+                    </button>
+</form>
+<form id="otp-resend" action="/resend-otp" method="POST">
+<div class="mt-8 text-center">
+<p class="text-sm text-gray-500 dark:text-gray-400">
+                        Didn't receive code? 
+<button type="submit" id="resendBtn" class="text-primary font-bold ml-1 hover:underline underline-offset-4 ring-2 ring-primary/10 px-3 py-1 rounded-full transition-all hidden">
+    Resend
+</button>
+</p>
+</div>
+</form>
+</div>
+</div>
+</main>
+
+</body>
+<script>
+    document.getElementById("otp-form").addEventListener("submit",function(e){
+        const d1=document.querySelector("input[name='d1']").value;
+        const d2=document.querySelector("input[name='d2']").value;
+        const d3=document.querySelector("input[name='d3']").value;
+        const d4=document.querySelector("input[name='d4']").value;
+
+        const fullOtp=d1+d2+d3+d4
+        document.getElementById('fullotp').value=fullOtp;
+    })
+
+    
+    let timeLeft = <%= typeof remainingTime !== 'undefined' ? remainingTime : 0 %>;
+
+    console.log("Remaining Time from Backend:", timeLeft);
+
+    
+    const timerElement = document.getElementById("timer");
+    const resendBtn = document.getElementById("resendBtn");
+    const timerWrapper = document.getElementById("timerWrapper");
+
+    const timerInterval = setInterval(updateTimer, 1000);
+
+
+function updateTimer() {
+
+    if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+
+       if(timerWrapper) timerWrapper.style.display = "none";
+       if(resendBtn) resendBtn.classList.remove("hidden");
+        return;
+    }
+
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    if(timerElement){
+
+        timerElement.textContent =
+        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+    }
+    
+    timeLeft--;
+}
+
+updateTimer();
+
+//move cursor controll to boxes
+
+const otpInputs = document.querySelectorAll("#otp-form input[type='text']");
+
+otpInputs.forEach((input, index) => {
+
+    input.addEventListener("input", function () {
+
+        // Allow only digits
+        this.value = this.value.replace(/[^0-9]/g, "");
+
+        if (this.value.length === 1 && index < otpInputs.length - 1) {
+            otpInputs[index + 1].focus();
+        }
+    });
+
+    // Handle backspace
+    input.addEventListener("keydown", function (e) {
+        if (e.key === "Backspace" && this.value === "" && index > 0) {
+            otpInputs[index - 1].focus();
+        }
+    });
+
+});
+
+
+    const message=document.getElementById('message').value
+    if(message){
+        swal.fire(message)
+    }
+
+
+
+
+</script>
+</html>

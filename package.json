@@ -11,13 +11,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.13.5",
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.2.4",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
     "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.19.0",
     "mongodb": "^7.1.0",
     "mongoose": "^9.1.6",
     "mongose": "^0.0.2-security",
-    "nodemon": "^3.1.11"
+    "nocache": "^4.0.0",
+    "nodemailer": "^8.0.1",
+    "nodemon": "^3.1.11",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0"
   }
 }

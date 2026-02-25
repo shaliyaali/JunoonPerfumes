@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Junoon Account Flow</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e0bd6c",
+                        "background-light": "#f9f7f6",
+                        "background-dark": "#1a1a1a",
+                        "junoon-black": "#1a170f",
+                        "junoon-gray": "#917f55",
+                        "danger-muted": "#9C2C40"
+                    },
+                    fontFamily: {
+                        "display": ["Noto Serif", "serif"],
+                        "sans": ["Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        .serif-font {
+            font-family: 'Noto Serif', serif;
+        }
+
+        .auth-card {
+            max-width: 480px;
+            width: 100%;
+        }
+
+        .frame-container {
+            width: 100%;
+            max-width: 1550px;
+            margin: 0 auto;
+            padding: 80px 20px;
+            border-bottom: 1px solid #e5dfd2;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark text-junoon-black dark:text-white transition-colors duration-300">
+    <input type="text" id="message" value="<%= message %>" name="message" hidden>
+    <!-- FRAME 1: SIGN UP PAGE -->
+    <div class="frame-container flex flex-col items-center">
+        <div
+            class="auth-card bg-white dark:bg-zinc-900 p-10 rounded-lg shadow-sm border border-[#e5dfd2] dark:border-zinc-800">
+            <h1 class="text-3xl font-bold text-center mb-2">Create Account</h1>
+            <p class="text-junoon-gray text-center mb-8 px-4">Join Junoon for faster checkout and order tracking.</p>
+            <form class="space-y-5" method="POST" action="/signup">
+                <div>
+                    <label class="block text-sm font-medium mb-1.5 ml-1">Full Name</label>
+                    <input
+                        class="w-full bg-background-light dark:bg-zinc-800 border-none rounded-lg h-12 px-4 focus:ring-1 focus:ring-primary"
+                        placeholder="Enter your name" type="text" name="name" id="name" />
+                    <p class="text-red-500 text-xs mt-1 hidden" id="nameError"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1.5 ml-1">Email ID</label>
+                    <input
+                        class="w-full bg-background-light dark:bg-zinc-800 border-none rounded-lg h-12 px-4 focus:ring-1 focus:ring-primary"
+                        placeholder="email@example.com" type="email" name="email" id="email" />
+                        <p class="text-red-500 text-xs mt-1 hidden" id="emailError"></p>
+                </div>
+                <div class="relative">
+                    <label class="block text-sm font-medium mb-1.5 ml-1">Password</label>
+                    <input
+                        class="w-full bg-background-light dark:bg-zinc-800 border-none rounded-lg h-12 px-4 focus:ring-1 focus:ring-primary"  type="password" name="password" id="password" />
+                    <p class="text-red-500 text-xs mt-1 hidden" id="passwordError"></p>
+                   
+                    <span
+                        class="material-symbols-outlined absolute right-4 top-9 text-junoon-gray cursor-pointer">visibility</span>
+                    <!-- <p class="text-[10px] text-junoon-gray mt-1 ml-1 uppercase tracking-wider">Minimum 8 characters</p> -->
+                </div>
+                <div class="relative">
+                    <label class="block text-sm font-medium mb-1.5 ml-1">Confirm Password</label>
+                    <input
+                        class="w-full bg-background-light dark:bg-zinc-800 border-none rounded-lg h-12 px-4 focus:ring-1 focus:ring-primary" type="password" name="cpassword" id="cpassword"/>
+                    <p class="text-red-500 text-xs mt-1 hidden" id="cpasswordError"></p>
+                    <span
+                        class="material-symbols-outlined absolute right-4 top-9 text-junoon-gray cursor-pointer">visibility</span>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1.5 ml-1">Do you have referal code</label>
+                    <input
+                        class="w-full bg-background-light dark:bg-zinc-800 border-none rounded-lg h-12 px-4 focus:ring-1 focus:ring-primary"
+                        placeholder="referal code" type="text" name="rcode" />
+                </div>
+                <div class="h-10"></div>
+
+                <button
+                    class="w-full bg-primary hover:bg-opacity-90 text-white font-bold h-12 rounded-lg transition-all serif-font text-lg tracking-wide uppercase">Sign
+                    Up</button>
+            </form>
+
+            <div class="relative my-8">
+                <div class="absolute inset-0 flex items-center">
+                    <span class="w-full border-t border-[#e5dfd2] dark:border-zinc-800"></span>
+                </div>
+                <div class="relative flex justify-center text-xs uppercase tracking-widest font-medium">
+                    <span class="bg-white dark:bg-zinc-900 px-4 text-junoon-gray">or</span>
+                </div>
+            </div>
+            <a href="/auth/google"
+                class="w-full flex items-center justify-center gap-3 bg-white dark:bg-transparent border border-[#e5dfd2] dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800 text-[#3c4043] dark:text-white font-medium h-12 rounded-lg transition-all font-inter shadow-sm">
+                <svg height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M19.6001 10.2269C19.6001 9.5314 19.5376 8.86107 19.4214 8.21729H10V12.0227H15.384C15.1518 13.2727 14.4464 14.3304 13.384 15.0415V17.5098H16.6251C18.5224 15.7611 19.6001 13.1834 19.6001 10.2269Z"
+                        fill="#4285F4"></path>
+                    <path
+                        d="M10 20C12.7 20 14.9643 19.1027 16.6251 17.5098L13.384 15.0415C12.4867 15.6428 11.3438 16.0001 10 16.0001C7.3884 16.0001 5.17415 14.2321 4.38397 11.8572H1.03577V14.4553C2.68308 17.7277 6.07594 20 10 20Z"
+                        fill="#34A853"></path>
+                    <path
+                        d="M4.38397 11.8572C4.18308 11.2545 4.067 10.6117 4.067 9.95543C4.067 9.29918 4.18308 8.65633 4.38397 8.05365V5.45544H1.03577C0.375043 6.76348 0 8.24115 0 9.80811C0 11.3751 0.375043 12.8527 1.03577 14.1608L4.38397 11.8572Z"
+                        fill="#FBBC05"></path>
+                    <path
+                        d="M10 3.99991C11.4688 3.99991 12.7858 4.50438 13.8215 5.49544L16.7 2.61687C14.9599 0.995441 12.6956 0 10 0C6.07594 0 2.68308 2.27232 1.03577 5.54464L4.38397 8.14285C5.17415 5.76785 7.3884 3.99991 10 3.99991Z"
+                        fill="#EA4335"></path>
+                </svg>
+                <span>Sign up with Google</span>
+            </a>
+
+            <div class="mt-8 text-center border-t border-background-light dark:border-zinc-800 pt-6">
+                <p class="text-sm text-junoon-gray">Already have an account? <a
+                        class="text-junoon-black dark:text-primary font-bold ml-1" href="/signin">Log in</a></p>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+ <script>
+    const message = document.getElementById('message').value
+    if (message) {
+        swal.fire(message)
+    }
+
+
+
+
+
+
+const form = document.querySelector("form");
+
+const nameInput = document.getElementById("name");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const confirmPasswordInput = document.getElementById("cpassword");
+
+const nameError = document.getElementById("nameError");
+const emailError = document.getElementById("emailError");
+const passwordError = document.getElementById("passwordError");
+const confirmPasswordError = document.getElementById("cpasswordError");
+
+
+// ================= NAME VALIDATION =================
+function validateName() {
+    const value = nameInput.value.trim();
+    const regex = /^[A-Za-z ]{3,}$/;
+
+    if (!value) {
+        showError(nameError, "Name is required");
+        return false;
+    }
+
+    if (!regex.test(value)) {
+        showError(nameError, "Name must be at least 3 letters and only alphabets");
+        return false;
+    }
+
+    hideError(nameError);
+    return true;
+}
+
+
+// ================= EMAIL VALIDATION =================
+function validateEmail() {
+    const value = emailInput.value.trim();
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!value) {
+        showError(emailError, "Email is required");
+        return false;
+    }
+
+    if (!regex.test(value)) {
+        showError(emailError, "Invalid email format");
+        return false;
+    }
+
+    hideError(emailError);
+    return true;
+}
+
+
+// ================= PASSWORD VALIDATION =================
+function validatePassword() {
+    const value = passwordInput.value;
+
+    if (!value) {
+        showError(passwordError, "Password is required");
+        return false;
+    }
+
+    if (value.length < 6) {
+        showError(passwordError, "Password must be at least 6 characters");
+        return false;
+    }
+
+    hideError(passwordError);
+    return true;
+}
+
+
+// ================= CONFIRM PASSWORD =================
+function validateConfirmPassword() {
+    if (!confirmPasswordInput.value) {
+        showError(confirmPasswordError, "Confirm your password");
+        return false;
+    }
+
+    if (confirmPasswordInput.value !== passwordInput.value) {
+        showError(confirmPasswordError, "Passwords do not match");
+        return false;
+    }
+
+    hideError(confirmPasswordError);
+    return true;
+}
+
+
+// ================= ERROR HANDLING =================
+function showError(element, message) {
+    element.textContent = message;
+    element.classList.remove("hidden");
+}
+
+function hideError(element) {
+    element.textContent = "";
+    element.classList.add("hidden");
+}
+
+
+// ================= LIVE VALIDATION =================
+nameInput.addEventListener("input", validateName);
+emailInput.addEventListener("input", validateEmail);
+passwordInput.addEventListener("input", validatePassword);
+confirmPasswordInput.addEventListener("input", validateConfirmPassword);
+
+
+// ================= FORM SUBMIT =================
+form.addEventListener("submit", function(e) {
+
+    const isValid =
+        validateName() &
+        validateEmail() &
+        validatePassword() &
+        validateConfirmPassword();
+
+    if (!isValid) {
+        e.preventDefault();
+    }
+
+});
+
+
+
+</script>
+
+</html>

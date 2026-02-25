@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Junoon Perfumes - Add/Edit Address</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#D4AF37", // Signature Junoon Gold
+              "background-light": "#FCFCFA", // Soft ivory
+              "background-dark": "#121212", // Luxury dark
+            },
+            fontFamily: {
+              display: ["Playfair Display", "serif"],
+              sans: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "12px",
+            },
+          },
+        },
+      };
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .serif-title {
+            font-family: 'Playfair Display', serif;
+        }input:focus, select:focus {
+            outline: none !important;
+            border-color: #D4AF37 !important;
+            ring: 1px;
+            --tw-ring-color: #D4AF37 !important;
+        }
+        .luxury-shadow {
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen transition-colors duration-300">
+
+<div class="w-full max-w-5xl mx-auto p-6 md:p-12">
+
+  <!-- Heading -->
+  <div class="flex items-center mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
+    <span class="material-icons-outlined text-primary mr-3 text-3xl">place</span>
+    <h1 class="text-3xl font-bold font-display tracking-tight text-gray-900 dark:text-white">Manage Addresses</h1>
+  </div>
+
+  <input type="text" id="message" value="<%= typeof message !== 'undefined' ? message : '' %>" hidden>
+
+  <!-- Address List Section -->
+  <div class="space-y-6 mb-12">
+    <% if(user.addresses.length === 0){ %>
+      <div class="text-center py-10 bg-gray-50 dark:bg-card-dark rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
+        <p class="text-gray-500 dark:text-gray-400 italic">No addresses added yet. Add one below.</p>
+      </div>
+    <% } %>
+
+    <% user.addresses.forEach(address => { %>
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center p-6 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-card-dark shadow-sm hover:shadow-md transition-shadow duration-300">
+        
+        <!-- Address Details -->
+        <div class="mb-4 md:mb-0">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-widest bg-gray-100 dark:bg-gray-800 rounded text-gray-600 dark:text-gray-300">
+              <%= address.type %>
+            </span>
+            <% if(address.isDefault){ %>
+              <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary rounded border border-primary/20">
+                Default
+              </span>
+            <% } %>
+          </div>
+          
+          <h3 class="font-bold text-lg text-gray-900 dark:text-white">
+            <%= address.name %> 
+            <span class="text-sm font-normal text-gray-500 ml-2"><%= address.phone %></span>
+          </h3>
+          
+          <p class="text-gray-600 dark:text-gray-400 text-sm mt-1 leading-relaxed">
+            <%= address.house %>, <%= address.street %>,<br>
+            <%= address.city %>, <%= address.state %> - <span class="font-semibold"><%= address.pincode %></span>
+          </p>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <button type="button" onclick='editAddress(<%- JSON.stringify(address) %>)'
+            class="flex-1 md:flex-none px-5 py-2 text-xs font-bold text-primary border border-primary rounded hover:bg-primary hover:text-black transition-colors uppercase tracking-wider">
+            Edit
+          </button>
+
+          <form method="POST" action="/delete-address/<%= address._id %>" onsubmit="confirmDelete(event)" class="flex-1 md:flex-none">
+            <button type="submit"
+              class="w-full px-5 py-2 text-xs font-bold text-red-500 border border-red-200 dark:border-red-900/30 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors uppercase tracking-wider">
+              Delete
+            </button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <!-- Add/Edit Form Section -->
+  <div class="bg-gray-50 dark:bg-card-dark p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-inner" id="formSection">
+    
+    <div class="flex justify-between items-center mb-6">
+      <h2 id="formTitle" class="text-xl font-bold font-display text-gray-900 dark:text-white">Add New Address</h2>
+      <button type="button" onclick="resetForm()" id="cancelEditBtn" class="hidden text-xs font-bold text-gray-500 hover:text-red-500 uppercase tracking-wider transition-colors">
+        Cancel Edit
+      </button>
+    </div>
+
+    <!-- Limit Warning -->
+    <div id="limitMsg" class="hidden bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4 mb-6 rounded-r">
+      <div class="flex">
+        <span class="material-icons-outlined text-yellow-500 mr-2">info</span>
+        <p class="text-sm text-yellow-700 dark:text-yellow-400">
+          You have reached the maximum limit of 5 addresses. You can edit existing addresses or delete one to add a new one.
+        </p>
+      </div>
+    </div>
+
+    <form id="addressForm" method="POST" action="/add-address" class="space-y-6">
+      <input type="hidden" name="addressId" id="addressId">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Name -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Full Name</label>
+          <input type="text" name="name" id="addrName" 
+            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" />
+          <p class="text-red-500 text-xs mt-1 hidden" id="nameError"></p>
+        </div>
+
+        <!-- Phone -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Phone Number</label>
+          <input type="text" name="phone" id="addrPhone" 
+            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" />
+          <p class="text-red-500 text-xs mt-1 hidden" id="phoneError"></p>
+        </div>
+
+        <!-- House -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">House / Flat No</label>
+          <input type="text" name="house" id="addrHouse" 
+            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" />
+          <p class="text-red-500 text-xs mt-1 hidden" id="houseError"></p>
+        </div>
+
+        <!-- Street -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Street</label>
+          <input type="text" name="street" id="addrStreet" 
+            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" />
+          <p class="text-red-500 text-xs mt-1 hidden" id="streetError"></p>
+        </div>
+
+        <!-- City -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">City</label>
+          <input type="text" name="city" id="addrCity" 
+            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" />
+          <p class="text-red-500 text-xs mt-1 hidden" id="cityError"></p>
+        </div>
+
+        <!-- State -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">State</label>
+          <input type="text" name="state" id="addrState" 
+            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" />
+          <p class="text-red-500 text-xs mt-1 hidden" id="stateError"></p>
+        </div>
+
+        <!-- Pincode -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Pincode</label>
+          <input type="text" name="pincode" id="addrPincode" 
+            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" />
+          <p class="text-red-500 text-xs mt-1 hidden" id="pincodeError"></p>
+        </div>
+
+        <!-- Type -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Address Type</label>
+          <select name="type" id="addrType"
+            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm">
+            <option value="">Select Type</option>
+            <option value="home">Home</option>
+            <option value="work">Work</option>
+            <option value="other">Other</option>
+          </select>
+          <p class="text-red-500 text-xs mt-1 hidden" id="addresstypeError"></p>
+        </div>
+
+      </div>
+
+      <!-- Default Checkbox -->
+      <div class="flex items-center p-4 bg-white dark:bg-black/20 rounded-lg border border-gray-200 dark:border-gray-700/50">
+        <input type="checkbox" name="isDefault" id="addrDefault" class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer">
+        <label for="addrDefault" class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+          Set as default address
+        </label>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" id="submitBtn"
+        class="w-full md:w-auto px-8 py-4 bg-primary text-black font-bold text-sm rounded-lg uppercase tracking-widest hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20">
+        Save Address
+      </button>
+
+    </form>
+  </div>
+
+  <!-- Back Link -->
+  <div class="mt-10 text-center">
+    <a href="/profile" class="inline-flex items-center text-gray-500 hover:text-primary transition-colors font-medium text-sm">
+      <span class="material-icons-outlined mr-2">arrow_back</span>
+      Back to Profile
+    </a>
+  </div>
+
+</div>
+
+
+</body>
+<script>
+
+ const message = document.getElementById('message').value
+  if (message) {
+    swal.fire(message)
+  }
+
+  //address Limit Logic
+  const addreCount=<%= user.addresses.length %>;
+  const submitBtn=document.getElementById('submitBtn');
+  const cancelEditBtn=document.getElementById('cancelEditBtn');
+  const formTitle=document.getElementById('formTitle');
+  const limitMsg=document.getElementById('limitMsg');
+  const form=document.getElementById('addressForm');
+
+  //initialize state
+  checkLimitState(false)
+
+  function checkLimitState(isEditMode){
+    if(!isEditMode && addressCount >= 5){
+      // Limit reached and trying to add new
+      submitBtn.classList.add('hidden');
+      limitMsg.classList.remove('hidden');
+      formTitle.innerText = "Address Limit Reached";
+    }else{
+      // Either editing OR limit not reached
+      submitBtn.classList.remove('hidden');
+      limitMsg.classList.add('hidden');
+      formTitle.innerText = isEditMode ? "Edit Address" : "Add New Address";
+
+    }
+  }
+   function editAddress(address) {
+    // Populate fields
+    document.getElementById("addrName").value = address.name || "";
+    document.getElementById("addrPhone").value = address.phone || "";
+    document.getElementById("addrHouse").value = address.house || "";
+    document.getElementById("addrStreet").value = address.street || "";
+    document.getElementById("addrCity").value = address.city || "";
+    document.getElementById("addrState").value = address.state || "";
+    document.getElementById("addrPincode").value = address.pincode || "";
+    document.getElementById("addrType").value = address.type || "";
+    document.getElementById("addrDefault").checked = address.isDefault;
+
+    // Update UI for Edit Mode
+    form.action = "/edit-address/" + address._id;
+    cancelEditBtn.classList.remove('hidden');
+    checkLimitState(true);
+
+    // Scroll to form
+    document.getElementById("formSection").scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function resetForm() {
+    form.reset();
+    form.action = "/add-address";
+    cancelEditBtn.classList.add('hidden');
+    checkLimitState(false);
+  }
+
+function confirmDelete(event) {
+  event.preventDefault();
+  const form = event.target;
+  
+  Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      form.submit();
+    }
+  });
+}
+
+  //add/edit address modal validation
+  const addressForm = document.getElementById("addressForm");
+
+  const fields = {
+    name: {
+      input: document.getElementById("addrName"),
+      error: document.getElementById("nameError"),
+      validate: (val) => /^[A-Za-z\s'-]{3,50}$/.test(val.trim()),
+      message: "Enter valid Name with minimum 3 charecters"
+    },
+    phone: {
+      input: document.getElementById("addrPhone"),
+      error: document.getElementById("phoneError"),
+      validate: (val) => /^[6-9]\d{9}$/.test(val.trim()),
+      message: "Enter valid 10-digit mobile number"
+    },
+    house: {
+      input: document.getElementById("addrHouse"),
+      error: document.getElementById("houseError"),
+      validate: (val) => /^[A-Za-z0-9\s,./-]{2,50}$/.test(val.trim()),
+      message: " enter House details with minimum 2 characters"
+    },
+    street: {
+      input: document.getElementById("addrStreet"),
+      error: document.getElementById("streetError"),
+      validate: (val) => /^[A-Za-z0-9\s,./-]{3,100}$/.test(val.trim()),
+      message: "Street must be at least 3 characters"
+    },
+    city: {
+      input: document.getElementById("addrCity"),
+      error: document.getElementById("cityError"),
+      validate: (val) => /^[A-Za-z\s.-]{2,50}$/.test(val.trim()),
+      message: "City must be atleast 2 charecters"
+    },
+    state: {
+      input: document.getElementById("addrState"),
+      error: document.getElementById("stateError"),
+      validate: (val) =>/^[A-Za-z\s.-]{2,50}$/.test(val.trim()),
+      message: "State must be atleast 2 charecters"
+    },
+    pincode: {
+      input: document.getElementById("addrPincode"),
+      error: document.getElementById("pincodeError"),
+      validate: (val) => /^[1-9][0-9]{5}$/.test(val.trim()),
+      message: "Enter valid 6-digit pincode"
+    },
+    type: {
+  input: document.getElementById("addrType"),
+   error: document.getElementById("addresstypeError"),
+  validate: (val) => val !== "",
+  message: "Select address type"
+}
+  };
+
+  Object.values(fields).forEach(field => {
+    field.input.addEventListener("input", () => {
+      validateField(field);
+    });
+  });
+
+  function validateField(field) {
+    const value = field.input.value;
+
+    if (!field.validate(value)) {
+      field.error.textContent = field.message;
+      field.error.classList.remove("hidden");
+      field.input.classList.add("border-red-500");
+      return false;
+    }
+
+    field.error.classList.add("hidden");
+    field.input.classList.remove("border-red-500");
+    return true;
+  }
+  addressForm.addEventListener("submit", async function (e) {
+    e.preventDefault(); // Prevent default submission immediately
+
+    let isValid = true;
+
+    // 1. Run Synchronous Regex Validations
+    Object.values(fields).forEach(field => {
+      if (!validateField(field)) {
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
+      return;
+    }
+
+    // 2. Run Asynchronous Pincode Validation
+    const pincode = document.getElementById('addrPincode').value;
+    const city = document.getElementById('addrCity').value;
+    const state = document.getElementById('addrState').value;
+    const errorMsg = document.getElementById('pincodeError');
+    const pincodeInput = document.getElementById('addrPincode');
+
+    try {
+      const response = await fetch('/validate-pincode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pincode, city, state })
+      });
+
+      const result = await response.json();
+
+      if (!result.valid) {
+        errorMsg.textContent = result.message;
+        errorMsg.classList.remove("hidden"); // Ensure error is visible
+        pincodeInput.classList.add("border-red-500");
+        pincodeInput.value = "";
+        return; // Stop submission
+      } else {
+        errorMsg.textContent = '';
+        errorMsg.classList.add("hidden");
+        pincodeInput.classList.remove("border-red-500");
+      }
+
+      // 3. If all valid, submit the form
+      addressForm.submit();
+
+    } catch (err) {
+      console.error('Validation check failed', err);
+      // In case of network error, you might want to let the backend handle it or show an alert
+      addressForm.submit(); 
+    }
+  });
+
+  // Blur listener for immediate feedback (Optional, but good UX)
+  const pincodeInput = document.getElementById('addrPincode');
+  const cityInput = document.getElementById('addrCity');
+  const stateInput = document.getElementById('addrState');
+  const errorMsg = document.getElementById('pincodeError');
+
+  pincodeInput.addEventListener('blur', async () => {
+    const pincode = pincodeInput.value;
+    const city = cityInput.value;
+    const state = stateInput.value;
+
+    if (pincode && city && state) {
+      try {
+        const response = await fetch('/validate-pincode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pincode, city, state })
+        });
+
+        const result = await response.json();
+
+        if (!result.valid) {
+          errorMsg.textContent = result.message;
+          errorMsg.classList.remove("hidden");
+          pincodeInput.classList.add("border-red-500");
+
+        } else {
+          errorMsg.textContent = '';
+          errorMsg.classList.add("hidden");
+          pincodeInput.classList.remove("border-red-500");
+        }
+      } catch (err) {
+        console.error('Validation failed', err);
+      }
+    }
+  });
+
+
+
+
+</script>
+
+</html>
