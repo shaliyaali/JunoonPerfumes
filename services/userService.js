@@ -27,7 +27,8 @@ const createUser = async (userData) => {
     name: userData.name,
     email: userData.email,
     password: hashedpassword,
-    isBlocked:false
+    isBlocked:false,
+    createdAt: new Date()
 
   })
   console.log(newUser)
@@ -45,7 +46,7 @@ const userLogin=async(email,password)=>{
   }
   if(user.isBlocked){
     throw new Error('User is blocked')
-  }
+  }console.log(user.password)
   const passwordMatch=await bcrypt.compare(password,user.password)
   if(!passwordMatch){
     console.log('password mismatch')

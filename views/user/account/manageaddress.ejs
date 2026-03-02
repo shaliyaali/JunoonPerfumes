@@ -168,12 +168,19 @@
             class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" />
           <p class="text-red-500 text-xs mt-1 hidden" id="streetError"></p>
         </div>
+         <!-- Pincode -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Pincode</label>
+          <input type="text" name="pincode" id="addrPincode" 
+            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" />
+          <p class="text-red-500 text-xs mt-1 hidden" id="pincodeError"></p>
+        </div>
 
         <!-- City -->
         <div>
           <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">City</label>
           <input type="text" name="city" id="addrCity" 
-            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" />
+            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" readonly/>
           <p class="text-red-500 text-xs mt-1 hidden" id="cityError"></p>
         </div>
 
@@ -181,17 +188,11 @@
         <div>
           <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">State</label>
           <input type="text" name="state" id="addrState" 
-            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" />
+            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" readonly/>
           <p class="text-red-500 text-xs mt-1 hidden" id="stateError"></p>
         </div>
 
-        <!-- Pincode -->
-        <div>
-          <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Pincode</label>
-          <input type="text" name="pincode" id="addrPincode" 
-            class="w-full bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 focus:ring-primary focus:border-primary transition-colors text-sm" />
-          <p class="text-red-500 text-xs mt-1 hidden" id="pincodeError"></p>
-        </div>
+       
 
         <!-- Type -->
         <div>
@@ -243,9 +244,42 @@
   if (message) {
     swal.fire(message)
   }
+const pincodeInput = document.getElementById("addrPincode");
+  const cityInput = document.getElementById("addrCity");
+  const stateInput = document.getElementById("addrState");
+  const errorMsg = document.getElementById("pincodeError");
+
+  pincodeInput.addEventListener("input", async () => {
+    const pincode = pincodeInput.value.trim();
+
+    if (pincode.length !== 6) return;
+
+    try {
+      const res = await fetch(`/api/pincode/${pincode}`);
+      const data = await res.json();
+      console.log("data:",data.city,data.state,data.success);
+      if (!data.success) {
+        errorMsg.textContent = data.message;
+        errorMsg.classList.remove("hidden");
+        pincodeInput.classList.add("border-red-500");
+        cityInput.value = "";
+        stateInput.value = "";
+      } else {
+        console.log("data:",data.city,data.state)
+        errorMsg.classList.add("hidden");
+        cityInput.value = data.city;
+        stateInput.value = data.state;
+      }
+
+    } catch (err) {
+      console.error("Error fetching pincode");
+    }
+  });
+
+
 
   //address Limit Logic
-  const addreCount=<%= user.addresses.length %>;
+  const addressCount=<%= user.addresses.length %>;
   const submitBtn=document.getElementById('submitBtn');
   const cancelEditBtn=document.getElementById('cancelEditBtn');
   const formTitle=document.getElementById('formTitle');
@@ -324,7 +358,7 @@ function confirmDelete(event) {
       input: document.getElementById("addrName"),
       error: document.getElementById("nameError"),
       validate: (val) => /^[A-Za-z\s'-]{3,50}$/.test(val.trim()),
-      message: "Enter valid Name with minimum 3 charecters"
+      message: "Enter valid Name with minimum 3 characters"
     },
     phone: {
       input: document.getElementById("addrPhone"),
@@ -353,7 +387,7 @@ function confirmDelete(event) {
     state: {
       input: document.getElementById("addrState"),
       error: document.getElementById("stateError"),
-      validate: (val) =>/^[A-Za-z\s.-]{2,50}$/.test(val.trim()),
+      validate: (val) => /^[A-Za-z\s.-]{2,50}$/.test(val.trim()),
       message: "State must be atleast 2 charecters"
     },
     pincode: {
@@ -391,95 +425,98 @@ function confirmDelete(event) {
     return true;
   }
   addressForm.addEventListener("submit", async function (e) {
-    e.preventDefault(); // Prevent default submission immediately
+    // Prevent default submission to handle validation
+    e.preventDefault();
 
-    let isValid = true;
+    let isFormValid = true;
 
-    // 1. Run Synchronous Regex Validations
+    // 1. Run all synchronous validations first
     Object.values(fields).forEach(field => {
       if (!validateField(field)) {
-        isValid = false;
+        isFormValid = false;
       }
     });
 
-    if (!isValid) {
-      return;
+    // If synchronous validations fail, stop here.
+    if (!isFormValid) {
+      return; 
     }
 
-    // 2. Run Asynchronous Pincode Validation
-    const pincode = document.getElementById('addrPincode').value;
-    const city = document.getElementById('addrCity').value;
-    const state = document.getElementById('addrState').value;
-    const errorMsg = document.getElementById('pincodeError');
-    const pincodeInput = document.getElementById('addrPincode');
+    addressForm.submit();
+  
 
-    try {
-      const response = await fetch('/validate-pincode', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pincode, city, state })
-      });
+    // 2. If synchronous checks pass, proceed to asynchronous Pincode Validation
+    // try {
+    //   const pincode = fields.pincode.input.value;
+    //   const city = fields.city.input.value;
+    //   const state = fields.state.input.value;
+    //   const errorMsg = fields.pincode.error;
+    //   const pincodeInput = fields.pincode.input;
 
-      const result = await response.json();
+    //   const response = await fetch('/validate-pincode', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({ pincode, city, state })
+    //   });
 
-      if (!result.valid) {
-        errorMsg.textContent = result.message;
-        errorMsg.classList.remove("hidden"); // Ensure error is visible
-        pincodeInput.classList.add("border-red-500");
-        pincodeInput.value = "";
-        return; // Stop submission
-      } else {
-        errorMsg.textContent = '';
-        errorMsg.classList.add("hidden");
-        pincodeInput.classList.remove("border-red-500");
-      }
+    //   const result = await response.json();
 
-      // 3. If all valid, submit the form
-      addressForm.submit();
-
-    } catch (err) {
-      console.error('Validation check failed', err);
-      // In case of network error, you might want to let the backend handle it or show an alert
-      addressForm.submit(); 
-    }
+    //   if (result.valid) {
+    //     // 3. If all validations (sync and async) pass, submit the form
+    //     addressForm.submit();
+    //   } else {
+    //     // Pincode is invalid, show error and stop
+    //     errorMsg.textContent = result.message;
+    //     errorMsg.classList.remove("hidden");
+    //     pincodeInput.classList.add("border-red-500");
+    //   }
+    // } catch (err) {
+    //   console.error('Pincode validation check failed:', err);
+    //   // Show an error if the validation API fails
+    //   alert("Could not validate pincode. Please try again.");
+    // }
+    
+  
   });
+  
 
-  // Blur listener for immediate feedback (Optional, but good UX)
-  const pincodeInput = document.getElementById('addrPincode');
-  const cityInput = document.getElementById('addrCity');
-  const stateInput = document.getElementById('addrState');
-  const errorMsg = document.getElementById('pincodeError');
+  // // Blur listener for immediate feedback (Optional, but good UX)
+  // const pincodeInput = document.getElementById('addrPincode');
+  // const cityInput = document.getElementById('addrCity');
+  // const stateInput = document.getElementById('addrState');
+  // const errorMsg = document.getElementById('pincodeError');
 
-  pincodeInput.addEventListener('blur', async () => {
-    const pincode = pincodeInput.value;
-    const city = cityInput.value;
-    const state = stateInput.value;
+  // pincodeInput.addEventListener('blur', async () => {
+  //   const pincode = pincodeInput.value;
+  //   const city = cityInput.value;
+  //   const state = stateInput.value;
 
-    if (pincode && city && state) {
-      try {
-        const response = await fetch('/validate-pincode', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pincode, city, state })
-        });
+  //   if (pincode && city && state) {
+  //     try {
+  //       const response = await fetch('/validate-pincode', {
+  //         method: 'POST',
+  //         headers: { 'Content-Type': 'application/json' },
+  //         body: JSON.stringify({ pincode, city, state })
+  //       });
 
-        const result = await response.json();
+  //       const result = await response.json();
 
-        if (!result.valid) {
-          errorMsg.textContent = result.message;
-          errorMsg.classList.remove("hidden");
-          pincodeInput.classList.add("border-red-500");
+  //       if (!result.valid) {
+  //         errorMsg.textContent = result.message;
+  //         errorMsg.classList.remove("hidden");
+  //         pincodeInput.classList.add("border-red-500");
 
-        } else {
-          errorMsg.textContent = '';
-          errorMsg.classList.add("hidden");
-          pincodeInput.classList.remove("border-red-500");
-        }
-      } catch (err) {
-        console.error('Validation failed', err);
-      }
-    }
-  });
+  //       } else {
+  //         errorMsg.textContent = '';
+  //         errorMsg.classList.add("hidden");
+  //         pincodeInput.classList.remove("border-red-500");
+          
+  //       }
+  //     } catch (err) {
+  //       console.error('Validation failed', err);
+  //     }
+  //   }
+  //});
 
 
 

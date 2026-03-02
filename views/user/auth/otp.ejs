@@ -75,11 +75,11 @@
 <!-- <form class="space-y-8" id="otp-form" action="/user/verify-otp" method="POST"> -->
 <form action="/<%= otpRoute %>" method="POST" id="otp-form">
 <!-- <div id="otpData" data-remaining="<%= remainingTime %>"></div> -->
-<div class="flex justify-between gap-4">
-<input class="w-16 h-16 md:w-20 md:h-20 text-center text-2xl font-bold rounded-xl border-gray-200 dark:border-gray-700 bg-transparent focus:border-primary dark:focus:border-primary focus:ring-0 gold-glow transition-all" maxlength="1" type="text" name="d1" value=""/>
-<input class="w-16 h-16 md:w-20 md:h-20 text-center text-2xl font-bold rounded-xl border-gray-200 dark:border-gray-700 bg-transparent focus:border-primary dark:focus:border-primary focus:ring-0 gold-glow transition-all" maxlength="1" type="text" name="d2" value=""/>
-<input class="w-16 h-16 md:w-20 md:h-20 text-center text-2xl font-bold rounded-xl border-gray-200 dark:border-gray-700 bg-transparent focus:border-primary dark:focus:border-primary focus:ring-0 gold-glow transition-all" maxlength="1" type="text" name="d3" value=""/>
-<input class="w-16 h-16 md:w-20 md:h-20 text-center text-2xl font-bold rounded-xl border-gray-200 dark:border-gray-700 bg-transparent focus:border-primary dark:focus:border-primary focus:ring-0 gold-glow transition-all" maxlength="1" type="text" name="d4" value=""/>
+<div class="  otp-container justify-between gap-4">
+<input class=" otp-input w-16 h-16 md:w-20 md:h-20 text-center text-2xl font-bold rounded-xl border-gray-200 dark:border-gray-700 bg-transparent focus:border-primary dark:focus:border-primary focus:ring-0 gold-glow transition-all" maxlength="1" type="text" name="d1"  value=""/>
+<input class=" otp-input w-16 h-16 md:w-20 md:h-20 text-center text-2xl font-bold rounded-xl border-gray-200 dark:border-gray-700 bg-transparent focus:border-primary dark:focus:border-primary focus:ring-0 gold-glow transition-all" maxlength="1" type="text" name="d2" class="otp-input" value=""/>
+<input class=" otp-input w-16 h-16 md:w-20 md:h-20 text-center text-2xl font-bold rounded-xl border-gray-200 dark:border-gray-700 bg-transparent focus:border-primary dark:focus:border-primary focus:ring-0 gold-glow transition-all" maxlength="1" type="text" name="d3" value=""/>
+<input class=" otp-input w-16 h-16 md:w-20 md:h-20 text-center text-2xl font-bold rounded-xl border-gray-200 dark:border-gray-700 bg-transparent focus:border-primary dark:focus:border-primary focus:ring-0 gold-glow transition-all" maxlength="1" type="text" name="d4"  value=""/>
 <input type="hidden" name="otp" id="fullotp">
 </div>
 <div class="text-center">
@@ -184,6 +184,46 @@ otpInputs.forEach((input, index) => {
     if(message){
         swal.fire(message)
     }
+
+
+  const inputs = document.querySelectorAll(".otp-input");
+
+//   // Auto move to next input while typing
+//   inputs.forEach((input, index) => {
+//     input.addEventListener("input", (e) => {
+//       if (e.target.value.length === 1 && index < inputs.length - 1) {
+//         inputs[index + 1].focus();
+//       }
+//     });
+
+//     // Move back on backspace
+//     input.addEventListener("keydown", (e) => {
+//       if (e.key === "Backspace" && !input.value && index > 0) {
+//         inputs[index - 1].focus();
+//       }
+//     });
+//   });
+
+  // Handle full OTP paste
+  document.querySelector(".otp-container").addEventListener("paste", (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").trim();
+
+    if (!/^\d+$/.test(pastedData)) return; // Only numbers
+
+    const otpArray = pastedData.split("");
+
+    inputs.forEach((input, index) => {
+      input.value = otpArray[index] || "";
+    });
+
+    // Focus last filled input
+    const lastIndex = Math.min(otpArray.length, inputs.length) - 1;
+    if (lastIndex >= 0) {
+      inputs[lastIndex].focus();
+    }
+  });
+
 
 
 

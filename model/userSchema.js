@@ -75,7 +75,8 @@ const userSchema=new mongoose.Schema({
   },
   isBlocked:{
     type:Boolean,
-    required:false
+    required:true,
+    default:false
   },
   
     createdOn:{

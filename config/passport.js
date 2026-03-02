@@ -11,7 +11,19 @@ passport.use(new GoogleStrategy({
   async (accessToken, refreshToken, profile, done) => {
     try {
       let user = await User.findOne({$or:[{googleId: profile.id},{email:profile.emails[0].value}]  });
-      if (!user) {  
+      if (user) {
+        if (user.isBlocked) {
+          return done(null, false, { message: 'User is blocked' });
+        }
+        if(user.password){
+
+          console.log('user with password trying for google signin')
+          // Link the Google ID to the existing user account
+          user.googleId = profile.id;
+          await user.save();
+          return done(null, user);
+        }
+      } else {
         user = new User({
           googleId: profile.id,
           name: profile.displayName,

@@ -30,13 +30,11 @@ router.get('/manageaddress',userauth.checkSession,userController.loadManageAddre
 router.post('/add-address',userauth.checkSession,userController.addAddress)
 router.post('/edit-address/:id',userauth.checkSession,userController.editAddress)
 router.post('/delete-address/:id',userauth.checkSession,userController.deleteAddress)
-router.post('/validate-pincode',userController.validatePincode)
-
+//router.post('/validate-pincode',userController.validatePincode)
+router.get('/api/pincode/:pincode', userController.getPincodeDetails);
 
 router.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}))
-router.get('/auth/google/callback',passport.authenticate('google', { failureRedirect: '/signup' }),
-  userController.googleCallback
-)
+router.get('/auth/google/callback', userController.googleCallback);
 
 
 

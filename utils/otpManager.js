@@ -3,14 +3,14 @@ function generateOTP() {
 }
 function createOtpSession(req,purpose,payload){
   const otp=generateOTP()
-
+  console.log('inside create otp',otp)
   req.session.otp={
     code:otp,
     purpose,
     payload,
     expiresAt:Date.now()+1*60*1000
   }
-  console.log(otp)
+  
   return otp
   
 }

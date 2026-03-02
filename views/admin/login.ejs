@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Junoon Account Flow</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e0bd6c",
+                        "background-light": "#f9f7f6",
+                        "background-dark": "#1a1a1a",
+                        "junoon-black": "#1a170f",
+                        "junoon-gray": "#917f55",
+                        "danger-muted": "#9C2C40"
+                    },
+                    fontFamily: {
+                        "display": ["Noto Serif", "serif"],
+                        "sans": ["Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Noto Sans', sans-serif; }
+        h1, h2, h3, .serif-font { font-family: 'Noto Serif', serif; }
+        .auth-card { max-width: 480px; width: 100%; }
+        .frame-container { width: 100%; max-width: 1550px; margin: 0 auto; padding: 80px 20px; border-bottom: 1px solid #e5dfd2; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-junoon-black dark:text-white transition-colors duration-300">
+
+  <!-- FRAME 1: LOG IN PAGE -->
+    <input type="text" id="message" value="<%= message %>" name="message" hidden>
+<div class="frame-container flex flex-col items-center">
+<div class="auth-card bg-white dark:bg-zinc-900 p-10 rounded-lg shadow-sm border border-[#e5dfd2] dark:border-zinc-800">
+<h1 class="text-3xl font-bold text-center mb-2">Log In</h1>
+<p class="text-junoon-gray text-center mb-8">Welcome back to Junoon.</p>
+<form class="space-y-5" method="POST" action="/admin/login">
+<div>
+<label class="block text-sm font-medium mb-1.5 ml-1">Email ID</label>
+<input class="w-full bg-background-light dark:bg-zinc-800 border-none rounded-lg h-12 px-4 focus:ring-1 focus:ring-primary" type="email" name="email" id="email"/>
+ <p class="text-red-500 text-xs mt-1 hidden" id="emailError"></p>
+</div>
+<div class="relative">
+<div class="flex justify-between items-center mb-1.5 ml-1">
+<label class="block text-sm font-medium">Password</label>
+<!-- <a class="text-xs text-junoon-gray hover:text-primary transition-colors" href="/forget-password">Forgot password?</a> -->
+</div>
+<input class="w-full bg-background-light dark:bg-zinc-800 border-none rounded-lg h-12 px-4 pr-12 focus:ring-1 focus:ring-primary" type="password" name="password" id="password"/>
+ <p class="text-red-500 text-xs mt-1 hidden" id="passwordError"></p>
+<span class="material-symbols-outlined absolute right-4 top-9 text-junoon-gray cursor-pointer select-none" onclick="togglePassword()">visibility</span>
+</div>
+
+<button class="w-full bg-primary hover:bg-opacity-90 text-white font-bold h-12 rounded-lg transition-all serif-font text-lg tracking-wide uppercase">Log In</button>
+</form>
+
+</div>
+</div>
+</body>

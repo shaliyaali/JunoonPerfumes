@@ -6,6 +6,7 @@ const { createOtpSession,getRemainingTime } = require('../utils/otpManager')
 const { verifyOtpSession, clearOtpSession } = require('../utils/otpManager')
 const bcrypt = require('bcrypt')
 const { validatePincodeMatch } = require('../utils/pincodeValidator')
+const passport = require('passport')
 
 
 const loadhome = (req, res) => {
@@ -76,7 +77,7 @@ const loadManageAddress=async (req,res)=>{
   }
 
 }
-async function sendVerificationEmail(email, otp) {
+async function sendVerificationEmail(email, otp,subject) {
   try {
     console.log('inside verification email')
     const transporter = nodemailer.createTransport({
@@ -92,7 +93,7 @@ async function sendVerificationEmail(email, otp) {
     const info = await transporter.sendMail({
       from: process.env.NODEMAILER_EMAIL,
       to: email,
-      subject: 'verify your account',
+      subject: subject,
       text: `your OTP is ${otp}`,
       html: `<b>Your OTP:${otp}</b>`
     })
@@ -142,8 +143,8 @@ const registerUser = async (req, res) => {
 
     const otp = createOtpSession(req, "signup",
       { name, email, password })
-
-    await sendVerificationEmail(email, otp)
+      const subject='verify your account';
+    await sendVerificationEmail(email, otp,subject)
     console.log("Remaining time:", getRemainingTime(req));
     return res.render('auth/otp', {
        message: 'OTP sent to email', 
@@ -173,7 +174,7 @@ const verifyOtp = async (req, res) => {
 
   await userService.createUser(userData)
   clearOtpSession(req)
-
+  req.session.message='registered sucessfull'
   return res.redirect('/signin')
 
 
@@ -215,7 +216,8 @@ const userLogin = async (req, res) => {
       req.session.user = {
         id: user._id,
         name: user.name,
-        email: user.email
+        email: user.email,
+       // password:user.password
       }
       console.log('user logged in successfully', user)
       return res.redirect('/')
@@ -277,7 +279,8 @@ const editEmail = async (req, res) => {
       newEmail
     })
     //send otp
-    await sendVerificationEmail(newEmail, otp)
+    const subject='Email verification';
+    await sendVerificationEmail(newEmail, otp,subject)
 
     return res.render('auth/otp', { 
       message: 'OTP send to new email ', 
@@ -352,8 +355,9 @@ const passwordReset = async (req, res) => {
       userId: user._id,
       email: user.email
     })
-
-    await sendVerificationEmail(email, otp)
+    const subject='Password reset';
+    //send otp
+    await sendVerificationEmail(email, otp,subject)
 
     return res.render('auth/otp', {
       message: "OTP sent to your email",
@@ -453,14 +457,15 @@ const changePassword = async (req, res) => {
     }
 
     const user = await userService.getUserById(sessionUser.id)
-
-    const passwordMatch = bcrypt.compare(
+    console.log('password',user.password)
+    console.log(currentPassword)
+    const passwordMatch = await bcrypt.compare(
       currentPassword,
       user.password
     )
 
     if (!passwordMatch) {
-      return res.render('account/profile', {
+      return res.render('account/profile', {user,
         message: "Current password is incorrect"
       })
     }
@@ -486,56 +491,92 @@ const pageNotFound = (req, res) => {
   }
 }
 
-const googleCallback = (req, res) => {
-  try {
-
-    const user = req.user  
-
+const googleCallback = (req, res, next) => {
+  passport.authenticate('google', (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
     if (!user) {
-      return res.redirect('/signup')
+      req.session.message = (info && info.message) || 'Google sign-in failed. Please try again.';
+      return res.redirect('/signup');
     }
-
-    req.session.user = {
-      id: user._id,
-      name: user.name,
-      email: user.email
-    }
-
-    console.log("Google login session created:", req.session.user)
-
-    return res.redirect('/')
-
-  } catch (error) {
-    console.error("Google callback error:", error)
-    return res.redirect('/signup')
-  }
+    req.logIn(user, (loginErr) => {
+      if (loginErr) {
+        return next(loginErr);
+      }
+      
+      req.session.user = {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      }
+      console.log("Google login session created:", req.session.user)
+      return res.redirect('/')
+    });
+  })(req, res, next);
 }
 
 
 
   
+// const addAddress = async (req, res) => {
+//   try {
+//     const userId = req.session.user.id;
+//     const user = await userService.getUserAddresses(userId);
+
+//     if (user.addresses.length >= 5) {
+//       req.session.message = "You can only add a maximum of 5 addresses.";
+//       return res.redirect('/manageaddress');
+//     }
+
+//     const addressData = { ...req.body, isDefault: !!req.body.isDefault };
+
+//     const pinCheck = await validatePincodeMatch(
+//       addressData.pincode,
+//       addressData.city,
+//       addressData.state
+//     );
+
+//     if (!pinCheck.valid) {
+//       req.session.message = pinCheck.message;
+//       return res.redirect('/manageaddress');
+//     }
+
+//     await userService.addAddress(userId, addressData);
+//     req.session.message = "Address added successfully.";
+//     return res.redirect('/manageaddress');
+
+//   } catch (error) {
+//     console.error("Add address error:", error);
+//     req.session.message = "Could not add address.";
+//     return res.redirect('/manageaddress');
+//   }
+// }
 const addAddress = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const user = await userService.getUserAddresses(userId);
-
+  console.log('inside add address')
     if (user.addresses.length >= 5) {
       req.session.message = "You can only add a maximum of 5 addresses.";
       return res.redirect('/manageaddress');
     }
 
-    const addressData = { ...req.body, isDefault: !!req.body.isDefault };
+    const {pincode} = req.body
 
-    const pinCheck = await validatePincodeMatch(
-      addressData.pincode,
-      addressData.city,
-      addressData.state
-    );
+    const pinCheck= await validatePincodeMatch(pincode);
 
     if (!pinCheck.valid) {
       req.session.message = pinCheck.message;
       return res.redirect('/manageaddress');
     }
+     const addressData={
+      ...req.body,
+      city:pinCheck.city,
+      state:pinCheck.state,
+      isDefault:!!req.body.isDefault
+     }
+
 
     await userService.addAddress(userId, addressData);
     req.session.message = "Address added successfully.";
@@ -557,7 +598,7 @@ const logoutUser = (req, res) => {
       return res.redirect('/profile')
     }
 
-    res.clearCookie('connect.sid')  // important
+    res.clearCookie('connect.sid')  
     return res.redirect('/signin')
 
   })
@@ -569,7 +610,7 @@ const editAddress = async (req, res) => {
     const addressId = req.params.id;
     const formData = { ...req.body, isDefault: !!req.body.isDefault };
 
-    const pinCheck = await validatePincodeMatch(formData.pincode, formData.city, formData.state);
+    const pinCheck = await validatePincodeMatch(formData.pincode);
     if (!pinCheck.valid) {
       req.session.message = pinCheck.message;
       return res.redirect('/manageaddress');
@@ -602,18 +643,33 @@ const deleteAddress = async (req, res) => {
   }
 }
 
-const validatePincode = async (req, res) => {
-  try {
-    const { pincode, city, state } = req.body
-    console.log('inside validate pincode')
-    const pinCheck = await validatePincodeMatch(pincode, city, state)
+// const validatePincode = async (req, res) => {
+//   try {
+//     const { pincode } = req.body
+//     console.log('inside validate pincode')
+//     const pinCheck = await validatePincodeMatch(pincode)
     
-    return res.json(pinCheck)
+//     return res.json(pinCheck)
     
-  } catch (error) {
-    console.error("Pincode validation error:", error)
-    return res.status(500).json({ valid: false, message: "Internal server error" })
-  }
-}
+//   } catch (error) {
+//     console.error("Pincode validation error:", error)
+//     return res.status(500).json({ valid: false, message: "Internal server error" })
+//   }
+// }
+  const getPincodeDetails=async(req,res)=>{
+    const {pincode}=req.params;
 
-module.exports = { loadRegister, registerUser, loadhome, pageNotFound, verifyOtp, loadLogin, loadOtp, resendOtp, userLogin, loadProfile, updateProfile, editEmail, verifyEmailOtp, loadForgetPassword, passwordReset, verifyResetOtp, resetPassword ,changePassword,logoutUser,addAddress,editAddress,deleteAddress,loadManageAddress,googleCallback,validatePincode}                                                                       
+    const result = await validatePincodeMatch(pincode);
+
+  if (!result.valid) {
+    return res.json({ success: false, message: result.message });
+  }
+console.log("city and state fetched",result.city,result.state)
+  return res.json({
+    success: true,
+    city: result.city,
+    state: result.state
+  });
+  }
+
+module.exports = { loadRegister, registerUser, loadhome, pageNotFound, verifyOtp, loadLogin, loadOtp, resendOtp, userLogin, loadProfile, updateProfile, editEmail, verifyEmailOtp, loadForgetPassword, passwordReset, verifyResetOtp, resetPassword ,changePassword,logoutUser,addAddress,editAddress,deleteAddress,loadManageAddress,googleCallback,getPincodeDetails}                                                                       

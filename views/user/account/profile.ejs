@@ -143,6 +143,7 @@
         class="bg-card-light dark:bg-card-dark p-8 rounded-DEFAULT shadow-sm border border-gray-100 dark:border-gray-800">
 
         <form action="/updateprofile" method="POST">
+          <input type="text" id="message" value="<%= typeof message !== 'undefined' ? message : '' %>" hidden>
 
           <div class="flex justify-between items-start mb-6">
             <div class="flex items-center">
@@ -269,7 +270,7 @@
           <span class="material-icons-outlined text-primary mr-2">lock</span>
           <h3 class="text-lg font-bold font-display tracking-tight">Change Password</h3>
         </div>
-        <% if (isGoogleUser) { %>
+        <% if (isGoogleUser && !user.password) { %>
           <div class="p-4 bg-gray-100 rounded text-sm text-gray-600">
             Password is managed by Google. You cannot change it here.
           </div>
@@ -284,7 +285,7 @@
                     Current Password
                   </label>
                   <div class="relative">
-                    <input type="password" id="currentPassword" name="currentPassword" required
+                    <input type="password" id="currentPassword" name="currentPassword" 
                       class="w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 pr-10" />
                     <span class="material-icons-outlined absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
                       onclick="togglePassword('currentPassword', this)">visibility</span>
@@ -297,7 +298,7 @@
                     New Password
                   </label>
                   <div class="relative">
-                    <input type="password" name="newPassword" id="newPassword" required minlength="8"
+                    <input type="password" name="newPassword" id="newPassword" 
                       class="w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 pr-10" />
                     <span class="material-icons-outlined absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
                       onclick="togglePassword('newPassword', this)">visibility</span>
@@ -310,7 +311,7 @@
                     Confirm New Password
                   </label>
                   <div class="relative">
-                    <input type="password" name="confirmPassword" id="confirmPassword" required
+                    <input type="password" name="confirmPassword" id="confirmPassword" 
                       class="w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 pr-10" />
                     <span class="material-icons-outlined absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
                       onclick="togglePassword('confirmPassword', this)">visibility</span>
@@ -418,6 +419,12 @@
 </body>
 
 <script>
+
+  const message = document.getElementById('message').value
+  if (message) {
+    swal.fire(message)
+  }
+
   //edit profile field validations
   const profileForm = document.querySelector('form[action="/updateprofile"]');
 
@@ -545,7 +552,7 @@
 
     function validateCurrentPassword() {
       if (currentPassword.value.trim() === "") {
-        currentPasswordError.textContent = "Current password is required";
+       currentPasswordError.textContent = "Current password is required";
         currentPasswordError.classList.remove("hidden");
         currentPassword.classList.add("border-red-500");
         return false;
@@ -556,7 +563,7 @@
     }
 
     function validateNewPassword() {
-      if (newPassword.value.length < 8) {
+      if (newPassword.value.length < 6) {
         newPasswordError.textContent = "Password must be at least 8 characters";
         newPasswordError.classList.remove("hidden");
         newPassword.classList.add("border-red-500");
