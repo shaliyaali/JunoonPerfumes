@@ -28,7 +28,7 @@ const createUser = async (userData) => {
     email: userData.email,
     password: hashedpassword,
     isBlocked:false,
-    createdAt: new Date()
+    //createdAt: new Date()
 
   })
   console.log(newUser)

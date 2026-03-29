@@ -35,6 +35,9 @@ router.get('/api/pincode/:pincode', userController.getPincodeDetails);
 
 router.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}))
 router.get('/auth/google/callback', userController.googleCallback);
+//allfragrence page
+router.get('/allfragrence',allFraggrenceController.getAllfragrence)
+
 
 
 

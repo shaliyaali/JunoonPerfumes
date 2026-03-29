@@ -73,3 +73,22 @@
 </div>
 </div>
 </body>
+<script>
+ const message=document.getElementById('message').value
+    if(message){
+        swal.fire(message)
+    }
+const passwordInput = document.getElementById("password");
+    function togglePassword() {
+    const icon = event.target;
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.textContent = "visibility_off";
+    } else {
+        passwordInput.type = "password";
+        icon.textContent = "visibility";
+    }
+}
+
+</script>
+</html>

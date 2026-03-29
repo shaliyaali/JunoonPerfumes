@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title><%= product ? 'Edit Product' : 'Add New Product' %> - Junoon Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#D4AF37",
+                        "background-light": "#FAFAFA",
+                        "background-dark": "#0F0F0F",
+                        "sidebar-light": "#FDFBF7",
+                        "sidebar-dark": "#1A1A1A",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#242424",
+                    },
+                    fontFamily: {
+                        display: ["Playfair Display", "serif"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <style type="text/tailwindcss">
+        @layer base { body { font-family: 'Inter', sans-serif; } }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 transition-colors duration-200">
+<div class="flex min-h-screen max-w-[1550px] mx-auto shadow-2xl">
+    <!-- Sidebar ( Simplified for brevity, matches existing ) -->
+    <aside class="w-64 bg-sidebar-light dark:bg-sidebar-dark border-r border-slate-200 dark:border-slate-800 flex flex-col sticky top-0 h-screen">
+        <div class="p-8">
+            <div class="flex items-center space-x-3 mb-12">
+                <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-lg text-white">
+                    <span class="material-symbols-outlined">spa</span>
+                </div>
+                <div>
+                    <h1 class="font-display text-xl font-bold tracking-tight text-slate-900 dark:text-white">Junoon</h1>
+                    <p class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Admin Suite</p>
+                </div>
+            </div>
+            <nav class="space-y-1">
+                <a href="/admin/dashboard" class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined mr-3 text-xl">dashboard</span>Dashboard</a>
+                <a href="/admin/productManagement" class="flex items-center px-4 py-3 bg-primary text-white rounded-lg shadow-lg shadow-primary/20"><span class="material-symbols-outlined mr-3 text-xl">inventory_2</span>Products</a>
+                <a href="/admin/categoryManagement" class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined mr-3 text-xl">category</span>Categories</a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col">
+        <header class="h-24 px-10 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-sidebar-dark">
+            <div class="flex items-center gap-4">
+                <a href="/admin/productManagement" class="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:border-primary hover:text-primary transition-all text-slate-400">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white"><%= product ? 'Edit Product' : 'Add New Product' %></h2>
+            </div>
+            <button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors" onclick="document.documentElement.classList.toggle('dark')">
+                <span class="material-symbols-outlined dark:hidden">dark_mode</span>
+                <span class="material-symbols-outlined hidden dark:block">light_mode</span>
+            </button>
+        </header>
+
+        <div class="p-10 overflow-auto">
+            <form id="productForm" action="<%= product ? '/admin/editProduct/'+product._id : '/admin/addProduct' %>" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Left Column: General Info & Variants -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- General Info -->
+                    <div class="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm">
+                        <h3 class="font-display font-bold text-lg mb-6">General Information</h3>
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Product Name</label>
+                                <input type="text" name="name" value="<%= product ? product.name : '' %>" required class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:text-slate-200" placeholder="e.g. Royal Oudh">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Tagline / Short Heading</label>
+                                <input type="text" name="tagline" value="<%= product ? product.tagline : '' %>" class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:text-slate-200" placeholder="e.g. A royal scent of ancient traditions">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Description</label>
+                                <textarea name="description" rows="4" class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:text-slate-200" placeholder="Product description..."><%= product ? product.description : '' %></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Variants -->
+                    <div class="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-display font-bold text-lg">Product Variants</h3>
+                            <button type="button" id="add-variant-btn" class="text-sm font-bold text-primary hover:text-primary/80 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-lg">add_circle</span> Add Variant
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left" id="variants-table">
+                                <thead class="bg-slate-50 dark:bg-slate-800/50 text-xs uppercase font-bold text-slate-500">
+                                    <tr>
+                                        <th class="px-4 py-3 rounded-l-lg">Size / Variant</th>
+                                        <th class="px-4 py-3">Price (₹)</th>
+                                        <th class="px-4 py-3">Stock</th>
+                                        <th class="px-4 py-3 rounded-r-lg text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="space-y-2" id="variant-container">
+                                    <!-- Initial Variant Row -->
+                                    <% if (product && product.variants && product.variants.length > 0) { %>
+                                        <% product.variants.forEach((variant, index) => { %>
+                                            <tr class="group">
+                                                <td class="p-2">
+                                                    <input type="text" name="variants[<%= index %>][size]" value="<%= variant.size %>" required class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="e.g. 50ml">
+                                                </td>
+                                                <td class="p-2">
+                                                    <input type="number" name="variants[<%= index %>][price]" value="<%= variant.price %>" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0">
+                                                </td>
+                                                <td class="p-2">
+                                                    <input type="number" name="variants[<%= index %>][stock]" value="<%= variant.stock %>" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0">
+                                                </td>
+                                                <td class="p-2 text-right">
+                                                    <button type="button" class="text-slate-400 hover:text-red-500 transition-colors" onclick="removeVariant(this)" <%= product.variants.length === 1 ? 'disabled' : '' %>>
+                                                        <span class="material-symbols-outlined">delete</span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <tr class="group">
+                                            <td class="p-2">
+                                                <input type="text" name="variants[0][size]" required class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="e.g. 50ml">
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="number" name="variants[0][price]" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0">
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="number" name="variants[0][stock]" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0">
+                                            </td>
+                                            <td class="p-2 text-right">
+                                                <button type="button" class="text-slate-400 hover:text-red-500 transition-colors" onclick="removeVariant(this)" disabled>
+                                                    <span class="material-symbols-outlined">delete</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column:-->
+                <div class="space-y-8">
+                    <!-- Organization -->
+                    <div class="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm">
+                        <!-- <h3 class="font-display font-bold text-lg mb-6"></h3> -->
+                         <div class="space-y-6">
+                          <div>
+                                <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Offer in Persentage</label>
+                                <input type="number" name="offer" value="<%= product ? product.offer : '' %>" class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:text-slate-200" >
+                            </div>
+                        <div>
+                                <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Top Note</label>
+                                <select name="notes" class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:text-slate-200 cursor-pointer">
+                                    <option value="Floral" <%= product && product.note === 'Floral' ? 'selected' : '' %>>Floral</option>
+                                    <option value="Woody" <%= product && product.note === 'Woody' ? 'selected' : '' %>>Woody</option>
+                                     <option value="Fresh" <%= product && product.note === 'Fresh' ? 'selected' : '' %>>Fresh</option>
+                                    <option value="oriental" <%= product && product.note === 'oriental' ? 'selected' : '' %>>Oreantal</option>
+                                     <option value="Musky" <%= product && product.note === 'Musky' ? 'selected' : '' %>>Musky</option>
+                                    <option value="Spicy" <%= product && product.note === 'Spicy' ? 'selected' : '' %>>Spicy</option>
+                                </select>
+                            </div>
+
+                        <!-- <div class="space-y-6"> -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Category</label>
+                                <select name="category" required class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:text-slate-200 cursor-pointer">
+                                    <option value="" disabled selected>Select Category</option>
+                                    <% categories.forEach(cat => { %>
+                                        <option value="<%= cat._id %>" <%= product && product.category && product.category._id.toString() === cat._id.toString() ? 'selected' : '' %>><%= cat.name %></option>
+                                    <% }) %>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Status</label>
+                                <select name="status" class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:text-slate-200 cursor-pointer">
+                                    <option value="Active" <%= product && product.status === 'Active' ? 'selected' : '' %>>Active</option>
+                                    <option value="Inactive" <%= product && product.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-3 pt-2">
+                                <input type="checkbox" name="isFeatured" id="isFeatured" <%= product && product.isFeatured ? 'checked' : '' %> class="w-5 h-5 text-primary border-slate-300 rounded focus:ring-primary bg-white dark:bg-background-dark cursor-pointer">
+                                <label for="isFeatured" class="text-sm font-medium text-slate-600 dark:text-slate-400 cursor-pointer">
+                                    Add to Home Screen
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Media -->
+                    <div class="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm">
+                        <h3 class="font-display font-bold text-lg mb-6">Product Images</h3>
+                        <div class="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center hover:border-primary/50 transition-colors relative">
+                            <!-- Main Input (Hidden, used for submission) -->
+                            <input type="file" name="images" id="imageInput" multiple accept="image/png, image/jpeg, image/jpg" class="hidden">
+                            
+                            <!-- Trigger Input (Used for selecting files to crop) -->
+                            <input type="file" id="cropInput" accept="image/png, image/jpeg, image/jpg" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            
+                            <div class="flex flex-col items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-4xl text-slate-400 mb-2">cloud_upload</span>
+                                <p class="text-sm font-semibold text-slate-600 dark:text-slate-300">Click to upload images</p>
+                                <p class="text-xs text-slate-400 mt-1">PNG, JPG up to 5MB</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 mt-4">
+                            <!-- Section for images already in the database -->
+                            <div id="existing-preview-container" class="contents">
+                                <% if (product && product.images) { %>
+                                    <% product.images.forEach((img, idx) => { %>
+                                        <div class="relative group" id="existing-img-<%= idx %>">
+                                            <img src="<%= img %>" class="w-full h-24 object-cover rounded-lg border border-slate-200 dark:border-slate-700">
+                                            <input type="hidden" name="existingImages" value="<%= img %>">
+                                            <button type="button" onclick="removeExistingImage('<%= idx %>')" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <span class="material-symbols-outlined text-sm">close</span>
+                                            </button>
+                                        </div>
+                                    <% }) %>
+                                <% } %>
+                            </div>
+                            <!-- Section for newly added cropped images -->
+                            <div id="new-preview-container" class="contents"></div>
+                        </div>
+                        <p id="image-error" class="text-red-500 text-xs mt-2 hidden">Minimum 3 images required.</p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-4 pt-4">
+                        <a href="/admin/productManagement" class="flex-1 px-6 py-3 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancel</a>
+                        <button type="submit" class="flex-1 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-opacity-90 transition-colors shadow-lg shadow-primary/20"><%= product ? 'Update Product' : 'Publish Product' %></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<!-- Cropper Modal -->
+<div id="cropperModal" class="fixed inset-0 z-50 hidden bg-black/90 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-card-dark rounded-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+            <h3 class="font-bold text-lg dark:text-white">Crop Image</h3>
+            <button type="button" onclick="closeCropper()" class="text-slate-500 hover:text-red-500">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="flex-1 bg-black p-4 overflow-hidden relative" style="min-height: 400px;">
+            <img id="cropperImage" src="" alt="To Crop" class="max-w-full block">
+        </div>
+        <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3">
+            <button type="button" onclick="closeCropper()" class="px-4 py-2 text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">Cancel</button>
+            <button type="button" id="cropBtn" class="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-opacity-90">Crop & Add</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    let variantCount = <%= product && product.variants ? product.variants.length : 1 %>;
+    const container = document.getElementById('variant-container');
+
+    document.getElementById('add-variant-btn').addEventListener('click', () => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="p-2"><input type="text" name="variants[${variantCount}][size]" required class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="Size"></td>
+            <td class="p-2"><input type="number" name="variants[${variantCount}][price]" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0"></td>
+            <td class="p-2"><input type="number" name="variants[${variantCount}][stock]" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0"></td>
+            <td class="p-2 text-right">
+                <button type="button" class="text-slate-400 hover:text-red-500 transition-colors" onclick="removeVariant(this)">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            </td>
+        `;
+        container.appendChild(row);
+        variantCount++;
+    });
+
+    function removeVariant(btn) {
+        if(container.children.length > 1) {
+            btn.closest('tr').remove();
+        }
+    }
+
+    // --- Image Cropping Logic ---
+    let cropper = null;
+    let croppedFiles = []; // Array to store final blobs
+    const cropInput = document.getElementById('cropInput');
+    const cropperModal = document.getElementById('cropperModal');
+    const cropperImage = document.getElementById('cropperImage');
+    const newPreviewContainer = document.getElementById('new-preview-container');
+    const productForm = document.getElementById('productForm');
+    const mainImageInput = document.getElementById('imageInput');
+
+    cropInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            cropperImage.src = event.target.result;
+            cropperModal.classList.remove('hidden');
+            
+            if (cropper) {
+                cropper.destroy();
+            }
+            
+            cropper = new Cropper(cropperImage, {
+                aspectRatio: 1, // Square crop, change to NaN for free crop
+                viewMode: 1,
+                autoCropArea: 1,
+            });
+        };
+        reader.readAsDataURL(file);
+        
+        // Reset input so same file can be selected again if needed
+        cropInput.value = '';
+    });
+
+    function closeCropper() {
+        cropperModal.classList.add('hidden');
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+    }
+
+    document.getElementById('cropBtn').addEventListener('click', function() {
+        if (!cropper) return;
+
+        cropper.getCroppedCanvas({
+            width: 800, // Resize options
+            height: 800
+        }).toBlob((blob) => {
+            // Create a unique name for the file
+            const fileName = `cropped-${Date.now()}.jpg`;
+            const file = new File([blob], fileName, { type: 'image/jpeg' });
+            
+            // Add to our array
+            croppedFiles.push(file);
+            
+            // Update UI
+            updatePreview();
+            closeCropper();
+        }, 'image/jpeg', 0.8);
+    });
+
+    function updatePreview() {
+        newPreviewContainer.innerHTML = '';
+        const errorMsg = document.getElementById('image-error');
+        
+        const existingCount = document.querySelectorAll('input[name="existingImages"]').length;
+        const totalImages = existingCount + croppedFiles.length;
+
+        if (totalImages < 3) {
+            errorMsg.classList.remove('hidden');
+            errorMsg.textContent = `Minimum 3 images required. Current: ${totalImages}`;
+        } else {
+            errorMsg.classList.add('hidden');
+        }
+
+        croppedFiles.forEach((file, index) => {
+            const url = URL.createObjectURL(file);
+            const div = document.createElement('div');
+            div.className = 'relative group';
+            div.innerHTML = `
+                <img src="${url}" class="w-full h-24 object-cover rounded-lg border border-slate-200 dark:border-slate-700">
+                <button type="button" onclick="removeImage(${index})" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+            `;
+            newPreviewContainer.appendChild(div);
+        });
+    }
+
+    window.removeImage = function(index) {
+        croppedFiles.splice(index, 1);
+        updatePreview();
+    }
+
+    window.removeExistingImage = function(idx) {
+        const el = document.getElementById(`existing-img-${idx}`);
+        if (el) el.remove();
+        updatePreview(); // Re-calculate total and update error message
+    }
+
+    // Intercept Form Submission
+    productForm.addEventListener('submit', function(e) {
+        const isEdit = <%= product ? 'true' : 'false' %>;
+        
+        // Calculate total images: existing (not deleted) + newly cropped
+        const existingInputs = document.querySelectorAll('input[name="existingImages"]');
+        const totalImagesCount = existingInputs.length + croppedFiles.length;
+
+        if (totalImagesCount < 3) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Images Required',
+                text: 'Please upload at least 3 images for the product.',
+                confirmButtonColor: '#D4AF37'
+            });
+            return;
+        }
+
+        // Create a DataTransfer to simulate file input
+        const dataTransfer = new DataTransfer();
+        croppedFiles.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+        
+        // Assign the cropped files to the hidden main input
+        mainImageInput.files = dataTransfer.files;
+    });
+</script>
+
+<% if (typeof error !== 'undefined' && error) { %>
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: '<%= error %>',
+        confirmButtonColor: '#D4AF37'
+    });
+</script>
+<% } %>
+
+
+</body>
+</html>

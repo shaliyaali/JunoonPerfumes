@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>All Fragrances | Junoon Perfumes</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af37",
+                        "gold-muted": "#a78b52",
+                        "warm-ivory": "#fbfaf9",
+                        "deep-black": "#0c0c0c",
+                        "rich-black": "#121212",
+                    },
+                    fontFamily: {
+                        "display": ["Cinzel", "serif"],
+                        "sans": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .hero-gradient {
+            background: linear-gradient(180deg, #0c0c0c 0%, #1a1a1a 100%);
+        }
+        .product-card-shadow:hover {
+            box-shadow: 0 20px 40px -15px rgba(212, 175, 55, 0.1);
+        }
+        .bottle-mask-rect {
+            clip-path: inset(10% 25% 10% 25% round 4px);
+        }
+        .bottle-mask-round {
+            clip-path: circle(35% at 50% 60%);
+        }
+    </style>
+</head>
+<body class="bg-warm-ivory text-rich-black antialiased">
+<header class="sticky top-0 z-50 w-full bg-deep-black border-b border-primary/20 px-6">
+<div class="max-w-[1550px] mx-auto flex items-center justify-between py-4">
+<a class="flex items-center gap-3 group" href="#">
+<div class="text-primary">
+<svg class="w-8 h-8" fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 4C24 4 42 4 42 17.3333C42 30.6667 42 30.6667 42 30.6667H24V44H6V30.6667C6 30.6667 6 30.6667 6 17.3333C6 4 24 4 24 4Z"></path>
+</svg>
+</div>
+<div class="flex flex-col">
+<h1 class="text-white text-xl font-display font-bold tracking-[0.1em] leading-tight">JUNOON <span class="font-light">Perfumes</span></h1>
+<span class="text-[8px] text-primary tracking-[0.4em] uppercase font-medium">Anussatti smrti</span>
+</div>
+</a>
+<nav class="hidden lg:flex items-center gap-10">
+<a class="text-gray-300 hover:text-primary text-xs font-bold tracking-[0.2em] transition-colors" href="#">HOME</a>
+<a class="text-gray-300 hover:text-primary text-xs font-bold tracking-[0.2em] transition-colors" href="#">BEST SELLER</a>
+<a class="text-primary text-xs font-bold tracking-[0.2em] border-b border-primary" href="#">ALL FRAGRANCE</a>
+<a class="text-gray-300 hover:text-primary text-xs font-bold tracking-[0.2em] transition-colors" href="#">SHOP</a>
+</nav>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center border-b border-white/20 pb-1">
+<span class="material-symbols-outlined text-primary text-xl">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-xs text-white placeholder-gray-500 w-32 ml-2" placeholder="SEARCH SCENT" type="text"/>
+</div>
+<div class="flex items-center gap-5">
+<button class="text-gray-300 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">favorite</span>
+</button>
+<button class="relative text-gray-300 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">shopping_bag</span>
+<span class="absolute -top-1 -right-1 bg-primary text-deep-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<section class="hero-gradient pt-20 pb-24 px-6 text-center relative overflow-hidden">
+<div class="absolute inset-0 opacity-10 pointer-events-none">
+<div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, rgba(212,175,55,0.15) 1px, transparent 0); background-size: 40px 40px;"></div>
+</div>
+<div class="max-w-[1550px] mx-auto relative z-10">
+<span class="text-primary uppercase tracking-[0.5em] text-[10px] font-bold mb-6 block">The Complete Collection</span>
+<h2 class="text-white text-5xl md:text-6xl font-display font-light tracking-tight mb-8">All Fragrances</h2>
+<p class="text-gray-400 text-base md:text-lg font-light max-w-2xl mx-auto leading-relaxed italic">
+            Explore our curated range of signature perfumes and rare attars, crafted for those who seek distinction.
+        </p>
+</div>
+</section>
+<main class="max-w-[1550px] mx-auto px-6 py-16 flex flex-col lg:flex-row gap-12">
+<aside class="w-full lg:w-72 shrink-0">
+<div class="sticky top-32 space-y-12">
+<div>
+<h3 class="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-8 border-b border-primary/20 pb-2">Filter Excellence</h3>
+<div class="mb-10">
+<p class="text-xs font-bold uppercase tracking-widest mb-5 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">category</span>
+        Categories
+    </p>
+<div class="space-y-4">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
+<span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">Perfume</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
+<span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">Athar</span>
+</label>
+</div>
+</div><div class="mb-10">
+<p class="text-xs font-bold uppercase tracking-widest mb-5 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">filter_vintage</span>
+                        Fragrance Notes
+                    </p>
+<div class="space-y-4">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
+<span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">Woody &amp; Oud</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
+<span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">Floral Memoirs</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
+<span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">Amber &amp; Musk</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
+<span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">Citrus &amp; Fresh</span>
+</label>
+</div>
+</div>
+<div class="mb-10">
+<p class="text-xs font-bold uppercase tracking-widest mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">payments</span>
+                        Price Range
+                    </p>
+<div class="px-2">
+<div class="relative h-px w-full bg-gray-300">
+<div class="absolute h-0.5 bg-primary -top-[0.5px] left-[10%] right-[30%]"></div>
+<div class="absolute -top-2 left-[10%] w-4 h-4 bg-white border border-primary rounded-full cursor-pointer"></div>
+<div class="absolute -top-2 right-[30%] w-4 h-4 bg-white border border-primary rounded-full cursor-pointer"></div>
+</div>
+<div class="flex justify-between mt-4 text-[10px] text-gray-500 font-bold tracking-widest uppercase">
+<span>₹2,500</span>
+<span>₹35,000</span>
+</div>
+</div>
+</div>
+<button class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-black hover:text-primary border border-primary transition-all duration-300">
+                    Apply Filter
+                </button>
+</div>
+</div>
+</aside>
+<section class="flex-1">
+<div class="flex flex-col sm:flex-row items-center justify-between mb-12 pb-6 border-b border-gray-200">
+<p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-4 sm:mb-0">Displaying <span class="text-black text-xs">6 Masterpieces</span></p>
+<div class="flex items-center gap-6">
+<span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Sort By</span>
+<select class="bg-transparent border-none text-[10px] font-bold uppercase tracking-widest focus:ring-0 cursor-pointer text-black py-0">
+<option>Collection Order</option>
+<option>Price: High to Low</option>
+<option>Price: Low to High</option>
+<option>Newest First</option>
+</select>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
+<div class="group flex flex-col bg-white border border-gray-100 product-card-shadow transition-all duration-500">
+<div class="aspect-[4/5] overflow-hidden relative bg-[#f4f3f1] flex items-center justify-center p-8">
+<div class="relative w-full h-full">
+<img alt="Velvet Ember" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-1000 bottle-mask-rect" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3Pm5tjYNrMb7u2_tmvXGQ0IAfGfA6H-gD0wezg-echWdjOKdIWg4pcpxfpmY-k66NGFuVkNFrZMvGCBgCDKseAjb6mb3VXukgObo0jVXrNrY6RUWsaMkW-DFfdwOSKRP5iMt-dTb8BESGtF5B_IAvwvhdx10kxAq83F1PG-Y7cQae4N2ywx_fPlMr4bZqVFsRtUftSlkUo9_dqxyhKMwcTAOt7ACSYHNWGEH7eC-EfpRiA8FJptkqigfq_o8z1PqIV-tfIsbhyhE"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-[10px] font-display font-bold text-black/20 tracking-[0.3em] uppercase -rotate-90">Junoon</span>
+</div>
+</div>
+<div class="absolute top-4 left-0">
+<span class="bg-black text-primary text-[9px] font-bold px-4 py-1 uppercase tracking-[0.2em]">Eau De Parfum</span>
+</div>
+</div>
+<div class="p-8 flex flex-col flex-1 text-center">
+<p class="text-[9px] text-primary font-bold uppercase tracking-[0.3em] mb-3">Junoon Perfumes</p>
+<h4 class="text-xl font-display font-medium text-gray-900 mb-2">Velvet Ember</h4>
+<p class="text-[10px] text-gray-500 mb-6 font-medium uppercase tracking-widest">Smoky Oud • Leather • Incense</p>
+<div class="mt-auto space-y-4">
+<span class="text-lg font-bold text-gray-900 block">₹16,500</span>
+<button class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                            Add to Cart
+                        </button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col bg-white border border-gray-100 product-card-shadow transition-all duration-500">
+<div class="aspect-[4/5] overflow-hidden relative bg-[#f4f3f1] flex items-center justify-center p-12">
+<div class="relative w-full h-full flex items-center justify-center">
+<img alt="Oud Whisper" class="w-4/5 h-4/5 object-contain group-hover:scale-105 transition-transform duration-1000 bottle-mask-round border-t-4 border-primary/40 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq-Cj1E_jcd9oNRhBLGOK6X0K0bT6lW9bMF_RCbW8tV_IvPlsW-PPErHc6nXwjaNl9Q6tGyqjg7R6UZNk6-jkBMMPbLedXS4_SppZ_ed13lu25OP3MLO4oTXbVB5EMBTttfHt0NljYAlFBK8d1iG5n7ieK3mdfBXRDAanep4ugoBxp9SsETrygCQIG2EzpoYAn0dIOVQrAvqeJXLjUsoqb_YBh-v-Bsko-mSfOaJu-sDDZtJoIKe_utiUjfCNQNUeSpUQlU5fi7XY"/>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+<span class="text-[8px] font-display font-bold text-black/30 tracking-[0.2em] uppercase">Junoon</span>
+</div>
+<div class="absolute top-1/4 w-12 h-2 bg-primary/30 rounded-full blur-sm"></div>
+</div>
+<div class="absolute top-4 left-0">
+<span class="bg-gold-muted text-white text-[9px] font-bold px-4 py-1 uppercase tracking-[0.2em]">Concentrated Oil</span>
+</div>
+</div>
+<div class="p-8 flex flex-col flex-1 text-center">
+<p class="text-[9px] text-primary font-bold uppercase tracking-[0.3em] mb-3">Junoon Perfumes</p>
+<h4 class="text-xl font-display font-medium text-gray-900 mb-2">Oud Whisper</h4>
+<p class="text-[10px] text-gray-500 mb-6 font-medium uppercase tracking-widest">Pure Dehn Al Oud • Sweet Resin</p>
+<div class="mt-auto space-y-4">
+<span class="text-lg font-bold text-gray-900 block">₹8,900</span>
+<button class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                            Add to Cart
+                        </button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col bg-white border border-gray-100 product-card-shadow transition-all duration-500">
+<div class="aspect-[4/5] overflow-hidden relative bg-[#f4f3f1] flex items-center justify-center p-8">
+<div class="relative w-full h-full">
+<img alt="Citrus Noir" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-1000 bottle-mask-rect" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlGqOq1xXXOiCv6GOaPSIcovEOn39QK98OpYgTNX__52djnWyScLznLtd3sttmdxzA1SB5Tftl6hetFLO5fq0aG7Z60bBhWrhdTtgzteO5Me_L1O4zGR7nlD68eDk6shleqrPX4NSardilUBb_uLs-C1bQp8bo3muc2VlOuANsS8roPRK2jDk9qtwNHGkmOZaJXy6YzLN-N85BxcZ3TwF2zjHFtx3cGZVK9mPuYS-2fdoDUa2Ivt3Qp3v7qXh2GJ1pRWWtUZMUjsM"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-[10px] font-display font-bold text-black/20 tracking-[0.3em] uppercase -rotate-90">Junoon</span>
+</div>
+</div>
+<div class="absolute top-4 left-0">
+<span class="bg-black text-primary text-[9px] font-bold px-4 py-1 uppercase tracking-[0.2em]">Eau De Parfum</span>
+</div>
+</div>
+<div class="p-8 flex flex-col flex-1 text-center">
+<p class="text-[9px] text-primary font-bold uppercase tracking-[0.3em] mb-3">Junoon Perfumes</p>
+<h4 class="text-xl font-display font-medium text-gray-900 mb-2">Citrus Noir</h4>
+<p class="text-[10px] text-gray-500 mb-6 font-medium uppercase tracking-widest">Black Lime • Bergamot • Patchouli</p>
+<div class="mt-auto space-y-4">
+<span class="text-lg font-bold text-gray-900 block">₹14,200</span>
+<button class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                            Add to Cart
+                        </button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col bg-white border border-gray-100 product-card-shadow transition-all duration-500">
+<div class="aspect-[4/5] overflow-hidden relative bg-[#f4f3f1] flex items-center justify-center p-12">
+<div class="relative w-full h-full flex items-center justify-center">
+<img alt="Amber Musk Attar" class="w-4/5 h-4/5 object-contain group-hover:scale-105 transition-transform duration-1000 bottle-mask-round border-t-4 border-primary/40 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArUZZv6eq3WPdRq1i6wVNdaPBYwYqJmer2tt64cDchdMTcxt9YdqaE7CGnAzBpnoNZPdh5NIB9nOdfHBE4g9ubdSDtNNAMz41IlPx_MCmFVBjty7DquAUJZECqHvLH_BfkzyvlvEGLmbJ_O_JzyTM4x6jleR9uhwCk7k-qhlvyI3zy5K2ZqpDbe_7S8yDHoh47dh_cGgx3oXXKec_foJwaklDIob34_4oBtITYrJO8oEUJdtZmkXwRb5_d8BpPW8ssn90J0M2CLwE"/>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+<span class="text-[8px] font-display font-bold text-black/30 tracking-[0.2em] uppercase">Junoon</span>
+</div>
+</div>
+<div class="absolute top-4 left-0">
+<span class="bg-gold-muted text-white text-[9px] font-bold px-4 py-1 uppercase tracking-[0.2em]">Concentrated Oil</span>
+</div>
+</div>
+<div class="p-8 flex flex-col flex-1 text-center">
+<p class="text-[9px] text-primary font-bold uppercase tracking-[0.3em] mb-3">Junoon Perfumes</p>
+<h4 class="text-xl font-display font-medium text-gray-900 mb-2">Amber Musk Attar</h4>
+<p class="text-[10px] text-gray-500 mb-6 font-medium uppercase tracking-widest">Royal Amber • White Musk</p>
+<div class="mt-auto space-y-4">
+<span class="text-lg font-bold text-gray-900 block">₹6,500</span>
+<button class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                            Add to Cart
+                        </button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col bg-white border border-gray-100 product-card-shadow transition-all duration-500">
+<div class="aspect-[4/5] overflow-hidden relative bg-[#f4f3f1] flex items-center justify-center p-8">
+<div class="relative w-full h-full">
+<img alt="Rose Saffron Mist" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-1000 bottle-mask-rect" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkcim6Mkad0A1RLbn67oQZ-wHfCazdLEf-fIFGPoN9lsh3D6rMNj7N1UbpvZXMe7NwtiAeJBKgs7N_VDEtxVyB7yDKJVrXuR8JPWi1A5C205STQwFSTAUC8Aaex-YAc9AHWRvI5dqdyfzklWKiXJ_37sIiI7Avv9LtSyXWm-XszZtTHb5wcbZUPaOYADKqYoPm3Wl2BqPIMWfHyjfMG-CBf6-oPqyE8kCcKYpmb_7IrN_XcrbB467gl74APpLAesV9mpWPWahWeFY"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-[10px] font-display font-bold text-black/20 tracking-[0.3em] uppercase -rotate-90">Junoon</span>
+</div>
+</div>
+<div class="absolute top-4 left-0">
+<span class="bg-black text-primary text-[9px] font-bold px-4 py-1 uppercase tracking-[0.2em]">Eau De Parfum</span>
+</div>
+</div>
+<div class="p-8 flex flex-col flex-1 text-center">
+<p class="text-[9px] text-primary font-bold uppercase tracking-[0.3em] mb-3">Junoon Perfumes</p>
+<h4 class="text-xl font-display font-medium text-gray-900 mb-2">Rose Saffron Mist</h4>
+<p class="text-[10px] text-gray-500 mb-6 font-medium uppercase tracking-widest">Damask Rose • Kashmiri Saffron</p>
+<div class="mt-auto space-y-4">
+<span class="text-lg font-bold text-gray-900 block">₹19,800</span>
+<button class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                            Add to Cart
+                        </button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col bg-white border border-gray-100 product-card-shadow transition-all duration-500">
+<div class="aspect-[4/5] overflow-hidden relative bg-[#f4f3f1] flex items-center justify-center p-12">
+<div class="relative w-full h-full flex items-center justify-center">
+<img alt="Sandal Bloom" class="w-4/5 h-4/5 object-contain group-hover:scale-105 transition-transform duration-1000 bottle-mask-round border-t-4 border-primary/40 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1AZn7WMo_tx19acaS476rU10IZOAiP7OnIFleuLV0CNKoktjr5SQ_5XwV-7j5q6P9CUFizUHf_YGJX6KHgzqP4GdZsUhePGRKbeYI0FR5LSURlqURlXtXz6hFiTnazb5eyNHWh3kIvqLjRIFRNc6Ye67weA0eOXyHnkP_HkQSzLh8M6LDmW3UOz3sKDL7qRlHFDMVlMgde7GXhaLB-hOzn1dt7EgvAKj4YyZg5Vy0F1exLzZjXpEyEPDE_BcO_5YxZaIuAMpLCSk"/>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+<span class="text-[8px] font-display font-bold text-black/30 tracking-[0.2em] uppercase">Junoon</span>
+</div>
+</div>
+<div class="absolute top-4 left-0">
+<span class="bg-gold-muted text-white text-[9px] font-bold px-4 py-1 uppercase tracking-[0.2em]">Concentrated Oil</span>
+</div>
+</div>
+<div class="p-8 flex flex-col flex-1 text-center">
+<p class="text-[9px] text-primary font-bold uppercase tracking-[0.3em] mb-3">Junoon Perfumes</p>
+<h4 class="text-xl font-display font-medium text-gray-900 mb-2">Sandal Bloom</h4>
+<p class="text-[10px] text-gray-500 mb-6 font-medium uppercase tracking-widest">Mysore Sandalwood • White Florals</p>
+<div class="mt-auto space-y-4">
+<span class="text-lg font-bold text-gray-900 block">₹7,200</span>
+<button class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                            Add to Cart
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-24 flex justify-center items-center gap-8">
+<button class="text-gray-400 hover:text-primary transition-colors disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined text-3xl">chevron_left</span>
+</button>
+<div class="flex items-center gap-6">
+<button class="text-xs font-bold tracking-widest border-b border-primary text-black">01</button>
+<button class="text-xs font-bold tracking-widest text-gray-400 hover:text-black transition-colors">02</button>
+<button class="text-xs font-bold tracking-widest text-gray-400 hover:text-black transition-colors">03</button>
+</div>
+<button class="text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl">chevron_right</span>
+</button>
+</div>
+</section>
+</main>
+<footer class="bg-deep-black text-white pt-24 pb-12 px-6 border-t border-primary/20">
+<div class="max-w-[1550px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 border-b border-white/5 pb-20">
+<div class="space-y-8">
+<div class="flex flex-col">
+<h3 class="text-2xl font-display font-bold tracking-[0.1em] text-primary">JUNOON <span class="font-light">Perfumes</span></h3>
+<span class="text-[9px] text-primary/60 tracking-[0.5em] uppercase mt-1">Anussatti smrti</span>
+</div>
+<p class="text-gray-400 text-sm leading-relaxed max-w-xs font-light">
+                Redefining luxury through the ancient art of perfumery. Each drop is a testament to timeless elegance and sensory perfection.
+            </p>
+<div class="flex gap-6">
+<a class="text-primary hover:text-white transition-colors" href="#"><span class="material-symbols-outlined">public</span></a>
+<a class="text-primary hover:text-white transition-colors" href="#"><span class="material-symbols-outlined">camera</span></a>
+<a class="text-primary hover:text-white transition-colors" href="#"><span class="material-symbols-outlined">mail</span></a>
+</div>
+</div>
+<div>
+<h4 class="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-8">Curations</h4>
+<ul class="space-y-4 text-xs font-medium tracking-widest text-gray-400 uppercase">
+<li><a class="hover:text-primary transition-colors" href="#">The Oud Vault</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Floral Memoirs</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Limited Editions</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Scented Oils</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-8">House of Junoon</h4>
+<ul class="space-y-4 text-xs font-medium tracking-widest text-gray-400 uppercase">
+<li><a class="hover:text-primary transition-colors" href="#">Our Heritage</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Bespoke Service</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Privacy &amp; Legal</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Concierge</a></li>
+</ul>
+</div>
+<div class="space-y-8">
+<h4 class="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-8">Stay Enveloped</h4>
+<p class="text-xs text-gray-400 font-light tracking-wide">Subscribe to receive exclusive collection previews and olfactory insights.</p>
+<div class="flex border-b border-primary/40 pb-2">
+<input class="bg-transparent border-none px-0 py-2 w-full focus:ring-0 outline-none text-xs text-white placeholder-gray-600 tracking-widest uppercase" placeholder="EMAIL ADDRESS" type="email"/>
+<button class="text-primary text-[10px] font-bold uppercase tracking-[0.2em] hover:text-white transition-colors ml-4">Enrol</button>
+</div>
+</div>
+</div>
+<div class="max-w-[1550px] mx-auto mt-12 flex flex-col md:flex-row justify-between items-center text-[9px] uppercase tracking-[0.4em] text-gray-500 font-medium">
+<p>© 2024 JUNOON PERFUMES. BORN IN INDIA.</p>
+<p class="mt-4 md:mt-0">Anussatti Smrti — Designed for Distinction</p>
+</div>
+</footer>
+<div class="fixed bottom-10 right-10 z-50">
+<button class="w-16 h-16 bg-black text-primary border border-primary/50 shadow-2xl flex items-center justify-center hover:scale-105 transition-all duration-300 group">
+<span class="material-symbols-outlined text-3xl">shopping_bag</span>
+<span class="absolute -top-1 -right-1 bg-primary text-black w-6 h-6 flex items-center justify-center text-[10px] font-bold">0</span>
+</button>
+</div>
+</body></html>

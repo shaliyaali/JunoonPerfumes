@@ -1,7 +1,7 @@
 
-const Admin = require("../model/adminSchema");
-const User = require("../model/userSchema");
-const adminService = require('../services/adminService');
+const Admin = require("../../model/adminSchema");
+const User = require("../../model/userSchema");
+const adminService = require('../../services/adminService');
 
 const loadLogin = async (req, res) => {
   try {
