@@ -3,6 +3,8 @@ const router=express.Router()
 const userController=require('../controller/userController.js')
 const userauth=require('../middlewares/userauth')
 const passport = require('passport')
+const { all } = require('axios')
+const allFragerenceController=require('../controller/allFragrenceController')
 
 
 console.log('router page')
@@ -36,10 +38,27 @@ router.get('/api/pincode/:pincode', userController.getPincodeDetails);
 router.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}))
 router.get('/auth/google/callback', userController.googleCallback);
 //allfragrence page
-router.get('/allfragrence',allFraggrenceController.getAllfragrence)
+router.get('/allfragrence',allFragerenceController.loadAllfragrence)
+//product details
+router.get('/product/:id', userController.loadProductDetails)
+// wishlist
+router.get('/wishlist',userauth.checkSession,userController.loadWishlist)
+router.post('/wishlist/toggle', userauth.checkSession, userController.toggleWishlist)
+router.post('/wishlist/to-cart', userauth.checkSession, userController.wishlistToBag)
+//cart
+router.get('/cart',userauth.checkSession,userController.loadCart)
+router.post('/cart/add', userauth.checkSession, userController.addToCart)
+router.post('/cart/update', userauth.checkSession, userController.updateCartQuantity)
+router.post('/cart/remove', userauth.checkSession, userController.removeCartItem)
+//checkout
+router.get('/checkout', userauth.checkSession, userController.loadCheckout)
+router.post('/place-order', userauth.checkSession, userController.placeOrder)
+router.get('/order-success/:orderId', userauth.checkSession, userController.loadOrderSuccess)
 
-
-
-
-
+//my orders
+router.get('/profile/myorders', userauth.checkSession, userController.loadMyOrders)
+router.post('/orders/cancel', userauth.checkSession, userController.cancelOrder)
+router.post('/orders/cancel-item', userauth.checkSession, userController.cancelOrderItem)
+router.post('/orders/return-item', userauth.checkSession, userController.returnOrderItem)
+router.get('/orders/download-invoice/:orderId', userauth.checkSession, userController.downloadInvoice)
 module.exports=router

@@ -29,7 +29,7 @@ res.render('categorymanagement',{
   totalPages: Math.ceil(count / limit),
   currentPage: page,
   search,
-  status,
+  status, 
   categoryCount: count
 }
   )
@@ -43,20 +43,24 @@ res.render('categorymanagement',{
 
 const addCategory=async(req,res)=>{
   try{
-  const {name,offer}=req.body
+  const {name,offer,status}=req.body
  
 const slug=slugify(name,{
   lower:true,
   strict:true
 })
-await categoryService.addCategory(name,offer,slug)
+await categoryService.addCategory(name,offer,slug,status)
 res.redirect('/admin/categoryManagement')
 
 }
 
   catch(error){
-    console.log(error);
-    res.redirect("/admin/categoryManagement");
+    console.error("Add Category Error:", error.message);
+    const errorMessage = (error.code === 11000 || error.message.includes("exists")) 
+        ? "Category with this name already exists" 
+        : "Failed to add category";
+    req.flash('error_msg', errorMessage);
+    res.redirect('/admin/categoryManagement');
   }
 }
 const deleteCategory=async(req,res)=>{
@@ -74,18 +78,22 @@ catch(error){
 const editCategory=async(req,res)=>{
   try{
     const id=req.params.id
-    const {name,offer}=req.body
+    const {name,offer,status}=req.body
     const slug=slugify(name,{
       lower:true,
       strict:true
     })
-      await categoryService.editCategory(id,name,offer,slug)
+      await categoryService.editCategory(id,name,offer,slug,status)
       res.redirect('/admin/categoryManagement') 
       }
   
     catch(error){
-      console.log(error) 
-      res.redirect('/admin/categoryManagement')
+      console.error("Edit Category Error:", error.message);
+      const errorMessage = (error.code === 11000 || error.message.includes("exists"))
+          ? "Category with this name already exists" 
+          : "Failed to update category";
+      req.flash('error_msg', errorMessage);
+      res.redirect('/admin/categoryManagement');
     }
 }
 module.exports={manageCategory,addCategory,deleteCategory,editCategory}    

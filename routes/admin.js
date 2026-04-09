@@ -5,6 +5,8 @@ const categoryController=require('../controller/admin/categoryController')
 const productController=require('../controller/admin/productController')
 const adminauth=require('../middlewares/adminauth')
 const upload=require('../middlewares/upload')
+const adminOrderController=require('../controller/admin/adminOrderController')
+
 
 
 
@@ -20,16 +22,22 @@ router.get('/', adminauth.checkSession, (req, res) => {
     res.redirect('/admin/dashboard');
 })
 //category management
-router.get('/categoryManagement', categoryController.manageCategory)
-router.post('/addCategory',categoryController.addCategory)
-router.post('/editCategory/:id',categoryController.editCategory)
-router.post('/deleteCategory/:id',categoryController.deleteCategory)  
+router.get('/categoryManagement',adminauth.checkSession ,categoryController.manageCategory)
+router.post('/addCategory',adminauth.checkSession,categoryController.addCategory)
+router.post('/editCategory/:id',adminauth.checkSession,categoryController.editCategory)
+router.post('/deleteCategory/:id',adminauth.checkSession,categoryController.deleteCategory)  
 //product management  
-router.get('/productManagement',productController.manageProduct)
-router.get('/addProduct', productController.loadAddProduct)
+router.get('/productManagement',adminauth.checkSession,productController.manageProduct)
+router.get('/addProduct', adminauth.checkSession,productController.loadAddProduct)
 router.post('/addProduct', upload.array('images', 5), productController.addProduct)
 router.get('/editProduct/:id', productController.loadEditProduct)
 router.post('/editProduct/:id', upload.array('images', 5), productController.editProduct)
 router.post('/deleteProduct/:id', productController.deleteProduct)
+
+//order management
+router.get('/orders', adminOrderController.loadOrders);
+router.get('/orders/:orderId', adminOrderController.loadOrderDetails);
+router.post('/orders/update-status', adminOrderController.changeStatus);
+router.post('/orders/update-item-status',adminOrderController.changeItemStatus)
 
 module.exports=router

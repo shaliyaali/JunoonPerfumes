@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Placed! | Junoon Perfumes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .gold-gradient { background: linear-gradient(to bottom, #f9f295, #e0aa3e, #b8860b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="bg-[#fbfaf9] text-[#121212] min-h-screen flex flex-col">
+    <!-- Simple Luxury Header -->
+    <header class="bg-black text-white py-6 px-12 flex justify-between items-center sticky top-0 z-50">
+        <a href="/" class="text-2xl font-serif font-bold tracking-widest gold-gradient">JUNOON</a>
+        <nav class="flex gap-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+            <a href="/" class="hover:text-[#d4af37]">Home</a>
+            <a href="/allfragrence" class="hover:text-[#d4af37]">All Fragrance</a>
+            <a href="/cart" class="hover:text-[#d4af37]">Cart</a>
+        </nav>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-6">
+        <div class="bg-white p-12 rounded-2xl shadow-lg border border-gray-100 text-center max-w-2xl w-full">
+            <span class="material-symbols-outlined text-green-500 text-8xl mb-6">check_circle</span>
+            <h1 class="text-5xl font-serif font-bold mb-4">Order Placed Successfully!</h1>
+            <p class="text-gray-700 text-lg mb-8">Your order ID is: <span class="font-bold text-primary"><%= order.orderId %></span>. A confirmation has been sent to your email.</p>
+            
+            <div class="border-t border-b border-gray-100 py-6 mb-8">
+                <p class="text-xl font-semibold mb-2">Order Total: ₹<%= order.totalAmount.toLocaleString() %></p>
+                <p class="text-gray-600">Payment Method: <%= order.paymentMethod %></p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="/profile/orders/<%= order.orderId %>" class="px-8 py-4 bg-black text-white rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-primary transition-all">
+                    View Order Details
+                </a>
+                <a href="/allfragrence" class="px-8 py-4 border border-black text-black rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-black hover:text-white transition-all">
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer (Optional, can be included from home.ejs if it's a common component) -->
+    <footer class="bg-black text-white py-6 text-center text-sm">
+        &copy; 2024 Junoon Perfumes. All rights reserved.
+    </footer>
+</body>
+</html>

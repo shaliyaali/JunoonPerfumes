@@ -1,3 +1,4 @@
+const PDFDocument = require('pdfkit');
 
 const userService = require('../services/userService')
 const nodemailer = require('nodemailer')
@@ -7,7 +8,11 @@ const { verifyOtpSession, clearOtpSession } = require('../utils/otpManager')
 const bcrypt = require('bcrypt')
 const { validatePincodeMatch } = require('../utils/pincodeValidator')
 const passport = require('passport')
+const wishlistService = require('../services/wishlistService')
+const productService = require('../services/productService')
+const cartService = require('../services/cartService')
 
+const orderService = require('../services/orderService');
 
 const loadhome = (req, res) => {
 
@@ -52,6 +57,314 @@ const loadProfile = async (req, res) => {
     return res.redirect('/')
   }
 }
+
+const loadWishlist = async (req, res) => {
+  try {
+    const message = req.session.message;
+    delete req.session.message;
+    
+    const user = await userService.getUserById(req.session.user.id);
+    const wishlistItems = await (await wishlistService.getWishlistByUser(req.session.user.id)).filter(item=>item.product !== null)
+    return res.render('account/wishlist', { 
+        user, 
+        message, 
+        session: req.session,
+        wishlistItems 
+    });
+  } catch (error) {
+    console.error('CRITICAL: Wishlist Render Error:', error.message);
+    // Temporarily send the error to the screen so you can see what's wrong
+    if (process.env.NODE_ENV === 'development') return res.status(500).send(error.message);
+    return res.redirect('/');
+  }
+};
+
+const toggleWishlist = async (req, res) => {
+    try {
+        const { productId, variantId } = req.body;
+        const userId = req.session.user.id;
+        const result = await wishlistService.toggleWishlist(userId, productId, variantId);
+       // console.log('inside toggle wishlist 2',result)
+        res.json({ success: true, added: result.added });
+    } catch (error) {
+        console.error('Error toggling wishlist:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// Add to Cart from product listing/details
+const addToCart = async (req, res) => {
+    try {
+        const { productId, variantId, quantity } = req.body;
+        console.log('inside add to cart')
+        const userId = req.session.user.id;
+        await cartService.addToCart(userId, productId, variantId, quantity || 1);
+        res.json({ success: true, message: 'Added to Shopping Bag' });
+    } catch (error) {
+        console.error('Add to cart error:', error.message);
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+
+const loadCart = async (req, res) => {
+  try {
+   
+    const message = req.session.message ;
+    delete req.session.message;
+    
+    if (!req.session.user) return res.redirect('/signin');
+
+    const user = await userService.getUserById(req.session.user.id);
+    const cart = await cartService.getCart(req.session.user.id);
+    console.log('cart:', cart)
+
+    // Safety Check: Filter out items where the product might have been deleted/nullified
+    if (cart && cart.items) {
+        cart.items = cart.items.filter(item => item.product !== null);
+    }
+
+    return res.render('account/cart', { user, cart, message, session: req.session });
+  } catch (error) {
+   
+    console.error('--- CART RENDER ERROR ---');
+    
+    return res.redirect('/');
+  }
+};
+
+const loadCheckout = async (req, res) => {
+  try {
+    const message = req.session.message;
+    delete req.session.message;
+
+    if (!req.session.user) return res.redirect('/signin');
+
+    const userId = req.session.user.id;
+    const user = await userService.getUserAddresses(userId);
+    const cart = await cartService.getCart(userId);
+
+    if (!cart || cart.items.length === 0) {
+      req.session.message = 'Your cart is empty. Please add items before checking out.';
+      return res.redirect('/cart');
+    }
+
+    // Filter out items where product might be null (deleted products)
+    cart.items = cart.items.filter(item => item.product !== null);
+    if (cart.items.length === 0) {
+        req.session.message = 'Your cart contains unavailable items. Please review your cart.';
+        return res.redirect('/cart');
+    }
+
+    // Calculate totals (subtotal, potential shipping, discounts)
+    let subtotal = 0;
+    for (const item of cart.items) {
+        subtotal += item.price * item.quantity;
+    }
+    const shippingCharge = subtotal > 5000 ? 0 : 50; // Example: Free shipping over 5000
+    const totalAmount = subtotal + shippingCharge; // No coupon logic yet
+
+    res.render('account/checkout', {
+      user,
+      cart,
+      addresses: user.addresses,
+      subtotal, shippingCharge, totalAmount,
+      message,
+      session: req.session
+    });
+  } catch (error) {
+    console.error('Error loading checkout page:', error);
+    res.redirect('/cart'); // Redirect to cart if there's an error
+  }
+};
+
+const placeOrder = async (req, res) => {
+  try {
+    const { selectedAddress, paymentMethod } = req.body;
+    const userId = req.session.user.id;
+
+    if (!selectedAddress || !paymentMethod) {
+      req.session.message = 'Please select a shipping address and payment method.';
+      return res.redirect('/checkout');
+    }
+
+    // no coupon or shipping charge logic here, will be calculated in service
+    const newOrder = await orderService.createOrder(userId, selectedAddress, paymentMethod);
+
+    req.session.message = 'Order placed successfully!';
+    res.redirect(`/order-success/${newOrder.orderId}`);
+
+  } catch (error) {
+    console.error('Error placing order:', error);
+    req.session.message = error.message || 'Failed to place order. Please try again.';
+    res.redirect('/checkout');
+  }
+};
+
+const loadOrderSuccess = async (req, res) => {
+  try {
+    const orderId = req.params.orderId; 
+    const order = await orderService.getOrderById(orderId);
+
+    if (!order || order.user._id.toString() !== req.session.user.id) {
+      req.session.message = 'Order not found or you do not have permission to view it.';
+      return res.redirect('/');
+    }
+
+    res.render('account/orderSuccess', { order, session: req.session });
+  } catch (error) {
+    console.error('Error loading order success page:', error);
+    res.redirect('/');
+  }
+};
+
+const loadMyOrders = async (req, res) => {
+  try {
+    const search = req.query.search || '';
+    const orders = await orderService.getOrdersByUser(req.session.user.id, search);
+    res.render('account/myOrders', { orders, search, session: req.session });
+  } catch (error) {
+    console.error('Error loading My Orders:', error);
+    res.redirect('/profile');
+  }
+};
+
+const cancelOrder = async (req, res) => {
+  try {
+    const { orderId, reason } = req.body;
+    // Reuse service logic - it already handles stock restoration
+    await orderService.updateOrderStatus(orderId, 'Cancelled');
+    // Update the reason specifically
+    await Order.updateOne({ orderId }, { cancelReason: reason });
+    
+    res.json({ success: true, message: 'Order cancelled successfully' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+const cancelOrderItem = async (req, res) => {
+  try {
+    const { orderId, itemId, reason } = req.body;
+    await orderService.updateOrderItemStatus(orderId, itemId, 'Cancelled', reason);
+    res.json({ success: true, message: 'Item cancelled successfully' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+const returnOrderItem = async (req, res) => {
+  try {
+    const { orderId, itemId, reason } = req.body;
+    if (!reason) throw new Error('Return reason is mandatory');
+    await orderService.updateOrderItemStatus(orderId, itemId, 'Return Requested', reason);
+    
+    res.json({ success: true, message: 'Return request submitted ' });
+  }
+  catch(error){
+
+  }
+}
+const downloadInvoice = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    //  Fetch order
+    const order = await Order.findById(orderId).populate("user");
+
+    if (!order) {
+      return res.status(404).send("Order not found");
+    }
+
+    const address = order.shippingAddress; // adjust based on your schema
+
+    // Create PDF
+    const doc = new PDFDocument();
+
+    //  Headers
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
+
+    //  Pipe
+    doc.pipe(res);
+
+    // ---- Your existing content ----
+    doc.fontSize(12).font('Helvetica-Bold').text('Billed To:', 50, 210);
+    doc.fontSize(10).font('Helvetica')
+      .text(order.user.name, 50, 225)
+      .text(order.user.email, 50, 240);
+
+    if (address) {
+      doc.fontSize(12).font('Helvetica-Bold').text('Shipped To:', 300, 210);
+      doc.fontSize(10).font('Helvetica')
+        .text(address.name, 300, 225)
+        .text(`${address.house}, ${address.street}`, 300, 240)
+        .text(`${address.city}, ${address.state} - ${address.pincode}`, 300, 255)
+        .text(`Phone: ${address.phone}`, 300, 270);
+    }
+
+    // Items
+    const tableTop = 330;
+    doc.font('Helvetica-Bold');
+    doc.text('Item Description', 50, tableTop);
+    doc.text('Size', 250, tableTop);
+    doc.text('Qty', 350, tableTop, { width: 50, align: 'center' });
+    doc.text('Price', 400, tableTop, { width: 70, align: 'right' });
+    doc.text('Amount', 480, tableTop, { width: 70, align: 'right' });
+
+    doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
+
+    let i = 0;
+    order.items.forEach(item => {
+      const y = tableTop + 30 + (i * 25);
+      doc.font('Helvetica');
+      doc.text(item.productName, 50, y, { width: 190 });
+      doc.text(item.variantSize, 250, y);
+      doc.text(item.quantity.toString(), 350, y, { width: 50, align: 'center' });
+      doc.text(`INR ${item.price.toLocaleString()}`, 400, y, { width: 70, align: 'right' });
+      doc.text(`INR ${(item.price * item.quantity).toLocaleString()}`, 480, y, { width: 70, align: 'right' });
+      i++;
+    });
+
+    const subtotal = order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    const summaryY = tableTop + 50 + (i * 25);
+
+    doc.moveTo(350, summaryY).lineTo(550, summaryY).stroke();
+
+    doc.font('Helvetica').text('Subtotal:', 350, summaryY + 15, { width: 100, align: 'right' });
+    doc.text(`INR ${subtotal.toLocaleString()}`, 480, summaryY + 15, { width: 70, align: 'right' });
+
+    doc.text('Shipping Charge:', 350, summaryY + 30, { width: 100, align: 'right' });
+    doc.text(`INR ${order.shippingCharge.toLocaleString()}`, 480, summaryY + 30, { width: 70, align: 'right' });
+
+    if (order.couponDiscount > 0) {
+      doc.text('Discount:', 350, summaryY + 45, { width: 100, align: 'right' });
+      doc.text(`- INR ${order.couponDiscount.toLocaleString()}`, 480, summaryY + 45, { width: 70, align: 'right' });
+    }
+
+    doc.font('Helvetica-Bold').fontSize(12)
+      .text('Total Paid:', 350, summaryY + 70, { width: 100, align: 'right' });
+
+    doc.text(`INR ${order.totalAmount.toLocaleString()}`, 480, summaryY + 70, { width: 70, align: 'right' });
+
+    doc.end();
+
+  } catch (error) {
+    console.error('Invoice Generation Error:', error);
+    res.status(500).send('Error generating invoice.');
+  }
+};
+const wishlistToBag = async (req, res) => {
+    try {
+        const { productId, variantId } = req.body;
+        const userId = req.session.user.id;
+        await cartService.addToCart(userId, productId, variantId, 1);
+        await wishlistService.toggleWishlist(userId, productId, variantId);
+        res.json({ success: true, message: 'Moved to Shopping Bag' });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
 
 const loadManageAddress=async (req,res)=>{
   try {
@@ -230,6 +543,29 @@ const userLogin = async (req, res) => {
     return res.render('auth/signin', { message: error.message })
   }
 }
+
+const loadProductDetails = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const product = await productService.getProductById(productId);
+    
+    if (!product || product.status !== 'Active') {
+      return res.redirect('/allfragrence');
+    }
+
+    // Fetch a few related products from the same category
+    const relatedProducts = await productService.getProducts({ 
+      category: product.category._id, 
+      _id: { $ne: product._id },
+      status: 'Active' 
+    }, 1, 4);
+
+    res.render('account/productdetails', { product, relatedProducts, session: req.session });
+  } catch (error) {
+    console.error('Error loading product details:', error);
+    res.redirect('/allfragrence');
+  }
+};
 
 const updateProfile = async (req, res) => {
   try {
@@ -519,39 +855,7 @@ const googleCallback = (req, res, next) => {
 
 
   
-// const addAddress = async (req, res) => {
-//   try {
-//     const userId = req.session.user.id;
-//     const user = await userService.getUserAddresses(userId);
 
-//     if (user.addresses.length >= 5) {
-//       req.session.message = "You can only add a maximum of 5 addresses.";
-//       return res.redirect('/manageaddress');
-//     }
-
-//     const addressData = { ...req.body, isDefault: !!req.body.isDefault };
-
-//     const pinCheck = await validatePincodeMatch(
-//       addressData.pincode,
-//       addressData.city,
-//       addressData.state
-//     );
-
-//     if (!pinCheck.valid) {
-//       req.session.message = pinCheck.message;
-//       return res.redirect('/manageaddress');
-//     }
-
-//     await userService.addAddress(userId, addressData);
-//     req.session.message = "Address added successfully.";
-//     return res.redirect('/manageaddress');
-
-//   } catch (error) {
-//     console.error("Add address error:", error);
-//     req.session.message = "Could not add address.";
-//     return res.redirect('/manageaddress');
-//   }
-// }
 const addAddress = async (req, res) => {
   try {
     const userId = req.session.user.id;
@@ -643,19 +947,7 @@ const deleteAddress = async (req, res) => {
   }
 }
 
-// const validatePincode = async (req, res) => {
-//   try {
-//     const { pincode } = req.body
-//     console.log('inside validate pincode')
-//     const pinCheck = await validatePincodeMatch(pincode)
-    
-//     return res.json(pinCheck)
-    
-//   } catch (error) {
-//     console.error("Pincode validation error:", error)
-//     return res.status(500).json({ valid: false, message: "Internal server error" })
-//   }
-// }
+
   const getPincodeDetails=async(req,res)=>{
     const {pincode}=req.params;
 
@@ -671,5 +963,26 @@ console.log("city and state fetched",result.city,result.state)
     state: result.state
   });
   }
+  const updateCartQuantity = async (req, res) => {
+    try {
+        const { productId, variantId, change } = req.body;
+        const userId = req.session.user.id;
+        const result = await cartService.updateQuantity(userId, productId, variantId, change);
+        res.json({ success: true, ...result });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
 
-module.exports = { loadRegister, registerUser, loadhome, pageNotFound, verifyOtp, loadLogin, loadOtp, resendOtp, userLogin, loadProfile, updateProfile, editEmail, verifyEmailOtp, loadForgetPassword, passwordReset, verifyResetOtp, resetPassword ,changePassword,logoutUser,addAddress,editAddress,deleteAddress,loadManageAddress,googleCallback,getPincodeDetails}                                                                       
+const removeCartItem = async (req, res) => {
+    try {
+        const { productId, variantId } = req.body;
+        const userId = req.session.user.id;
+        const result = await cartService.removeItem(userId, productId, variantId);
+        res.json({ success: true, ...result });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+};
+module.exports = { loadRegister, registerUser, loadhome, pageNotFound, verifyOtp, loadLogin, loadOtp, resendOtp, userLogin, loadProfile, updateProfile, editEmail, verifyEmailOtp, loadForgetPassword, passwordReset, verifyResetOtp, resetPassword ,changePassword,logoutUser,addAddress,editAddress,deleteAddress,loadManageAddress,googleCallback,getPincodeDetails, loadWishlist, toggleWishlist, loadProductDetails, addToCart,loadCart,updateCartQuantity,removeCartItem, loadCheckout, placeOrder, loadOrderSuccess, loadMyOrders, cancelOrder, cancelOrderItem, returnOrderItem, downloadInvoice,wishlistToBag }
+

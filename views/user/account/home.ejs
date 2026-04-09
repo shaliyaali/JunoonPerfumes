@@ -81,7 +81,7 @@
 <nav class="hidden lg:flex items-center gap-8 ml-4">
 <a class="text-xs font-bold tracking-[0.2em] text-luxury-ivory hover:text-primary transition-colors" href="#">HOME</a>
 <a class="text-xs font-bold tracking-[0.2em] text-luxury-ivory hover:text-primary transition-colors" href="#">BEST SELLER</a>
-<a class="text-xs font-bold tracking-[0.2em] text-luxury-ivory hover:text-primary transition-colors" href="#">ALL FRAGRANCE</a>
+<a class="text-xs font-bold tracking-[0.2em] text-luxury-ivory hover:text-primary transition-colors" href="/allfragrence">ALL FRAGRANCE</a>
 <div class="relative group">
 <button class="flex items-center gap-1 text-xs font-bold tracking-[0.2em] text-luxury-ivory hover:text-primary transition-colors">
                     SHOP <span class="material-symbols-outlined text-sm">expand_more</span>
@@ -97,10 +97,10 @@
 </nav>
 </div>
 <div class="flex items-center gap-6">
-<div class="hidden md:flex items-center border-b border-primary/30 py-1">
-<span class="material-symbols-outlined text-primary text-xl">search</span>
-<input class="bg-transparent border-none text-[10px] tracking-widest text-luxury-ivory focus:ring-0 placeholder:text-gray-500 w-32 uppercase" placeholder="SEARCH SCENT" type="text"/>
-</div>
+<form action="/allfragrence" method="GET" class="hidden md:flex items-center border-b border-primary/30 py-1">
+    <button type="submit" class="material-symbols-outlined text-primary text-xl">search</button>
+    <input name="search" class="bg-transparent border-none text-[10px] tracking-widest text-luxury-ivory focus:ring-0 placeholder:text-gray-500 w-32 uppercase" placeholder="SEARCH SCENT" type="text"/>
+</form>
 
 <% if (session && session.user) { %>
 
@@ -130,7 +130,7 @@
 <div class="flex items-center gap-5">
 <% if (session && session.user) { %>
   <!-- Wishlist -->
-  <a href="/user/wishlist"
+  <a href="/wishlist"
      class="text-luxury-ivory hover:text-primary transition-colors relative">
 
     <span class="material-symbols-outlined">favorite_border</span>
@@ -139,7 +139,7 @@
   </a>
 
   <!-- Cart -->
-  <a href="/user/cart"
+  <a href="/cart"
      class="text-luxury-ivory hover:text-primary transition-colors relative">
 
     <span class="material-symbols-outlined">shopping_bag</span>

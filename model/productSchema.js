@@ -15,6 +15,10 @@ const variantSchema = new mongoose.Schema({
     required: true,
     default: 0
   },
+  salePrice: {
+    type: Number,
+    required: true
+  },
   sku: {
     type: String,
     unique: true

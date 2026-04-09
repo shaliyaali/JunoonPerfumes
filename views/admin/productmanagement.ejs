@@ -83,7 +83,7 @@
 </div>
 </div>
 <nav class="space-y-1">
-<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="#">
+<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="/admin/dashboard">
 <span class="material-symbols-outlined mr-3 text-xl group-hover:scale-110 transition-transform">dashboard</span>
 <span class="text-sm font-medium">Dashboard</span>
 </a>
@@ -92,15 +92,15 @@
 <span class="material-symbols-outlined mr-3 text-xl group-hover:scale-110 transition-transform">inventory_2</span>
 <span class="text-sm font-medium">Products</span>
 </a>
-<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="#">
+<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="/admin/categoryManagement">
 <span class="material-symbols-outlined mr-3 text-xl">category</span>
 <span class="text-sm font-semibold">Categories</span>
 </a>
-<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="#">
+<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="/admin/orders">
 <span class="material-symbols-outlined mr-3 text-xl group-hover:scale-110 transition-transform">shopping_cart</span>
 <span class="text-sm font-medium">Orders</span>
 </a>
-<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="#">
+<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="/admin/usermanagement">
 <span class="material-symbols-outlined mr-3 text-xl group-hover:scale-110 transition-transform">people</span>
 <span class="text-sm font-medium">Users</span>
 </a>
@@ -267,7 +267,7 @@
                                                     <span class="material-symbols-outlined text-xl">delete</span>
                                                 </button>
                                                 <form id="delete-form-<%= prod._id %>" action="/admin/deleteProduct/<%= prod._id %>" method="POST" class="hidden"></form>
-                                            </div>
+                                            </div> 
                                         </td>
                                     </tr>
                                 <% }) %>
@@ -284,25 +284,29 @@
                 </div>
 
                 <!-- Pagination -->
-                <% if (totalPages > 1) { %>
-                    <div class="d-flex justify-content-center py-3">
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination mb-0">
-                                <li class="page-item <%= currentPage == 1 ? 'disabled' : '' %>">
-                                    <a class="page-link" href="?page=<%= currentPage - 1 %>&search=<%= search %>&status=<%= status %>">Previous</a>
-                                </li>
+                <div class="border-t border-slate-100 dark:border-slate-800 p-6 flex items-center justify-center">
+                    <% if (totalPages > 1) { %>
+                        <nav class="flex items-center space-x-2">
+                            <% if (currentPage > 1) { %>
+                                <a href="?page=<%= currentPage - 1 %>&search=<%= search %>&status=<%= status %>" class="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:border-primary hover:text-primary transition-all text-slate-400">
+                                    <span class="material-symbols-outlined">chevron_left</span>
+                                </a>
+                            <% } %>
+                            <div class="flex items-center space-x-2 px-4">
                                 <% for(let i = 1; i <= totalPages; i++) { %>
-                                    <li class="page-item <%= currentPage == i ? 'active' : '' %>">
-                                        <a class="page-link" href="?page=<%= i %>&search=<%= search %>&status=<%= status %>"><%= i %></a>
-                                    </li>
+                                    <a href="?page=<%= i %>&search=<%= search %>&status=<%= status %>" class="w-10 h-10 flex items-center justify-center rounded-lg font-medium text-sm transition-colors <%= currentPage == i ? 'bg-primary text-white font-bold shadow-lg shadow-primary/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400' %>">
+                                        <%= i.toString().padStart(2, '0') %>
+                                    </a>
                                 <% } %>
-                                <li class="page-item <%= currentPage == totalPages ? 'disabled' : '' %>">
-                                    <a class="page-link" href="?page=<%= currentPage + 1 %>&search=<%= search %>&status=<%= status %>">Next</a>
-                                </li>
-                            </ul>
+                            </div>
+                            <% if (currentPage < totalPages) { %>
+                                <a href="?page=<%= currentPage + 1 %>&search=<%= search %>&status=<%= status %>" class="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:border-primary hover:text-primary transition-all text-slate-400">
+                                    <span class="material-symbols-outlined">chevron_right</span>
+                                </a>
+                            <% } %>
                         </nav>
-                    </div>
-                <% } %>
+                    <% } %>
+                </div>
             </div>
         </div>
     </div>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Junoon Perfumes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .gold-gradient { background: linear-gradient(to bottom, #f9f295, #e0aa3e, #b8860b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="bg-[#fbfaf9] text-[#121212]">
+    <!-- Simple Luxury Header -->
+    <header class="bg-black text-white py-6 px-12 flex justify-between items-center sticky top-0 z-50">
+        <a href="/" class="text-2xl font-serif font-bold tracking-widest gold-gradient">JUNOON</a>
+        <nav class="flex gap-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+            <a href="/" class="hover:text-[#d4af37]">Home</a>
+            <a href="/allfragrence" class="hover:text-[#d4af37]">All Fragrance</a>
+            <a href="/cart" class="text-[#d4af37]">Cart</a>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-16">
+        <h1 class="text-5xl font-serif font-bold mb-12 text-center">Checkout</h1>
+
+        <form action="/place-order" method="POST" id="checkoutForm">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <!-- Shipping Address Section -->
+                <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                    <h2 class="text-2xl font-serif font-bold mb-6">Shipping Address</h2>
+                    <% if (addresses && addresses.length > 0) { %>
+                        <div class="space-y-6">
+                            <% addresses.forEach(addr => { %>
+                                <label class="flex items-start p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input type="radio" name="selectedAddress" value="<%= addr._id %>" class="mt-1 mr-4 text-primary focus:ring-primary" <%= addr.isDefault ? 'checked' : '' %>>
+                                    <div class="flex-1">
+                                        <p class="font-bold text-lg"><%= addr.name %> (<%= addr.type %>)</p>
+                                        <p class="text-sm text-gray-700"><%= addr.house %>, <%= addr.street %></p>
+                                        <p class="text-sm text-gray-700"><%= addr.city %>, <%= addr.state %> - <%= addr.pincode %></p>
+                                        <p class="text-sm text-gray-700"><%= addr.phone %></p>
+                                        <% if (addr.isDefault) { %>
+                                            <span class="text-xs text-primary font-semibold mt-1 inline-block">Default Address</span>
+                                        <% } %>
+                                    </div>
+                                    <a href="/manageaddress" class="text-sm text-blue-600 hover:underline ml-4">Edit</a>
+                                </label>
+                            <% }) %>
+                        </div>
+                    <% } else { %>
+                        <p class="text-gray-600 mb-4">No addresses found. Please add one to proceed.</p>
+                    <% } %>
+                    <div class="mt-8">
+                        <a href="/manageaddress" class="inline-flex items-center px-6 py-3 bg-black text-white rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-primary transition-all">
+                            <span class="material-symbols-outlined mr-2 text-lg">add_location</span> Add New Address
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Order Summary & Payment -->
+                <div class="lg:col-span-1 bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                    <h2 class="text-2xl font-serif font-bold mb-6">Order Summary</h2>
+                    <div class="space-y-4 mb-8">
+                        <% cart.items.forEach(item => { %>
+                            <div class="flex items-center gap-4 border-b border-gray-100 pb-4">
+                                <img src="<%= item.product.images[0] %>" alt="<%= item.product.name %>" class="w-16 h-16 object-cover rounded-lg">
+                                <div class="flex-1">
+                                    <p class="font-semibold"><%= item.product.name %> (<%= item.product.variants.id(item.variantId).size %>)</p>
+                                    <p class="text-sm text-gray-600">Qty: <%= item.quantity %></p>
+                                </div>
+                                <p class="font-bold">₹<%= (item.price * item.quantity).toLocaleString() %></p>
+                            </div>
+                        <% }) %>
+                    </div>
+
+                    <div class="space-y-3 text-lg mb-8">
+                        <div class="flex justify-between">
+                            <span>Subtotal:</span>
+                            <span class="font-semibold">₹<%= subtotal.toLocaleString() %></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Shipping:</span>
+                            <span class="font-semibold">₹<%= shippingCharge.toLocaleString() %></span>
+                        </div>
+                        <div class="flex justify-between font-bold text-xl border-t border-gray-200 pt-4 mt-4">
+                            <span>Total:</span>
+                            <span>₹<%= totalAmount.toLocaleString() %></span>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-serif font-bold mb-4">Payment Method</h3>
+                    <div class="space-y-4 mb-8">
+                        <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                            <input type="radio" name="paymentMethod" value="COD" class="mt-1 mr-4 text-primary focus:ring-primary" checked>
+                            <span class="font-bold">Cash on Delivery</span>
+                        </label>
+                        <!-- Add other payment methods here if needed -->
+                        <!-- <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                            <input type="radio" name="paymentMethod" value="Online Payment" class="mt-1 mr-4 text-primary focus:ring-primary">
+                            <span class="font-bold">Online Payment</span>
+                        </label> -->
+                    </div>
+
+                    <button type="submit" class="w-full py-4 bg-primary text-black rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-black hover:text-primary transition-all">
+                        Place Order
+                    </button>
+                    <% if (message) { %>
+                        <p class="text-red-500 text-center mt-4"><%= message %></p>
+                    <% } %>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.getElementById('checkoutForm').addEventListener('submit', function(event) {
+            const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+            if (!selectedAddress) {
+                event.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Selection Required',
+                    text: 'Please select a shipping address.',
+                    confirmButtonColor: '#D4AF37'
+                });
+            }
+        });
+    </script>
+</body>
+</html>

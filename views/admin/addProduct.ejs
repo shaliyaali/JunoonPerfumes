@@ -37,25 +37,57 @@
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 transition-colors duration-200">
 <div class="flex min-h-screen max-w-[1550px] mx-auto shadow-2xl">
-    <!-- Sidebar ( Simplified for brevity, matches existing ) -->
-    <aside class="w-64 bg-sidebar-light dark:bg-sidebar-dark border-r border-slate-200 dark:border-slate-800 flex flex-col sticky top-0 h-screen">
-        <div class="p-8">
-            <div class="flex items-center space-x-3 mb-12">
-                <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-lg text-white">
-                    <span class="material-symbols-outlined">spa</span>
-                </div>
-                <div>
-                    <h1 class="font-display text-xl font-bold tracking-tight text-slate-900 dark:text-white">Junoon</h1>
-                    <p class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Admin Suite</p>
-                </div>
-            </div>
-            <nav class="space-y-1">
-                <a href="/admin/dashboard" class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined mr-3 text-xl">dashboard</span>Dashboard</a>
-                <a href="/admin/productManagement" class="flex items-center px-4 py-3 bg-primary text-white rounded-lg shadow-lg shadow-primary/20"><span class="material-symbols-outlined mr-3 text-xl">inventory_2</span>Products</a>
-                <a href="/admin/categoryManagement" class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined mr-3 text-xl">category</span>Categories</a>
-            </nav>
-        </div>
-    </aside>
+    <!-- Sidebar -->
+<aside class="w-64 bg-sidebar-light dark:bg-sidebar-dark border-r border-stone-200 dark:border-stone-800 flex flex-col sticky top-0 h-screen transition-colors duration-300">
+<div class="p-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary flex items-center justify-center rounded-lg text-white">
+<span class="material-symbols-outlined">spa</span>
+</div>
+<div>
+<h1 class="font-display text-xl font-bold text-stone-900 dark:text-white leading-none">Junoon</h1>
+<p class="text-[10px] uppercase tracking-widest text-primary font-bold mt-1">Admin Suite</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 mt-4 space-y-1">
+<a class="active-nav flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-xl shadow-lg shadow-primary/20 transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all" href="/admin/productManagement">
+<!-- <span class="material-symbols-outlined"> -->
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-medium">Products</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all" href="/admin/categoryManagement">
+<span class="material-symbols-outlined">category</span>
+<span class="font-medium">Categories</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-medium">Orders</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all" href="/admin/usermanagement">
+<span class="material-symbols-outlined">group</span>
+<span class="font-medium">Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">confirmation_number</span>
+<span class="font-medium">Coupons</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-medium">Sales &amp; Revenue</span>
+</a>
+</nav>
+<div class="p-6 border-t border-stone-200 dark:border-stone-800">
+<a class="flex items-center gap-3 px-4 py-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-medium">Logout</span>
+</a>
+</div>
+</aside>
 
     <main class="flex-1 flex flex-col">
         <header class="h-24 px-10 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-sidebar-dark">
@@ -82,7 +114,7 @@
                         <div class="space-y-6">
                             <div>
                                 <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Product Name</label>
-                                <input type="text" name="name" value="<%= product ? product.name : '' %>" required class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:text-slate-200" placeholder="e.g. Royal Oudh">
+                                <input type="text" name="name" value="<%= product ? product.name : '' %>"  class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:text-slate-200" placeholder="e.g. Royal Oudh">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Tagline / Short Heading</label>
@@ -119,13 +151,13 @@
                                         <% product.variants.forEach((variant, index) => { %>
                                             <tr class="group">
                                                 <td class="p-2">
-                                                    <input type="text" name="variants[<%= index %>][size]" value="<%= variant.size %>" required class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="e.g. 50ml">
+                                                    <input type="text" name="variants[<%= index %>][size]" value="<%= variant.size %>"  class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="e.g. 50ml">
                                                 </td>
                                                 <td class="p-2">
-                                                    <input type="number" name="variants[<%= index %>][price]" value="<%= variant.price %>" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0">
+                                                    <input type="number" name="variants[<%= index %>][price]" value="<%= variant.price %>"  min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0">
                                                 </td>
                                                 <td class="p-2">
-                                                    <input type="number" name="variants[<%= index %>][stock]" value="<%= variant.stock %>" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0">
+                                                    <input type="number" name="variants[<%= index %>][stock]" value="<%= variant.stock %>"  min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0">
                                                 </td>
                                                 <td class="p-2 text-right">
                                                     <button type="button" class="text-slate-400 hover:text-red-500 transition-colors" onclick="removeVariant(this)" <%= product.variants.length === 1 ? 'disabled' : '' %>>
@@ -136,18 +168,19 @@
                                         <% }) %>
                                     <% } else { %>
                                         <tr class="group">
+                                            <% const initialVariantId = Date.now(); %>
                                             <td class="p-2">
-                                                <input type="text" name="variants[0][size]" required class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="e.g. 50ml">
+                                                <input type="text" name="variants[<%= initialVariantId %>][size]"  class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="e.g. 50ml">
                                             </td>
                                             <td class="p-2">
-                                                <input type="number" name="variants[0][price]" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0">
+                                                <input type="number" name="variants[<%= initialVariantId %>][price]"  min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0">
                                             </td>
                                             <td class="p-2">
-                                                <input type="number" name="variants[0][stock]" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0">
+                                                <input type="number" name="variants[<%= initialVariantId %>][stock]"  min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0">
                                             </td>
                                             <td class="p-2 text-right">
                                                 <button type="button" class="text-slate-400 hover:text-red-500 transition-colors" onclick="removeVariant(this)" disabled>
-                                                    <span class="material-symbols-outlined">delete</span>
+                                                     <span class="material-symbols-outlined">delete</span>
                                                 </button>
                                             </td>
                                         </tr>
@@ -183,7 +216,7 @@
                         <!-- <div class="space-y-6"> -->
                             <div>
                                 <label class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Category</label>
-                                <select name="category" required class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:text-slate-200 cursor-pointer">
+                                <select name="category"  class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:text-slate-200 cursor-pointer">
                                     <option value="" disabled selected>Select Category</option>
                                     <% categories.forEach(cat => { %>
                                         <option value="<%= cat._id %>" <%= product && product.category && product.category._id.toString() === cat._id.toString() ? 'selected' : '' %>><%= cat.name %></option>
@@ -277,15 +310,15 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    let variantCount = <%= product && product.variants ? product.variants.length : 1 %>;
     const container = document.getElementById('variant-container');
 
     document.getElementById('add-variant-btn').addEventListener('click', () => {
+        const uniqueId = Date.now() + Math.floor(Math.random() * 1000); // Generate a unique ID for the new variant
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td class="p-2"><input type="text" name="variants[${variantCount}][size]" required class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="Size"></td>
-            <td class="p-2"><input type="number" name="variants[${variantCount}][price]" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0"></td>
-            <td class="p-2"><input type="number" name="variants[${variantCount}][stock]" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0"></td>
+            <td class="p-2"><input type="text" name="variants[${uniqueId}][size]" required class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="e.g. 50ml"></td>
+            <td class="p-2"><input type="number" name="variants[${uniqueId}][price]" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0"></td>
+            <td class="p-2"><input type="number" name="variants[${uniqueId}][stock]" required min="0" class="w-full px-3 py-2 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-primary outline-none" placeholder="0"></td>
             <td class="p-2 text-right">
                 <button type="button" class="text-slate-400 hover:text-red-500 transition-colors" onclick="removeVariant(this)">
                     <span class="material-symbols-outlined">delete</span>
@@ -293,12 +326,28 @@
             </td>
         `;
         container.appendChild(row);
-        variantCount++;
+        updateRemoveButtonsState();
     });
 
     function removeVariant(btn) {
         if(container.children.length > 1) {
             btn.closest('tr').remove();
+            updateRemoveButtonsState();
+        } else {
+            showValidationError('At least one variant is required.');
+        }
+    }
+
+    function updateRemoveButtonsState() {
+        const removeButtons = container.querySelectorAll('button[onclick="removeVariant(this)"]');
+        if (removeButtons.length === 1) {
+            removeButtons[0].disabled = true; // Disable if only one variant remains
+            removeButtons[0].classList.add('opacity-30', 'cursor-not-allowed');
+        } else {
+            removeButtons.forEach(button => {
+                button.disabled = false; // Enable all if more than one
+                button.classList.remove('opacity-30', 'cursor-not-allowed');
+            });
         }
     }
 
@@ -383,12 +432,12 @@
             const url = URL.createObjectURL(file);
             const div = document.createElement('div');
             div.className = 'relative group';
-            div.innerHTML = `
-                <img src="${url}" class="w-full h-24 object-cover rounded-lg border border-slate-200 dark:border-slate-700">
-                <button type="button" onclick="removeImage(${index})" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span class="material-symbols-outlined text-sm">close</span>
-                </button>
-            `;
+            div.innerHTML = ` 
+                <img src="${url}" class="w-full h-24 object-cover rounded-lg border border-slate-200 dark:border-slate-700"> 
+                <button type="button" onclick="removeImage(${index})" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"> 
+                    <span class="material-symbols-outlined text-sm">close</span> 
+                </button> 
+            `; 
             newPreviewContainer.appendChild(div);
         });
     }
@@ -402,10 +451,93 @@
         const el = document.getElementById(`existing-img-${idx}`);
         if (el) el.remove();
         updatePreview(); // Re-calculate total and update error message
+    } 
+
+    // Helper function to show SweetAlert error
+    function showValidationError(message) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: message,
+            confirmButtonColor: '#D4AF37'
+        });
     }
+
+    // --- Inline Validation Helpers ---
+    function showFieldError(input, message) {
+        const parent = input.parentElement;
+        // Remove existing error
+        const existingError = parent.querySelector('.field-error-msg');
+        if (existingError) existingError.remove();
+
+        if (message) {
+            const errorSpan = document.createElement('span');
+            errorSpan.className = 'field-error-msg text-red-500 text-[10px] mt-1 block font-bold';
+            errorSpan.textContent = message;
+            parent.appendChild(errorSpan);
+            input.classList.add('border-red-500');
+        } else {
+            input.classList.remove('border-red-500');
+        }
+    }
+
+    function clearAllErrors() {
+        document.querySelectorAll('.field-error-msg').forEach(el => el.remove());
+        document.querySelectorAll('.border-red-500').forEach(el => {
+            el.classList.remove('border-red-500');
+        });
+    }
+
+    // Initial call to set button states on page load
+    document.addEventListener('DOMContentLoaded', updateRemoveButtonsState);
 
     // Intercept Form Submission
     productForm.addEventListener('submit', function(e) {
+        clearAllErrors();
+        let isValid = true;
+
+        // General Information Validation
+        const productNameInput = document.querySelector('input[name="name"]');
+        if (!productNameInput.value.trim()) {
+            showFieldError(productNameInput, 'Product Name is required.');
+            isValid = false;
+        }
+
+        const taglineInput = document.querySelector('input[name="tagline"]');
+        if (!taglineInput.value.trim()) {
+            showFieldError(taglineInput, 'Tagline is required.');
+            isValid = false;
+        }
+
+        const descriptionInput = document.querySelector('textarea[name="description"]');
+        if (!descriptionInput.value.trim()) {
+            showFieldError(descriptionInput, 'Description is required.');
+            isValid = false;
+        }
+
+        // Offer Validation
+        const offerInput = document.querySelector('input[name="offer"]');
+        const offerValue = parseInt(offerInput.value);
+        if (offerInput.value !== '' && (isNaN(offerValue) || offerValue < 0 || offerValue > 100)) {
+            showFieldError(offerInput, 'Must be between 0 and 100.');
+            isValid = false;
+        }
+
+        // Category Validation
+        const categorySelect = document.querySelector('select[name="category"]');
+        if (!categorySelect.value) {
+            showFieldError(categorySelect, 'Category selection is required.');
+            isValid = false;
+        }
+
+        // Variants Validation
+        const variantRows = container.querySelectorAll('tr');
+        if (variantRows.length === 0) {
+            showValidationError('At least one product variant is required.');
+            isValid = false;
+        }
+
+        // Image Validation (moved here to be part of the main submit validation flow)
         const isEdit = <%= product ? 'true' : 'false' %>;
         
         // Calculate total images: existing (not deleted) + newly cropped
@@ -413,13 +545,39 @@
         const totalImagesCount = existingInputs.length + croppedFiles.length;
 
         if (totalImagesCount < 3) {
+            document.getElementById('image-error').classList.remove('hidden');
+            isValid = false;
+        }
+
+        for (let i = 0; i < variantRows.length; i++) {
+            const row = variantRows[i];
+            // Use querySelector for inputs within the current row to ensure correct variant data
+            const sizeInput = row.querySelector('input[name$="[size]"]');
+            const priceInput = row.querySelector('input[name$="[price]"]');
+            const stockInput = row.querySelector('input[name$="[stock]"]');
+
+            const sizeValue = sizeInput.value.trim();
+            const priceValue = parseFloat(priceInput.value);
+            const stockValue = parseInt(stockInput.value);
+
+            if (!sizeValue) {
+                showFieldError(sizeInput, 'Required');
+                isValid = false;
+            }
+            if (isNaN(priceValue) || priceValue < 0) {
+                showFieldError(priceInput, 'Invalid price');
+                isValid = false;
+            }
+            if (isNaN(stockValue) || stockValue < 0) {
+                showFieldError(stockInput, 'Invalid stock');
+                isValid = false;
+            }
+        }
+
+        if (!isValid) {
             e.preventDefault();
-            Swal.fire({
-                icon: 'error',
-                title: 'Images Required',
-                text: 'Please upload at least 3 images for the product.',
-                confirmButtonColor: '#D4AF37'
-            });
+            const firstError = document.querySelector('.border-red-500');
+            if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
 

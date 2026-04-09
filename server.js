@@ -10,6 +10,7 @@ const session = require('express-session')
 const nocache = require('nocache')
 const connectDB = require("./config/db")
 const passport = require('./config/passport')
+const flash = require('connect-flash')
 
 app.use(nocache())
 
@@ -24,8 +25,12 @@ app.use(session({
   }
 }))
 
+app.use(flash())
+
 app.use((req, res, next) => {
   res.locals.session = req.session
+  res.locals.success_msg = req.flash('success_msg')
+  res.locals.error_msg = req.flash('error_msg')
   next()
 })
 

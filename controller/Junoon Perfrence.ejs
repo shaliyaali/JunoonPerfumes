@@ -140,15 +140,10 @@
         </nav>
     </div>
     <div class="flex items-center gap-6">
-        <!-- <div class="hidden md:flex items-center border-b border-primary/30 py-1">
+        <div class="hidden md:flex items-center border-b border-primary/30 py-1">
             <span class="material-symbols-outlined text-primary text-xl">search</span>
-            <input name="search" class="bg-transparent border-none text-[10px] tracking-widest text-luxury-ivory focus:ring-0 placeholder:text-gray-500 w-32 uppercase" placeholder="SEARCH PERFUMES" type="text" value="<%= search %>"/>
-        </div> -->
-        <form id="header-search-form" action="/allfragrence" method="Get" class="hidden md:flex items-center border-b border-primary/30 py-1 ">
-             <button type="submit" class="material-symbols-outlined text-primary text-xl">search</button>
-            <input name="search" class="bg-transparent border-none text-[10px] tracking-widest text-luxury-ivory focus:ring-0 placeholder:text-gray-500 w-32 uppercase" placeholder="SEARCH PERFUMES" type="text" value="<%= search %>"/>
-        
-        </form>
+            <input class="bg-transparent border-none text-[10px] tracking-widest text-luxury-ivory focus:ring-0 placeholder:text-gray-500 w-32 uppercase" placeholder="SEARCH SCENT" type="text"/>
+        </div>
         <% if (typeof session !== 'undefined' && session && session.user) { %>
             <a href="/profile" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold uppercase">
                 <%= session.user.name.charAt(0) %>
@@ -278,11 +273,9 @@
         <% product.forEach(prod => { %>
             <div class="group flex flex-col bg-white border border-gray-100 product-card-shadow transition-all duration-500">
                 <div class="aspect-[4/5] overflow-hidden relative bg-[#f4f3f1] flex items-center justify-center p-8">
-                    <div class="relative w-full h-full cursor-pointer">
-                        <a href="/product/<%= prod._id %>">
-                            <img alt="<%= prod.name %>" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-1000" src="<%= prod.images && prod.images.length > 0 ? prod.images[0] : 'https://via.placeholder.com/400x500' %>"/>
-                        </a>
-                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div class="relative w-full h-full">
+                        <img alt="<%= prod.name %>" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-1000" src="<%= prod.images && prod.images.length > 0 ? prod.images[0] : 'https://via.placeholder.com/400x500' %>"/>
+                        <div class="absolute inset-0 flex items-center justify-center">
                             <span class="text-[10px] font-serif font-bold text-black/20 tracking-[0.3em] uppercase -rotate-90">Junoon</span>
                         </div>
                     </div>
@@ -312,9 +305,9 @@
                                 N/A
                             <% } %>
                         </span>
-                        <!-- <button type="button" onclick="handleAddToCart('<%= prod._id %>', '<%= prod.variants[0]._id %>')" class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                        <button class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
                             Add to Cart
-                        </button>  -->
+                        </button>
                     </div>
                 </div>
             </div>
@@ -325,31 +318,19 @@
         </div>
     <% } %>
 </div>
-
-<div class="border-t border-slate-100 dark:border-slate-800 p-6 flex items-center justify-center">
-    <% if (totalPages > 1) { %>
-        <nav class="flex items-center space-x-2">
-            <% if (currentPage > 1) { %>
-                <a href="?page=<%= currentPage - 1 %>&search=<%= search %>" class="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:border-primary hover:text-primary transition-all text-slate-400">
-                    <span class="material-symbols-outlined">chevron_left</span>
-                </a>
-            <% } %>
-            <div class="flex items-center space-x-2 px-4">
-                <% for(let i = 1; i <= totalPages; i++) { %>
-                    <a href="?page=<%= i %>&search=<%= search %>" class="w-10 h-10 flex items-center justify-center rounded-lg font-medium text-sm transition-colors <%= currentPage === i ? 'bg-primary text-white font-bold shadow-lg shadow-primary/20' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400' %>">
-                        <%= i.toString().padStart(2, '0') %>
-                    </a>
-                <% } %>
-            </div>
-            <% if (currentPage < totalPages) { %>
-                <a href="?page=<%= currentPage + 1 %>&search=<%= search %>" class="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:border-primary hover:text-primary transition-all text-slate-400">
-                    <span class="material-symbols-outlined">chevron_right</span>
-                </a>
-            <% } %>
-        </nav>
-    <% } %>
+<div class="mt-24 flex justify-center items-center gap-8">
+<button class="text-gray-400 hover:text-primary transition-colors disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined text-3xl">chevron_left</span>
+</button>
+<div class="flex items-center gap-6">
+<button class="text-xs font-bold tracking-widest border-b border-primary text-black">01</button>
+<button class="text-xs font-bold tracking-widest text-gray-400 hover:text-black transition-colors">02</button>
+<button class="text-xs font-bold tracking-widest text-gray-400 hover:text-black transition-colors">03</button>
 </div>
-
+<button class="text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl">chevron_right</span>
+</button>
+</div>
 </section>
 </main>
 <footer class="bg-luxury-black text-luxury-ivory pt-24 pb-12 px-6 md:px-16">
@@ -437,16 +418,11 @@
         const productGrid = document.getElementById('product-grid');
         const productCount = document.getElementById('product-count');
         const sortFilter = document.getElementById('sort-filter');
-        const searchInput = document.querySelector('input[name="search"]');
-        const headerSearchForm = document.getElementById('header-search-form');
 
         async function updateProducts() {
             // Get selected price
             const selectedPrice = document.querySelector('input[name="price"]:checked')?.value || '';
             const selectedSort = sortFilter.value;
-
-
-            const searchValue = searchInput.value.trim();
 
             // Get selected categories from checkboxes
             const selectedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
@@ -459,7 +435,6 @@
             // Build query string
             const params = new URLSearchParams({
                 ajax: 'true',
-                search: searchValue,
                 price: selectedPrice,
                 sort: selectedSort,
                 category: selectedCategories.join(','),
@@ -480,7 +455,7 @@
             }
         }
 
-        function renderProducts(products, wishlistIds = []) {
+        function renderProducts(products, wishlistIds) {
             if (!products || products.length === 0) {
                 productGrid.innerHTML = `
                     <div class="col-span-full py-20 text-center">
@@ -495,16 +470,14 @@
                     : 'N/A';
                 const categoryName = prod.category ? prod.category.name : 'Perfume';
                 const image = prod.images && prod.images.length > 0 ? prod.images[0] : 'https://via.placeholder.com/400x500';
-                const isHidden = wishlistIds.includes(prod._id.toString()) ? 'hidden' : '';
+                const isActive = wishlistIds.includes(prod._id.toString()) ? 'wishlist-active' : '';
 
                 return `
                     <div class="group flex flex-col bg-white border border-gray-100 product-card-shadow transition-all duration-500">
                         <div class="aspect-[4/5] overflow-hidden relative bg-[#f4f3f1] flex items-center justify-center p-8">
-                            <div class="relative w-full h-full cursor-pointer">
-                                <a href="/product/${prod._id}">
-                                    <img alt="${prod.name}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-1000" src="${image}"/>
-                                </a>
-                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div class="relative w-full h-full">
+                                <img alt="${prod.name}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-1000" src="${image}"/>
+                                <div class="absolute inset-0 flex items-center justify-center">
                                     <span class="text-[10px] font-serif font-bold text-black/20 tracking-[0.3em] uppercase -rotate-90">Junoon</span>
                                 </div>
                             </div>
@@ -513,7 +486,7 @@
                                     ? `<span class="bg-primary text-luxury-black text-[10px] font-bold px-2 py-1 uppercase tracking-wider">${prod.offer}% OFF</span>` 
                                     : '<div></div>'}
                                 <button type="button" onclick="event.stopPropagation(); toggleWishlist('${prod._id}', '${prod.variants[0]._id}')" class="text-gray-400 hover:text-primary transition-colors wishlist-btn-${prod._id} ${isHidden}">
-                                    <span class="material-symbols-outlined">favorite</span>
+                                    <span class="material-symbols-outlined ${isActive}">favorite</span>
                                 </button>
                             </div>
                         </div>
@@ -523,9 +496,9 @@
                             <p class="text-[10px] text-gray-500 mb-6 font-medium uppercase tracking-widest italic">${prod.tagline || ''}</p>
                             <div class="mt-auto space-y-4">
                                 <span class="text-lg font-bold text-gray-900 block">₹${minPrice}</span>
-                                // <button onclick="handleAddToCart('${prod._id}', '${prod.variants[0]._id}')" class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
-                                //     Add to Cart
-                                // </button>
+                                <button class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                                    Add to Cart
+                                </button>
                             </div>
                         </div>
                     </div>`;
@@ -551,11 +524,6 @@
         });
 
         sortFilter.addEventListener('change', updateProducts);
-
-        headerSearchForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            updateProducts();
-        });
     });
 
     async function toggleWishlist(productId, variantId) {
@@ -576,53 +544,17 @@
             const data = await response.json();
             if (data.success) {
                 const icon = document.querySelector(`.wishlist-btn-${productId} span`);
+                icon.classList.toggle('wishlist-active', data.added);
+                
                 if (data.added) {
-                    icon.classList.add('text-primary');
-                    icon.style.fontVariationSettings = "'FILL' 1";
                     Swal.fire({ icon: 'success', title: 'Added to Wishlist', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
                 } else {
-                    icon.classList.remove('text-primary');
-                    icon.style.fontVariationSettings = "'FILL' 0";
                     Swal.fire({ icon: 'info', title: 'Removed from Wishlist', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
                 }
             }
         } catch (error) {
             console.error('Wishlist error:', error);
             // If session check failed and returned HTML instead of JSON
-            window.location.href = '/signin';
-        }
-    }
-
-    async function handleAddToCart(productId, variantId) {
-        try {
-            const response = await fetch('/cart/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId, variantId , quantity: 1})
-            });
-
-            if (response.redirected) {
-                window.location.href = '/signin';
-                return;
-            }
-
-            const data = await response.json();
-            if (data.success) {
-                Swal.fire({ 
-                    icon: 'success', 
-                    title: 'Added to Cart', 
-                    toast: true, 
-                    position: 'top-end', 
-                    showConfirmButton: false, 
-                    timer: 1500 
-                }).then(() => {
-                    window.location.href = '/cart';
-                });
-            } else {
-                Swal.fire({ icon: 'error', title: 'Action Failed', text: data.message });
-            }
-        } catch (error) {
-            console.error('Cart error:', error);
             window.location.href = '/signin';
         }
     }

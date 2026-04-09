@@ -1,0 +1,197 @@
+const Order = require('../model/orderSchema');
+const Cart = require('../model/cartSchema');
+const Product = require('../model/productSchema');
+const User = require('../model/userSchema');
+
+const createOrder = async (userId, addressId, paymentMethod, couponDiscount = 0, shippingCharge = 0) => {
+  const cart = await Cart.findOne({ user: userId }).populate('items.product');
+  if (!cart || cart.items.length === 0) {
+    throw new Error('Cart is empty.');
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error('User not found.');
+  }
+
+  const shippingAddress = user.addresses.id(addressId);
+  if (!shippingAddress) {
+    throw new Error('Shipping address not found.');
+  }
+
+  let totalAmount = 0;
+  const orderItems = [];
+
+  for (const cartItem of cart.items) {
+    const product = cartItem.product;
+    const variant = product.variants.id(cartItem.variantId);
+
+    if (!product || product.status !== 'Active' || !variant || variant.stock < cartItem.quantity) {
+      throw new Error(`Product ${product ? product.name : 'unknown'} (Size: ${variant ? variant.size : 'unknown'}) is out of stock or unavailable.`);
+    }
+
+    // Deduct stock
+    await Product.updateOne(
+      { _id: product._id, "variants._id": variant._id },
+      { $inc: { "variants.$.stock": -cartItem.quantity } }
+    );
+
+    totalAmount += cartItem.price * cartItem.quantity;
+
+    orderItems.push({
+      product: product._id,
+      variantId: variant._id,
+      quantity: cartItem.quantity,
+      price: cartItem.price,
+      variantSize: variant.size,
+      productName: product.name,
+      productImage: product.images[0] // Assuming first image is the main one
+    });
+  }
+
+  totalAmount -= couponDiscount;
+  totalAmount += shippingCharge;
+  if (totalAmount < 0) totalAmount = 0; // Ensure total doesn't go negative
+
+  const newOrder = new Order({
+    user: userId,
+    shippingAddress: shippingAddress._id, // Store the _id of the subdocument
+    items: orderItems,
+    totalAmount: totalAmount,
+    paymentMethod: paymentMethod,
+    couponDiscount: couponDiscount,
+    shippingCharge: shippingCharge,
+    paymentStatus: paymentMethod === 'COD' ? 'Pending' : 'Pending' // For online, it will be updated later
+  });
+
+  await newOrder.save();
+
+  // Clear the cart after successful order
+  cart.items = [];
+  await cart.save();
+
+  return newOrder;
+};
+
+const getOrderById = async (orderId) => {
+  return await Order.findOne({orderId: orderId  })
+    .populate('user')
+    .populate({
+      path: 'items.product',
+      model: 'Product'
+    });
+};
+
+const getOrdersByUser = async (userId, search = '') => {
+  let query = { user: userId };
+  
+  if (search) {
+    query.$or = [
+      { orderId: { $regex: search, $options: 'i' } },
+      { "items.productName": { $regex: search, $options: 'i' } }
+    ];
+  }
+
+  return await Order.find(query)
+    .sort({ orderDate: -1 })
+    .populate('user')
+    .populate({
+      path: 'items.product',
+      model: 'Product'
+    });
+};
+
+const getAllOrdersAdmin = async (page = 1, limit = 10, search = '', status = '') => {
+  const skip = (page - 1) * limit;
+  let query = {};
+
+  if (status && status !== 'all') {
+    query.status = status;
+  }
+
+  // Advanced search for OrderID or User Name
+  if (search) {
+    const userIds = await User.find({ name: { $regex: search, $options: 'i' } }).distinct('_id');
+    query.$or = [
+      { orderId: { $regex: search, $options: 'i' } },
+      { user: { $in: userIds } }
+    ];
+  }
+
+  const orders = await Order.find(query)
+    .populate('user', 'name email')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const totalOrders = await Order.countDocuments(query);
+
+  return {
+    orders,
+    totalOrders,
+    totalPages: Math.ceil(totalOrders / limit),
+    currentPage: page
+  };
+};
+
+const updateOrderStatus = async (orderId, status, paymentStatus, reason = null) => {
+  const order = await Order.findOne({ orderId });
+  if (!order) throw new Error('Order not found');
+
+  // If transitioning to Cancelled, restore stock to inventory
+  if (status === 'Cancelled' && order.status !== 'Cancelled' && order.status !== 'Delivered') {
+    for (const item of order.items.filter(i => i.status !== 'Cancelled' && i.status !== 'Returned')) {
+      await Product.updateOne(
+        { _id: item.product, "variants._id": item.variantId },
+        { $inc: { "variants.$.stock": item.quantity } }
+      );
+    }
+  }
+
+  const updateData = { status };
+  if (paymentStatus) {
+    updateData.paymentStatus = paymentStatus;
+  } else if (status === 'Delivered') {
+    updateData.paymentStatus = 'Completed';
+  } else if (status === 'Cancelled') {
+    // If COD, payment failed. If Online, refund logic would trigger here.
+    updateData.paymentStatus = order.paymentMethod === 'COD' ? 'Failed' : order.paymentStatus;
+  }
+
+  order.status = updateData.status;
+  if (updateData.paymentStatus) order.paymentStatus = updateData.paymentStatus;
+  if (reason) order.cancelReason = reason;
+  
+  return await order.save();
+};
+
+const updateOrderItemStatus = async (orderId, itemId, status, reason = null) => {
+  const order = await Order.findOne({ orderId });
+  if (!order) throw new Error('Order not found');
+
+  const item = order.items.id(itemId);
+  if (!item) throw new Error('Item not found in order');
+
+  const oldStatus = item.status;
+  item.status = status;
+  if (reason) item.reason = reason;
+
+  // Handle stock restoration for individual item cancellation/return
+  if ((status === 'Cancelled' ) && (oldStatus !== 'Cancelled' && oldStatus !== 'Returned')) {
+    await Product.updateOne(
+      { _id: item.product, "variants._id": item.variantId },
+      { $inc: { "variants.$.stock": item.quantity } }
+    );
+  }
+
+  return await order.save();
+};
+
+module.exports = {
+  createOrder,
+  getOrderById,
+  getOrdersByUser,
+  getAllOrdersAdmin,
+  updateOrderStatus,
+  updateOrderItemStatus
+};

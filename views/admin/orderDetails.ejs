@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Order Details - <%= order.orderId %> | Junoon Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { primary: "#D4AF37", "background-light": "#FAFAFA", "background-dark": "#0F0F0F", "sidebar-light": "#FDFBF7", "sidebar-dark": "#1A1A1A", "card-light": "#FFFFFF", "card-dark": "#242424" },
+                    fontFamily: { display: ["Playfair Display", "serif"], sans: ["Inter", "sans-serif"] },
+                },
+            },
+        };
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 transition-colors duration-200">
+<div class="flex min-h-screen max-w-[1550px] mx-auto shadow-2xl">
+    <main class="flex-1 flex flex-col">
+        <header class="h-24 px-10 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-sidebar-dark">
+            <div class="flex items-center gap-4">
+                <a href="/admin/orders" class="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 hover:border-primary hover:text-primary transition-all text-slate-400">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </a>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Order #<%= order.orderId %></h2>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
+                    <%= order.status %>
+                </span>
+            </div>
+        </header>
+
+        <div class="p-10 space-y-8 overflow-y-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Side: Order Items -->
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="bg-white dark:bg-card-dark rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                        <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                            <h3 class="font-display font-bold text-lg text-primary">Order Items</h3>
+                            <p class="text-xs text-slate-400 uppercase tracking-widest"><%= order.items.length %> Product(s)</p>
+                        </div>
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 dark:bg-slate-800/50 text-[10px] uppercase font-bold text-slate-500 tracking-tighter">
+                                <tr>
+                                    <th class="px-8 py-4">Product</th>
+                                    <th class="px-8 py-4">Details</th>
+                                    <th class="px-8 py-4">Total</th>
+                                    <th class="px-8 py-4 text-right">Item Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <% order.items.forEach(item => { %>
+                                    <tr class="group">
+                                        <td class="px-8 py-6">
+                                            <div class="flex items-center gap-4">
+                                                <img src="<%= item.productImage %>" class="w-12 h-16 object-contain rounded bg-slate-50 p-1 border border-slate-100 dark:border-slate-700">
+                                                <div>
+                                                    <div class="text-sm font-bold"><%= item.productName %></div>
+                                                    <div class="text-[10px] text-slate-400 uppercase tracking-widest"><%= item.variantSize %></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-6 text-sm">
+                                            <span class="text-slate-400">₹<%= item.price.toLocaleString() %> × <%= item.quantity %></span>
+                                        </td>
+                                        <td class="px-8 py-6 font-bold text-sm">₹<%= (item.price * item.quantity).toLocaleString() %></td>
+                                        <td class="px-8 py-6 text-right">
+                                            <select onchange="updateItemStatus('<%= order.orderId %>', '<%= item._id %>', this.value)" 
+                                                    class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 bg-transparent focus:ring-1 focus:ring-primary outline-none">
+                                                <% ['Pending','Shipped', 'Delivered', 'Cancelled', 'Returned'].forEach(s => { %>
+                                                    <option value="<%= s %>" <%= item.status === s ? 'selected' : '' %> <%= (item.status === 'Cancelled' || item.status === 'Returned' || order.status === 'Delivered') ? 'disabled' : '' %>><%= s %></option>
+                                                <% }) %>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right Side: Info Panels -->
+                <div class="space-y-8">
+                    <!-- Customer Info -->
+                    <div class="bg-white dark:bg-card-dark p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h3 class="font-display font-bold text-lg mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">person</span> Customer
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Full Name</p>
+                                <p class="text-sm font-semibold"><%= order.user.name %></p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Email Address</p>
+                                <p class="text-sm"><%= order.user.email %></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Address -->
+                    <div class="bg-white dark:bg-card-dark p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h3 class="font-display font-bold text-lg mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">local_shipping</span> Delivery
+                        </h3>
+                        <% const addr = order.user.addresses.id(order.shippingAddress) %>
+                        <% if (addr) { %>
+                            <div class="text-sm leading-relaxed">
+                                <p class="font-bold mb-1"><%= addr.name %></p>
+                                <p class="text-slate-500"><%= addr.house %>, <%= addr.street %></p>
+                                <p class="text-slate-500"><%= addr.city %>, <%= addr.state %> - <%= addr.pincode %></p>
+                                <p class="mt-3 font-medium text-slate-400">Phone: <%= addr.phone %></p>
+                            </div>
+                        <% } else { %>
+                            <p class="text-sm text-rose-500">Address details missing.</p>
+                        <% } %>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="bg-primary text-white p-8 rounded-2xl shadow-xl shadow-primary/20">
+                        <h3 class="font-display font-bold text-lg mb-6">Payment Summary</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between opacity-80">
+                                <span>Payment Method</span>
+                                <span class="font-bold"><%= order.paymentMethod %></span>
+                            </div>
+                            <div class="flex justify-between opacity-80">
+                                <span>Payment Status</span>
+                                <span class="font-bold"><%= order.paymentStatus %></span>
+                            </div>
+                            <div class="pt-4 border-t border-white/20 flex justify-between text-xl font-bold">
+                                <span>Total Paid</span>
+                                <span>₹<%= order.totalAmount.toLocaleString() %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    async function updateItemStatus(orderId, itemId, newStatus) {
+        const result = await Swal.fire({
+            title: 'Update Item Status?',
+            text: `Set this product to ${newStatus}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#D4AF37'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch('/admin/orders/update-item-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId, itemId, status: newStatus })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    Swal.fire('Success', 'Item status updated', 'success').then(() => location.reload());
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (err) {
+                Swal.fire('Error', err.message || 'Failed to update item status', 'error');
+            }
+        }
+    }
+</script>
+</body>
+</html>

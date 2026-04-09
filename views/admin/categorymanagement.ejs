@@ -59,11 +59,11 @@
 </div>
 </div>
 <nav class="space-y-1">
-<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="#">
+<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="/admin/dashboard">
 <span class="material-symbols-outlined mr-3 text-xl group-hover:scale-110 transition-transform">dashboard</span>
 <span class="text-sm font-medium">Dashboard</span>
 </a>
-<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="#">
+<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="/admin/productManagement">
 <span class="material-symbols-outlined mr-3 text-xl group-hover:scale-110 transition-transform">inventory_2</span>
 <span class="text-sm font-medium">Products</span>
 </a>
@@ -71,11 +71,11 @@
 <span class="material-symbols-outlined mr-3 text-xl">category</span>
 <span class="text-sm font-semibold">Categories</span>
 </a>
-<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="#">
+<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="/admin/orders">
 <span class="material-symbols-outlined mr-3 text-xl group-hover:scale-110 transition-transform">shopping_cart</span>
 <span class="text-sm font-medium">Orders</span>
 </a>
-<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="#">
+<a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors group" href="/admin/usermanagement">
 <span class="material-symbols-outlined mr-3 text-xl group-hover:scale-110 transition-transform">people</span>
 <span class="text-sm font-medium">Users</span>
 </a>
@@ -168,7 +168,7 @@
                 </td>
                 <td class="px-8 py-5 text-right">
                     <div class="flex items-center justify-end space-x-6">
-                        <button onclick="openEditModal('<%= cat._id %>', '<%= cat.name %>', '<%= cat.offer %>')" type="button" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary border-b border-transparent hover:border-primary transition-all">Edit</button>
+                        <button onclick="openEditModal('<%= cat._id %>', '<%= cat.name %>', '<%= cat.offer %>', '<%= cat.status %>')" type="button" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary border-b border-transparent hover:border-primary transition-all">Edit</button>
                         <form action="/admin/deleteCategory/<%= cat._id %>" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this category?');">
                             <button type="submit" class="text-primary hover:text-red-500 transition-colors">
                                 <span class="material-symbols-outlined text-xl">delete</span>
@@ -236,6 +236,13 @@
                     <label for="offer" class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Offer in Percentage(if any)</label>
                     <input type="number" id="offer" name="offer" min="0" max="100" class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none dark:text-slate-200" placeholder="0">
                 </div>
+                <div>
+                    <label for="categoryStatus" class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Status</label>
+                    <select id="categoryStatus" name="status" class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none dark:text-slate-200 cursor-pointer">
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
             </div>
             <div class="mt-8 flex justify-end space-x-4">
                 <button type="button" id="cancel-modal-btn" class="px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
@@ -260,6 +267,7 @@
     const modalSubmitBtn = document.getElementById('modal-submit-btn');
     const nameInput = document.getElementById('categoryName');
     const offerInput = document.getElementById('offer');
+    const statusInput = document.getElementById('categoryStatus');
 
     const openAddModal = () => {
         categoryForm.reset();
@@ -272,9 +280,10 @@
     const closeModal = () => addCategoryModal.classList.replace('flex', 'hidden');
 
     // Global function to be called from the Edit button in the table
-    window.openEditModal = (id, name, offer) => {
+    window.openEditModal = (id, name, offer, status) => {
         nameInput.value = name;
         offerInput.value = offer || 0;
+        statusInput.value = status || 'Active';
         categoryForm.action = `/admin/editCategory/${id}`; // Ensure this route exists in your backend
         modalTitle.innerText = "Edit Category";
         modalSubmitBtn.innerText = "Update Category";
@@ -305,6 +314,16 @@
             });
         }
     });
-</script>
 
+    // Handle Backend Errors via Flash Messages
+    const backendError = "<%= error_msg %>";
+    if (backendError && backendError.length > 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Action Failed',
+            text: backendError,
+            confirmButtonColor: '#D4AF37'
+        });
+    }
+</script>
 </body></html>

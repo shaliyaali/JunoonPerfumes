@@ -46,8 +46,7 @@ const manageProduct=async(req,res)=>{
 const loadAddProduct=async(req,res)=>{
   try {
     const categories=await Category.find({status:'Active'})
-    const error = req.query.error || null;
-    res.render('addproduct', { categories, product: null, error });
+    res.render('addproduct', { categories, product: null });
 
     
   } catch (error) {
@@ -109,9 +108,11 @@ const addProduct = async (req, res) => {
   } catch (error) {
     console.error("Error adding product:", error.message);
     if (error.message.includes("exists")) {
-        return res.redirect(`/admin/addProduct?error=${encodeURIComponent(error.message)}`);
+        req.flash('error_msg', error.message);
+        return res.redirect('/admin/addProduct');
     }
-    res.status(500).redirect('/admin/addProduct?error=Something went wrong');
+    req.flash('error_msg', 'Something went wrong');
+    res.status(500).redirect('/admin/addProduct');
   }
 };
 
@@ -122,9 +123,8 @@ const loadEditProduct = async (req, res) => {
    
     if (!product) throw new Error('Product not found')
     const categories = await Category.find({ status: 'Active' });
-    
-    const error = req.query.error || null;
-    res.render('addProduct', { categories, product, error });
+
+    res.render('addProduct', { categories, product });
   } catch (error) {
     console.error("Error loading edit product page:", error);
     res.redirect("/admin/productManagement");
@@ -177,7 +177,8 @@ const editProduct = async (req, res) => {
 
     // Server-side validation for minimum 3 images
     if (updateData.images.length < 3) {
-        return res.redirect(`/admin/editProduct/${id}?error=${encodeURIComponent("Minimum 3 images are required")}`);
+        req.flash('error_msg', 'Minimum 3 images are required');
+        return res.redirect(`/admin/editProduct/${id}`);
     }
 
     await productService.updateProduct(id, updateData);
@@ -187,7 +188,8 @@ const editProduct = async (req, res) => {
     console.error("Error editing product:", error.message);
     const id = req.params.id;
     if (error.message.includes("exists")) {
-        return res.redirect(`/admin/editProduct/${id}?error=${encodeURIComponent(error.message)}`);
+        req.flash('error_msg', error.message);
+        return res.redirect(`/admin/editProduct/${id}`);
     }
     res.redirect('/admin/productManagement');
   }
