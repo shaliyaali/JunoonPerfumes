@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Order = require('../model/orderSchema');
 const Cart = require('../model/cartSchema');
 const Product = require('../model/productSchema');
@@ -83,12 +84,16 @@ const getOrderById = async (orderId) => {
 };
 
 const getOrdersByUser = async (userId, search = '') => {
-  let query = { user: userId };
-  
-  if (search) {
+    // Ensure userId is a proper ObjectId for query reliability
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    let query = { user: userObjectId };
+
+    if (search && search.trim()) {
+        const searchRegex = { $regex: search.trim(), $options: 'i' };
+        
     query.$or = [
-      { orderId: { $regex: search, $options: 'i' } },
-      { "items.productName": { $regex: search, $options: 'i' } }
+            { orderId: searchRegex },
+            { "items.productName": searchRegex }
     ];
   }
 
@@ -183,6 +188,23 @@ const updateOrderItemStatus = async (orderId, itemId, status, reason = null) => 
       { $inc: { "variants.$.stock": item.quantity } }
     );
   }
+
+  // Recalculate Overall Order Status
+  const allItems = order.items;
+  const activeItems = allItems.filter(i => i.status !== 'Cancelled' && i.status !== 'Returned');
+  const deliveredItems = activeItems.filter(i => i.status === 'Delivered');
+
+  if (activeItems.length > 0) {
+    if (deliveredItems.length === activeItems.length) {
+      order.status = 'Delivered';
+      
+    } else if (deliveredItems.length > 0) {
+      order.status = 'Partially Delivered';
+    }
+  } 
+  // else if (allItems.length > 0) {
+  //   order.status = 'Cancelled';
+  // }
 
   return await order.save();
 };

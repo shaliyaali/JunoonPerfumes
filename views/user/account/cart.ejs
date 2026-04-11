@@ -48,10 +48,18 @@
     </nav>
     <div class="flex items-center space-x-5">
       <span class="material-icons-outlined cursor-pointer hover:text-primary">search</span>
-      <a href="/wishlist"><span class="material-icons-outlined cursor-pointer hover:text-primary">favorite_border</span></a>
-      <div class="relative cursor-pointer">
+      <a href="/wishlist" class="relative">
+        <span class="material-icons-outlined cursor-pointer hover:text-primary">favorite_border</span>
+        <span id="wishlist-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof wishlistCount !== 'undefined' && wishlistCount > 0) ? '' : 'hidden' %>">
+          <%= typeof wishlistCount !== 'undefined' ? wishlistCount : 0 %>
+        </span>
+      </a>
+      <a href="/cart" class="relative cursor-pointer">
         <span class="material-icons-outlined text-primary">shopping_bag</span>
-      </div>
+        <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof cartCount !== 'undefined' && cartCount > 0) ? '' : 'hidden' %>">
+          <%= typeof cartCount !== 'undefined' ? cartCount : 0 %>
+        </span>
+      </a>
       <% if (session && session.user) { %>
         <a href="/profile" class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-black font-bold uppercase text-xs">
           <%= session.user.name.charAt(0) %>
@@ -167,6 +175,11 @@
                 document.getElementById(`total-${variantId}`).innerText = '₹' + data.itemTotal.toLocaleString();
                 document.getElementById('summary-subtotal').innerText = '₹' + data.subtotal.toLocaleString();
                 document.getElementById('summary-total').innerText = '₹' + data.subtotal.toLocaleString();
+                const cartBadge = document.getElementById('cart-count');
+                if (cartBadge) {
+                    cartBadge.textContent = data.cartCount;
+                    cartBadge.classList.toggle('hidden', data.cartCount === 0);
+                }
             } else {
                 Swal.fire({ icon: 'warning', title: 'Limit Reached', text: data.message });
             }
@@ -203,6 +216,11 @@
                         } else {
                             document.getElementById('summary-subtotal').innerText = '₹' + data.subtotal.toLocaleString();
                             document.getElementById('summary-total').innerText = '₹' + data.subtotal.toLocaleString();
+                            const cartBadge = document.getElementById('cart-count');
+                            if (cartBadge) {
+                                cartBadge.textContent = data.count;
+                                cartBadge.classList.toggle('hidden', data.count === 0);
+                            }
                         }
                     }, 300);
                 }

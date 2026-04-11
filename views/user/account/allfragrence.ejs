@@ -5,6 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>All Fragrances | Junoon Perfumes</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -159,13 +160,20 @@
         <% } %>
         <div class="flex items-center gap-5">
             <% if (typeof session !== 'undefined' && session && session.user) { %>
-                <a href="/wishlist" class="text-luxury-ivory hover:text-primary transition-colors relative"><span class="material-symbols-outlined">favorite_border</span></a>
-                <a href="/cart" class="text-luxury-ivory hover:text-primary transition-colors relative"><span class="material-symbols-outlined">shopping_bag</span></a>
+                <a href="/wishlist" class="text-luxury-ivory hover:text-primary transition-colors relative">
+                    <span class="material-symbols-outlined">favorite_border</span>
+                    <span id="wishlist-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof wishlistCount !== 'undefined' && wishlistCount > 0) ? '' : 'hidden' %>"><%= typeof wishlistCount !== 'undefined' ? wishlistCount : 0 %></span>
+                </a>
+                <a href="/cart" class="text-luxury-ivory hover:text-primary transition-colors relative">
+                    <span class="material-symbols-outlined">shopping_bag</span>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof cartCount !== 'undefined' && cartCount > 0) ? '' : 'hidden' %>"><%= typeof cartCount !== 'undefined' ? cartCount : 0 %></span>
+                </a>
             <% } %>
         </div>
     </div>
 </header>
 
+<input type="hidden" id="success-message" value="<%= typeof message !== 'undefined' ? message : '' %>">
 <section class="hero-gradient pt-20 pb-24 px-6 text-center relative overflow-hidden">
 <div class="absolute inset-0 opacity-10 pointer-events-none">
 <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, rgba(212,175,55,0.15) 1px, transparent 0); background-size: 40px 40px;"></div>
@@ -263,7 +271,7 @@
 </aside>
 <section class="flex-1">
 <div class="flex flex-col sm:flex-row items-center justify-between mb-12 pb-6 border-b border-gray-200">
-<p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-4 sm:mb-0">Displaying <span id="product-count" class="text-black text-xs"><%= typeof product !== 'undefined' ? product.length : 0 %></span> Masterpieces</p>
+<p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-4 sm:mb-0">Displaying <span id="product-count" class="text-black text-xs"><%= typeof product !== 'undefined' ? product.length : 0 %></span> products</p>
 <div class="flex items-center gap-6">
 <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Sort By</span>
 <select id="sort-filter" class="bg-transparent border-none text-[10px] font-bold uppercase tracking-widest focus:ring-0 cursor-pointer text-black py-0">
@@ -312,9 +320,9 @@
                                 N/A
                             <% } %>
                         </span>
-                        <!-- <button type="button" onclick="handleAddToCart('<%= prod._id %>', '<%= prod.variants[0]._id %>')" class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                        <button type="button" onclick="handleAddToCart('<%= prod._id %>', '<%= prod.variants[0]._id %>')" class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
                             Add to Cart
-                        </button>  -->
+                        </button> 
                     </div>
                 </div>
             </div>
@@ -351,6 +359,7 @@
 </div>
 
 </section>
+
 </main>
 <footer class="bg-luxury-black text-luxury-ivory pt-24 pb-12 px-6 md:px-16">
     <div class="max-w-7xl mx-auto">
@@ -423,12 +432,12 @@
         </div>
     </div>
 </footer>
-<div class="fixed bottom-10 right-10 z-50">
+<!-- <div class="fixed bottom-10 right-10 z-50">
 <button class="w-16 h-16 bg-black text-primary border border-primary/50 shadow-2xl flex items-center justify-center hover:scale-105 transition-all duration-300 group">
 <span class="material-symbols-outlined text-3xl">shopping_bag</span>
-<span class="absolute -top-1 -right-1 bg-primary text-black w-6 h-6 flex items-center justify-center text-[10px] font-bold">0</span>
+<span id="floating-cart-count" class="absolute -top-1 -right-1 bg-primary text-black w-6 h-6 flex items-center justify-center text-[10px] font-bold"><%= typeof cartCount !== 'undefined' ? cartCount : 0 %></span>
 </button>
-</div>
+</div> -->
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -439,6 +448,16 @@
         const sortFilter = document.getElementById('sort-filter');
         const searchInput = document.querySelector('input[name="search"]');
         const headerSearchForm = document.getElementById('header-search-form');
+
+        function updateHeaderCounts(cart, wishlist) {
+            const cartBadge = document.getElementById('cart-count');
+            const wishBadge = document.getElementById('wishlist-count');
+            const floatBadge = document.getElementById('floating-cart-count');
+
+            if (cartBadge) { cartBadge.textContent = cart; cartBadge.classList.toggle('hidden', cart === 0); }
+            if (floatBadge) { floatBadge.textContent = cart; }
+            if (wishBadge) { wishBadge.textContent = wishlist; wishBadge.classList.toggle('hidden', wishlist === 0); }
+        }
 
         async function updateProducts() {
             // Get selected price
@@ -472,6 +491,7 @@
                 
                 renderProducts(data.product, data.wishlistIds || []);
                 productCount.textContent = data.product.length;
+                updateHeaderCounts(data.cartCount, data.wishlistCount);
                 
                 // Update URL without refreshing
                 window.history.pushState({}, '', `/allfragrence?${params.toString().replace('&ajax=true', '')}`);
@@ -523,9 +543,9 @@
                             <p class="text-[10px] text-gray-500 mb-6 font-medium uppercase tracking-widest italic">${prod.tagline || ''}</p>
                             <div class="mt-auto space-y-4">
                                 <span class="text-lg font-bold text-gray-900 block">₹${minPrice}</span>
-                                // <button onclick="handleAddToCart('${prod._id}', '${prod.variants[0]._id}')" class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
-                                //     Add to Cart
-                                // </button>
+                                <button type="button" onclick="handleAddToCart('${prod._id}', '${prod.variants[0]._id}')" class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                                    Add to Cart
+                                </button>
                             </div>
                         </div>
                     </div>`;
@@ -566,20 +586,17 @@
                 body: JSON.stringify({ productId, variantId })
             });
 
-            // If not logged in, fetch might follow redirect to /signin. 
-            // Check if response URL contains signin
-            if (response.redirected && response.url.includes('signin')) {
-                window.location.href = '/signin';
-                return;
-            }
+            if (response.status === 401) return window.location.href = '/signin';
 
             const data = await response.json();
             if (data.success) {
+                const wishBadge = document.getElementById('wishlist-count');
+                if (wishBadge) { wishBadge.textContent = data.wishlistCount; wishBadge.classList.remove('hidden'); }
+
                 const icon = document.querySelector(`.wishlist-btn-${productId} span`);
                 if (data.added) {
-                    icon.classList.add('text-primary');
                     icon.style.fontVariationSettings = "'FILL' 1";
-                    Swal.fire({ icon: 'success', title: 'Added to Wishlist', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+                    Swal.fire({ icon: 'success', title: 'Added to Wishlist', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
                 } else {
                     icon.classList.remove('text-primary');
                     icon.style.fontVariationSettings = "'FILL' 0";
@@ -588,8 +605,7 @@
             }
         } catch (error) {
             console.error('Wishlist error:', error);
-            // If session check failed and returned HTML instead of JSON
-            window.location.href = '/signin';
+            // Avoid forced redirect unless explicitly necessary
         }
     }
 
@@ -601,13 +617,15 @@
                 body: JSON.stringify({ productId, variantId , quantity: 1})
             });
 
-            if (response.redirected) {
-                window.location.href = '/signin';
-                return;
-            }
+            if (response.status === 401) return window.location.href = '/signin';
 
             const data = await response.json();
             if (data.success) {
+                const cartBadge = document.getElementById('cart-count');
+                const floatBadge = document.getElementById('floating-cart-count');
+                if (cartBadge) { cartBadge.textContent = data.cartCount; cartBadge.classList.remove('hidden'); }
+                if (floatBadge) { floatBadge.textContent = data.cartCount; }
+
                 Swal.fire({ 
                     icon: 'success', 
                     title: 'Added to Cart', 
@@ -615,17 +633,27 @@
                     position: 'top-end', 
                     showConfirmButton: false, 
                     timer: 1500 
-                }).then(() => {
-                    window.location.href = '/cart';
                 });
             } else {
                 Swal.fire({ icon: 'error', title: 'Action Failed', text: data.message });
             }
         } catch (error) {
             console.error('Cart error:', error);
-            window.location.href = '/signin';
         }
     }
+
+     const msg = document.getElementById('success-message').value;
+if (msg) {
+    Swal.fire({
+        icon: msg.includes('failed') || msg.includes('exists') ? 'error' : 'success',
+        title: 'Notification',
+        text: msg,
+        timer: 2500,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
+    });
+}
 </script>
 
 

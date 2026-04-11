@@ -71,9 +71,15 @@
     </nav>
     <div class="flex items-center space-x-5">
       <span class="material-icons-outlined cursor-pointer hover:text-primary">search</span>
-      <a href="/wishlist"><span class="material-icons-outlined cursor-pointer text-primary">favorite</span></a>
+      <a href="/wishlist" class="relative">
+        <span class="material-icons-outlined cursor-pointer text-primary">favorite</span>
+        <span id="wishlist-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof wishlistCount !== 'undefined' && wishlistCount > 0) ? '' : 'hidden' %>"><%= typeof wishlistCount !== 'undefined' ? wishlistCount : 0 %></span>
+      </a>
       <div class="relative cursor-pointer">
-        <a href="/cart"><span class="material-icons-outlined hover:text-primary">shopping_bag</span></a>
+        <a href="/cart">
+          <span class="material-icons-outlined hover:text-primary">shopping_bag</span>
+          <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof cartCount !== 'undefined' && cartCount > 0) ? '' : 'hidden' %>"><%= typeof cartCount !== 'undefined' ? cartCount : 0 %></span>
+        </a>
       </div>
       <a href="/profile">
         <span class="material-icons-outlined cursor-pointer">person</span>
@@ -141,7 +147,9 @@
           <% wishlistItems.forEach(item => { %>
             <div id="item-<%= item.product._id %>" class="bg-card-light dark:bg-card-dark rounded-DEFAULT overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800 group transition-all duration-500">
               <div class="relative aspect-square bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-6">
+                <a href="/product/<%=item.product._id%>">
                 <img src="<%= item.product.images[0] %>" alt="<%= item.product.name %>" class="max-h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                </a>
                 <button onclick="removeFromWishlist('<%= item.product._id %>', '<%= item.variantId %>')" class="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md text-primary hover:text-red-500 transition-colors" title="Remove from Wishlist">
                   <span class="material-icons-outlined">favorite</span>
                 </button>
@@ -155,7 +163,7 @@
                     <% const variant = item.product.variants.find(v => v._id.toString() === item.variantId.toString()) %>
                     ₹<%= variant ? variant.price.toLocaleString() : 'N/A' %>
                   </span>
-                  <button onclick="wishlisttocart('<%= item.product._id %>', '<%= item.variantId %>')" class="text-[10px] font-bold uppercase tracking-widest py-2 px-4 bg-primary text-black rounded hover:bg-black hover:text-primary transition-colors">
+                  <button onclick="wishlisToCart('<%= item.product._id %>', '<%= item.variantId %>')" class="text-[10px] font-bold uppercase tracking-widest py-2 px-4 bg-primary text-black rounded hover:bg-black hover:text-primary transition-colors">
                     Add To Bag
                   </button>
                 </div>
@@ -204,14 +212,22 @@
         });
 
         const data = await response.json();
-        if (data.success && !data.added) {
+        if (data.success) {
+            const wishBadge = document.getElementById('wishlist-count');
+            if (wishBadge) {
+                wishBadge.textContent = data.wishlistCount;
+                if (data.wishlistCount === 0) wishBadge.classList.add('hidden');
+            }
+
+            if (!data.added) {
           const itemElement = document.getElementById(`item-${productId}`);
           if (itemElement) {
             itemElement.classList.add('opacity-0', 'scale-95');
             setTimeout(() => {
               itemElement.remove();
               const grid = document.getElementById('wishlist-grid');
-              if (grid && grid.children.length === 0) {
+              // If no items left in grid or count is 0
+              if (data.wishlistCount === 0) {
                 grid.classList.add('hidden');
                 document.getElementById('dynamic-empty-state').classList.remove('hidden');
               }
@@ -219,12 +235,64 @@
             Swal.fire({ icon: 'info', title: 'Removed from Wishlist', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
           }
         }
+        }
       } catch (error) {
         console.error('Error removing from wishlist:', error);
       }
     }
-  </script>
-  <script>
+  async function wishlisToCart(productId, variantId) {
+    try {
+      // 1. Call the specific 'move to cart' endpoint
+      const response = await fetch('/wishlist/to-cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, variantId })
+      });
+      console.log('................');
+      const data = await response.json();
+
+      if (data.success) {
+        const cartBadge = document.getElementById('cart-count');
+        const wishBadge = document.getElementById('wishlist-count');
+        
+        if (cartBadge) { cartBadge.textContent = data.cartCount; cartBadge.classList.remove('hidden'); }
+        if (wishBadge) { wishBadge.textContent = data.wishlistCount; if(data.wishlistCount === 0) wishBadge.classList.add('hidden'); }
+
+        Swal.fire({
+          icon: 'success',
+          title:'Moved to Bag',
+          text:data.message,
+          toast:true,
+          position:'top-end',
+          showConfirmButton:false,
+          timer:3000
+        });
+
+        // 3. Remove the item from the UI immediately
+        const itemElement = document.getElementById(`item-${productId}`);
+        if (itemElement) {
+          itemElement.classList.add('opacity-0', 'scale-95');
+          setTimeout(() => {
+            itemElement.remove();
+            if (data.wishlistCount === 0) {
+              const grid = document.getElementById('wishlist-grid');
+              grid.classList.add('hidden');
+              document.getElementById('dynamic-empty-state').classList.remove('hidden');
+            }
+          }, 500);
+        }
+      } else {
+        throw new Error(data.message || 'Failed to move item');
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Could not move item to bag'
+      });
+    }
+  }
     const message = document.getElementById('message').value;
     if (message) { Swal.fire(message); }
   </script>

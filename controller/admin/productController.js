@@ -7,6 +7,9 @@ const slugify = require('slugify');
 
 const manageProduct=async(req,res)=>{
   try{
+    const message = req.session.message;
+    delete req.session.message;
+
     const search=req.query.search||"";
     const page=parseInt(req.query.page)||1;
     const limit=10;
@@ -35,7 +38,8 @@ const manageProduct=async(req,res)=>{
       search,
       status,
       count,
-      sort: sortValue
+      sort: sortValue,
+      message
     })
   }catch(error){
     console.log(error)
@@ -104,6 +108,7 @@ const addProduct = async (req, res) => {
     };
 
     await productService.createProduct(productData);
+    req.session.message = "Product added successfully";
     res.redirect('/admin/productManagement');
   } catch (error) {
     console.error("Error adding product:", error.message);
@@ -182,6 +187,7 @@ const editProduct = async (req, res) => {
     }
 
     await productService.updateProduct(id, updateData);
+    req.session.message = "Product updated successfully";
     res.redirect('/admin/productManagement');
   } catch (error) {
 
@@ -198,6 +204,7 @@ const editProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     await productService.softDeleteProduct(req.params.id);
+    req.session.message = "Product deleted successfully";
     res.redirect('/admin/productManagement');
   } catch (error) {
     console.error("Error deleting product:", error);

@@ -12,13 +12,34 @@ const wishlistService = require('../services/wishlistService')
 const productService = require('../services/productService')
 const cartService = require('../services/cartService')
 
+const Order = require('../model/orderSchema');
 const orderService = require('../services/orderService');
 
-const loadhome = (req, res) => {
+const loadhome = async (req, res) => {
 
   try {
-    console.log('session at home:', req.session)
-    res.render('account/home')
+    let wishlistCount = 0;
+    let cartCount = 0;
+    let wishlistIds = [];
+
+    if (req.session.user) {
+        const wishlist = await wishlistService.getWishlistByUser(req.session.user.id);
+        wishlistCount = wishlist.length;
+        wishlistIds = wishlist.map(item => item.product._id.toString());
+        const cart = await cartService.getCart(req.session.user.id);
+        cartCount = cart ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+    }
+
+    // Fetch up to 8 featured products that are currently active
+    const featuredProducts = await productService.getProducts({ isFeatured: true, status: 'Active' }, 1, 8);
+
+    res.render('account/home', { 
+        wishlistCount, 
+        cartCount, 
+        wishlistIds,
+        session: req.session,
+        featuredProducts 
+    })
   }
   catch (error) {
     console.log('home page not loading', error)
@@ -64,12 +85,18 @@ const loadWishlist = async (req, res) => {
     delete req.session.message;
     
     const user = await userService.getUserById(req.session.user.id);
-    const wishlistItems = await (await wishlistService.getWishlistByUser(req.session.user.id)).filter(item=>item.product !== null)
+    const wishlist = await wishlistService.getWishlistByUser(req.session.user.id);
+    const wishlistItems = wishlist.filter(item => item.product !== null);
+    const cart = await cartService.getCart(req.session.user.id);
+    const cartCount = cart ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+
     return res.render('account/wishlist', { 
         user, 
         message, 
         session: req.session,
-        wishlistItems 
+        wishlistItems,
+        wishlistCount: wishlistItems.length,
+        cartCount
     });
   } catch (error) {
     console.error('CRITICAL: Wishlist Render Error:', error.message);
@@ -85,7 +112,8 @@ const toggleWishlist = async (req, res) => {
         const userId = req.session.user.id;
         const result = await wishlistService.toggleWishlist(userId, productId, variantId);
        // console.log('inside toggle wishlist 2',result)
-        res.json({ success: true, added: result.added });
+        const wishlistItems = await wishlistService.getWishlistByUser(userId);
+        res.json({ success: true, added: result.added, wishlistCount: wishlistItems.length });
     } catch (error) {
         console.error('Error toggling wishlist:', error);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -98,8 +126,9 @@ const addToCart = async (req, res) => {
         const { productId, variantId, quantity } = req.body;
         console.log('inside add to cart')
         const userId = req.session.user.id;
-        await cartService.addToCart(userId, productId, variantId, quantity || 1);
-        res.json({ success: true, message: 'Added to Shopping Bag' });
+        const cart = await cartService.addToCart(userId, productId, variantId, quantity || 1);
+        const totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+        res.json({ success: true, message: 'Added to Shopping Bag', cartCount: totalQuantity });
     } catch (error) {
         console.error('Add to cart error:', error.message);
         res.status(400).json({ success: false, message: error.message });
@@ -119,12 +148,17 @@ const loadCart = async (req, res) => {
     const cart = await cartService.getCart(req.session.user.id);
     console.log('cart:', cart)
 
+    const wishlist = await wishlistService.getWishlistByUser(req.session.user.id);
+    const wishlistItems = wishlist.filter(item => item.product !== null);
+    const wishlistCount = wishlistItems.length;
+
     // Safety Check: Filter out items where the product might have been deleted/nullified
     if (cart && cart.items) {
         cart.items = cart.items.filter(item => item.product !== null);
     }
+    const cartCount = cart ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
 
-    return res.render('account/cart', { user, cart, message, session: req.session });
+    return res.render('account/cart', { user, cart, message, session: req.session, wishlistCount, cartCount });
   } catch (error) {
    
     console.error('--- CART RENDER ERROR ---');
@@ -191,7 +225,7 @@ const placeOrder = async (req, res) => {
     // no coupon or shipping charge logic here, will be calculated in service
     const newOrder = await orderService.createOrder(userId, selectedAddress, paymentMethod);
 
-    req.session.message = 'Order placed successfully!';
+    //req.session.message = 'Order placed successfully!';
     res.redirect(`/order-success/${newOrder.orderId}`);
 
   } catch (error) {
@@ -220,7 +254,7 @@ const loadOrderSuccess = async (req, res) => {
 
 const loadMyOrders = async (req, res) => {
   try {
-    const search = req.query.search || '';
+    const search = (req.query.search || '').trim();
     const orders = await orderService.getOrdersByUser(req.session.user.id, search);
     res.render('account/myOrders', { orders, search, session: req.session });
   } catch (error) {
@@ -267,16 +301,16 @@ const returnOrderItem = async (req, res) => {
 }
 const downloadInvoice = async (req, res) => {
   try {
-    const orderId = req.params.id;
+    const orderId = req.params.orderId;
 
     //  Fetch order
-    const order = await Order.findById(orderId).populate("user");
+    const order = await Order.findOne({orderId}).populate("user");
 
     if (!order) {
       return res.status(404).send("Order not found");
     }
 
-    const address = order.shippingAddress; // adjust based on your schema
+    const address = order.user.addresses.id(order.shippingAddress) 
 
     // Create PDF
     const doc = new PDFDocument();
@@ -358,9 +392,17 @@ const wishlistToBag = async (req, res) => {
     try {
         const { productId, variantId } = req.body;
         const userId = req.session.user.id;
-        await cartService.addToCart(userId, productId, variantId, 1);
+        const cart = await cartService.addToCart(userId, productId, variantId, 1);
         await wishlistService.toggleWishlist(userId, productId, variantId);
-        res.json({ success: true, message: 'Moved to Shopping Bag' });
+        const wishlistItems = await wishlistService.getWishlistByUser(userId);
+        const totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
+        res.json({ 
+            success: true, 
+            message: 'Moved to Shopping Bag',
+            cartCount: totalQuantity,
+            wishlistCount: wishlistItems.length
+        });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });
     }
@@ -985,4 +1027,3 @@ const removeCartItem = async (req, res) => {
     }
 };
 module.exports = { loadRegister, registerUser, loadhome, pageNotFound, verifyOtp, loadLogin, loadOtp, resendOtp, userLogin, loadProfile, updateProfile, editEmail, verifyEmailOtp, loadForgetPassword, passwordReset, verifyResetOtp, resetPassword ,changePassword,logoutUser,addAddress,editAddress,deleteAddress,loadManageAddress,googleCallback,getPincodeDetails, loadWishlist, toggleWishlist, loadProductDetails, addToCart,loadCart,updateCartQuantity,removeCartItem, loadCheckout, placeOrder, loadOrderSuccess, loadMyOrders, cancelOrder, cancelOrderItem, returnOrderItem, downloadInvoice,wishlistToBag }
-

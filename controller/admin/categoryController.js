@@ -9,6 +9,8 @@ const manageCategory=async (req, res) =>
   
   {
   try {
+    const message = req.session.message;
+    delete req.session.message;
     const search = req.query.search || "";
     const page = parseInt(req.query.page) || 1;
     const status = req.query.status || "all";
@@ -30,7 +32,8 @@ res.render('categorymanagement',{
   currentPage: page,
   search,
   status, 
-  categoryCount: count
+  categoryCount: count,
+  message
 }
   )
    
@@ -43,23 +46,25 @@ res.render('categorymanagement',{
 
 const addCategory=async(req,res)=>{
   try{
-  const {name,offer,status}=req.body
+  const { name, offer, status } = req.body;
+
+  if (!name || name.trim() === "") {
+    req.session.message = "Category name is required";
+    return res.redirect('/admin/categoryManagement');
+  }
  
-const slug=slugify(name,{
-  lower:true,
-  strict:true
-})
-await categoryService.addCategory(name,offer,slug,status)
-res.redirect('/admin/categoryManagement')
+  const slug = slugify(name, { lower: true, strict: true });
+  const categoryOffer = parseFloat(offer) || 0;
 
-}
-
+  await categoryService.addCategory(name, categoryOffer, slug, status);
+  req.session.message = "Category added successfully";
+  res.redirect('/admin/categoryManagement');
+  }
   catch(error){
     console.error("Add Category Error:", error.message);
-    const errorMessage = (error.code === 11000 || error.message.includes("exists")) 
+    req.session.message = error.message.includes("exists") 
         ? "Category with this name already exists" 
         : "Failed to add category";
-    req.flash('error_msg', errorMessage);
     res.redirect('/admin/categoryManagement');
   }
 }
@@ -67,6 +72,7 @@ const deleteCategory=async(req,res)=>{
   try{
     const id=req.params.id
     await categoryService.softDeleteCategory(id)
+    req.session.message="Category deleted successfully"
     res.redirect('/admin/categoryManagement')
 }
 catch(error){
@@ -78,22 +84,27 @@ catch(error){
 const editCategory=async(req,res)=>{
   try{
     const id=req.params.id
-    const {name,offer,status}=req.body
-    const slug=slugify(name,{
-      lower:true,
-      strict:true
-    })
-      await categoryService.editCategory(id,name,offer,slug,status)
-      res.redirect('/admin/categoryManagement') 
-      }
-  
-    catch(error){
-      console.error("Edit Category Error:", error.message);
-      const errorMessage = (error.code === 11000 || error.message.includes("exists"))
-          ? "Category with this name already exists" 
-          : "Failed to update category";
-      req.flash('error_msg', errorMessage);
-      res.redirect('/admin/categoryManagement');
+    const { name, offer, status } = req.body;
+
+    if (!name || name.trim() === "") {
+      req.session.message = "Category name is required";
+      return res.redirect('/admin/categoryManagement');
     }
+
+    const slug = slugify(name, { lower: true, strict: true });
+    const categoryOffer = parseFloat(offer) || 0;
+
+    await categoryService.editCategory(id, name, categoryOffer, slug, status);
+    req.session.message = "Category updated successfully";
+    res.redirect('/admin/categoryManagement'); 
+  }
+  
+  catch(error){
+    console.error("Edit Category Error:", error.message);
+    req.session.message = error.message.includes("exists") 
+        ? "Category with this name already exists" 
+        : "Failed to update category";
+    res.redirect('/admin/categoryManagement');
+  }
 }
 module.exports={manageCategory,addCategory,deleteCategory,editCategory}    

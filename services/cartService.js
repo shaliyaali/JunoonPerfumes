@@ -16,6 +16,8 @@ const addToCart = async (userId, productId, variantId, quantity = 1) => {
     if (variant.stock <= 0) throw new Error('Out of stock');
 
     // Offer Logic: Product vs Category (apply whichever is greater)
+
+    
     const productOffer = product.offer || 0;
     const categoryOffer = (product.category && product.category.offer) ? product.category.offer : 0;
     const bestOffer = Math.max(productOffer, categoryOffer);
@@ -78,7 +80,8 @@ const updateQuantity = async (userId, productId, variantId, change) => {
     await cart.save();
 
     const subtotal = cart.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    return { quantity: newQuantity, itemTotal: cart.items[itemIndex].price * newQuantity, subtotal };
+    const cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    return { quantity: newQuantity, itemTotal: cart.items[itemIndex].price * newQuantity, subtotal, cartCount };
 };
 
 const removeItem = async (userId, productId, variantId) => {
@@ -91,7 +94,8 @@ const removeItem = async (userId, productId, variantId) => {
 
     await cart.save();
     const subtotal = cart.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    return { subtotal, count: cart.items.length };
+    const cartCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    return { subtotal, count: cartCount };
 };
 
 module.exports = { addToCart, getCart, updateQuantity, removeItem };

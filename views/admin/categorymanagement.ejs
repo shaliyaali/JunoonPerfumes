@@ -96,6 +96,8 @@
 </a>
 </div>
 </aside>
+
+<input type="hidden" id="success-message" value="<%= typeof message !== 'undefined' ? message : '' %>">
 <main class="flex-1 flex flex-col bg-background-light dark:bg-background-dark">
 <header class="h-24 px-10 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-sidebar-dark">
 <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Category management</h2>
@@ -169,11 +171,10 @@
                 <td class="px-8 py-5 text-right">
                     <div class="flex items-center justify-end space-x-6">
                         <button onclick="openEditModal('<%= cat._id %>', '<%= cat.name %>', '<%= cat.offer %>', '<%= cat.status %>')" type="button" class="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-primary border-b border-transparent hover:border-primary transition-all">Edit</button>
-                        <form action="/admin/deleteCategory/<%= cat._id %>" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this category?');">
-                            <button type="submit" class="text-primary hover:text-red-500 transition-colors">
-                                <span class="material-symbols-outlined text-xl">delete</span>
-                            </button>
-                        </form>
+                        <button type="button" onclick="confirmDelete('<%= cat._id %>')" class="<%= cat.status === 'Active' ? 'text-primary hover:text-red-500' : 'text-slate-300 cursor-not-allowed' %> transition-colors" <%= cat.status === 'Inactive' ? 'disabled' : '' %>>
+                            <span class="material-symbols-outlined text-xl">delete</span>
+                        </button>
+                        <form id="delete-form-<%= cat._id %>" action="/admin/deleteCategory/<%= cat._id %>" method="POST" class="hidden"></form>
                     </div>
                 </td>
             </tr>
@@ -230,7 +231,7 @@
             <div class="space-y-4">
                 <div>
                     <label for="categoryName" class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Category Name</label>
-                    <input type="text" id="categoryName" name="name" required class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none dark:text-slate-200" placeholder="e.g., Perfumes">
+                    <input type="text" id="categoryName" name="name"  class="w-full px-4 py-3 bg-white dark:bg-background-dark border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none dark:text-slate-200" placeholder="e.g., Perfumes">
                 </div>
                 <div>
                     <label for="offer" class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Offer in Percentage(if any)</label>
@@ -256,8 +257,8 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ <script>
     const addCategoryModal = document.getElementById('add-category-modal');
     const addCategoryBtn = document.getElementById('add-category-btn');
     const closeModalBtn = document.getElementById('close-modal-btn');
@@ -288,6 +289,23 @@
         modalTitle.innerText = "Edit Category";
         modalSubmitBtn.innerText = "Update Category";
         addCategoryModal.classList.replace('hidden', 'flex');
+    };
+
+    window.confirmDelete = (categoryId) => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you really want to delete this category?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + categoryId).submit();
+            }
+        })
     };
 
     addCategoryBtn.addEventListener('click', openAddModal);
@@ -325,5 +343,18 @@
             confirmButtonColor: '#D4AF37'
         });
     }
+
+    const msg = document.getElementById('success-message').value;
+if (msg) {
+    Swal.fire({
+        icon: msg.includes('failed') || msg.includes('exists') ? 'error' : 'success',
+        title: 'Notification',
+        text: msg,
+        timer: 2500,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
+    });
+}
 </script>
 </body></html>

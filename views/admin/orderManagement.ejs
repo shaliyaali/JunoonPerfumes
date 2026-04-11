@@ -96,7 +96,7 @@
                 </div>
                 <select name="status" onchange="this.form.submit()" class="w-48 py-3 bg-slate-50 dark:bg-background-dark border-none rounded-xl focus:ring-2 focus:ring-primary outline-none">
                     <option value="all" <%= status === 'all' ? 'selected' : '' %>>All Status</option>
-                    <% ['Pending', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'].forEach(s => { %>
+                    <% ['Pending', 'Shipped', 'Out for Delivery', 'Partially Delivered','Delivered', 'Cancelled'].forEach(s => { %>
                         <option value="<%= s %>" <%= status === s ? 'selected' : '' %>><%= s %></option>
                     <% }) %>
                 </select>
@@ -130,8 +130,9 @@
                                     <select onchange="updateStatus('<%= order.orderId %>', this.value)" 
                                             class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border-none focus:ring-1 focus:ring-primary
                                             <%= order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 
-                                               order.status === 'Cancelled' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700' %>">
-                                        <% ['Pending',  'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'].forEach(s => { %>
+                                               order.status === 'Cancelled' ? 'bg-rose-100 text-rose-700' : 
+                                               order.status === 'Partially Delivered' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700' %>">
+                                        <% ['Pending', 'Shipped', 'Out for Delivery', 'Partially Delivered', 'Delivered', 'Cancelled'].forEach(s => { %>
                                             <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %> <%= (order.status === 'Delivered' || order.status === 'Cancelled') ? 'disabled' : '' %>><%= s %></option>
                                         <% }) %>
                                     </select>

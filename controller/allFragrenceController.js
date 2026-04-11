@@ -1,6 +1,7 @@
 const productService=require('../services/productService')
 const Category = require('../model/categorySchema');
 const wishlistService = require('../services/wishlistService');
+const cartService = require('../services/cartService');
 
 const loadAllfragrence = async (req, res) => {
   try {
@@ -53,14 +54,19 @@ const loadAllfragrence = async (req, res) => {
 
     // Get user's wishlist IDs
     let wishlistIds = [];
+    let wishlistCount = 0;
+    let cartCount = 0;
     if (req.session.user) {
         const items = await wishlistService.getWishlistByUser(req.session.user.id);
         wishlistIds = items.map(item => item.product._id.toString());
+        wishlistCount = items.length;
+        const cart = await cartService.getCart(req.session.user.id);
+        cartCount = cart ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
     }
 
     // If it's an AJAX request, return JSON
     if (req.query.ajax === 'true') {
-        return res.json({ product: products, wishlistIds });
+        return res.json({ product: products, wishlistIds, wishlistCount, cartCount });
     }
 
     const count=await productService.countProducts(query )
@@ -71,6 +77,8 @@ const loadAllfragrence = async (req, res) => {
       product: products,
       session: req.session,
       wishlistIds,
+      wishlistCount,
+      cartCount,
       search,
       totalPages:Math.ceil(count/limit),
       currentPage
