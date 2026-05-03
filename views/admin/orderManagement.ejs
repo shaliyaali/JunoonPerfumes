@@ -81,10 +81,10 @@
     <main class="flex-1 flex flex-col">
         <header class="h-24 px-10 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-sidebar-dark">
             <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Order Management</h2>
-            <button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors" onclick="document.documentElement.classList.toggle('dark')">
+            <!-- <button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors" onclick="document.documentElement.classList.toggle('dark')">
                 <span class="material-symbols-outlined dark:hidden">dark_mode</span>
                 <span class="material-symbols-outlined hidden dark:block">light_mode</span>
-            </button>
+            </button> -->
         </header>
 
         <div class="p-10 space-y-8 flex-1">
@@ -94,13 +94,20 @@
                     <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
                     <input type="text" name="search" value="<%= search %>" class="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-background-dark border-none rounded-xl focus:ring-2 focus:ring-primary outline-none" placeholder="Search by Order ID or Customer Name...">
                 </div>
-                <select name="status" onchange="this.form.submit()" class="w-48 py-3 bg-slate-50 dark:bg-background-dark border-none rounded-xl focus:ring-2 focus:ring-primary outline-none">
-                    <option value="all" <%= status === 'all' ? 'selected' : '' %>>All Status</option>
-                    <% ['Pending', 'Shipped', 'Out for Delivery', 'Partially Delivered','Delivered', 'Cancelled'].forEach(s => { %>
-                        <option value="<%= s %>" <%= status === s ? 'selected' : '' %>><%= s %></option>
-                    <% }) %>
-                </select>
-                <a href="/admin/orders" class="px-6 py-3 text-slate-400 hover:text-primary transition-colors flex items-center">Clear</a>
+                <div class="flex gap-4 items-center">
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 ml-1">From</label>
+                        <input type="date" name="startDate" value="<%= typeof startDate !== 'undefined' ? startDate : '' %>" class="px-4 py-3 bg-slate-50 dark:bg-background-dark border-none rounded-xl focus:ring-2 focus:ring-primary outline-none text-xs">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 ml-1">To</label>
+                        <input type="date" name="endDate" value="<%= typeof endDate !== 'undefined' ? endDate : '' %>" class="px-4 py-3 bg-slate-50 dark:bg-background-dark border-none rounded-xl focus:ring-2 focus:ring-primary outline-none text-xs">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="h-[46px] bg-primary text-white px-6 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors">Filter</button>
+                        <a href="/admin/orders" class="ml-4 h-[46px] flex items-center text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors">Clear</a>
+                    </div>
+                </div>
             </form>
 
             <!-- Table -->
@@ -112,7 +119,6 @@
                             <th class="px-8 py-5">Date</th>
                             <th class="px-8 py-5">Customer</th>
                             <th class="px-8 py-5">Total</th>
-                            <th class="px-8 py-5">Status</th>
                             <th class="px-8 py-5 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -126,20 +132,22 @@
                                     <div class="text-[10px] text-slate-400 uppercase tracking-tight"><%= order.user.email %></div>
                                 </td>
                                 <td class="px-8 py-5 font-bold">₹<%= order.totalAmount.toLocaleString() %></td>
-                                <td class="px-8 py-5">
-                                    <select onchange="updateStatus('<%= order.orderId %>', this.value)" 
-                                            class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border-none focus:ring-1 focus:ring-primary
-                                            <%= order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 
-                                               order.status === 'Cancelled' ? 'bg-rose-100 text-rose-700' : 
-                                               order.status === 'Partially Delivered' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700' %>">
-                                        <% ['Pending', 'Shipped', 'Out for Delivery', 'Partially Delivered', 'Delivered', 'Cancelled'].forEach(s => { %>
-                                            <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %> <%= (order.status === 'Delivered' || order.status === 'Cancelled') ? 'disabled' : '' %>><%= s %></option>
-                                        <% }) %>
-                                    </select>
-                                </td>
                                 <td class="px-8 py-5 text-right space-x-3">
                                     <a href="/admin/orders/<%= order.orderId %>" class="text-xs font-bold text-slate-400 hover:text-primary transition-colors uppercase tracking-widest">Details</a>
                                 </td>
+
+                                <td class="px-6 py-4">
+    <!-- Check if any item in the order has a return request -->
+    <% if (order.items.some(item => item.status === 'Return Requested')) { %>
+        <div class="flex flex-col gap-1">
+            <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-orange-100 text-orange-600 border border-orange-200">
+                Return Requested
+            </span>
+            <span class="text-[9px] text-gray-500 italic">Action Required</span>
+        </div>
+    <% }  %>
+</td>
+
                             </tr>
                         <% }) %>
                     </tbody>
@@ -148,7 +156,7 @@
                 <!-- Pagination -->
                 <div class="p-6 border-t border-slate-100 dark:border-slate-800 flex justify-center gap-2">
                     <% for(let i = 1; i <= totalPages; i++) { %>
-                        <a href="?page=<%= i %>&search=<%= search %>&status=<%= status %>" 
+                        <a href="?page=<%= i %>&search=<%= search %>&startDate=<%= typeof startDate !== 'undefined' ? startDate : '' %>&endDate=<%= typeof endDate !== 'undefined' ? endDate : '' %>" 
                            class="w-10 h-10 flex items-center justify-center rounded-lg font-bold text-xs transition-all 
                            <%= currentPage == i ? 'bg-primary text-white shadow-lg' : 'text-slate-400 hover:bg-slate-100' %>">
                             <%= i %>
@@ -162,29 +170,29 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    async function updateStatus(orderId, newStatus) {
-        const result = await Swal.fire({
-            title: 'Update Status?',
-            text: `Change order status to ${newStatus}?`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#D4AF37'
-        });
+    // async function updateStatus(orderId, newStatus) {
+    //     const result = await Swal.fire({
+    //         title: 'Update Status?',
+    //         text: `Change order status to ${newStatus}?`,
+    //         icon: 'question',
+    //         showCancelButton: true,
+    //         confirmButtonColor: '#D4AF37'
+    //     });
 
-        if (result.isConfirmed) {
-            try {
-                const response = await fetch('/admin/orders/update-status', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderId, status: newStatus })
-                });
-                const data = await response.json();
-                if (data.success) location.reload();
-            } catch (err) {
-                Swal.fire('Error', 'Failed to update status', 'error');
-            }
-        }
-    }
+    //     if (result.isConfirmed) {
+    //         try {
+    //             const response = await fetch('/admin/orders/update-status', {
+    //                 method: 'POST',
+    //                 headers: { 'Content-Type': 'application/json' },
+    //                 body: JSON.stringify({ orderId, status: newStatus })
+    //             });
+    //             const data = await response.json();
+    //             if (data.success) location.reload();
+    //         } catch (err) {
+    //             Swal.fire('Error', 'Failed to update status', 'error');
+    //         }
+    //     }
+    // }
 </script>
 </body>
 </html>

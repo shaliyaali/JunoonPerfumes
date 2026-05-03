@@ -11,25 +11,42 @@ const passport = require('passport')
 const wishlistService = require('../services/wishlistService')
 const productService = require('../services/productService')
 const cartService = require('../services/cartService')
-
+const Category=require('../model/categorySchema')
 const Order = require('../model/orderSchema');
+const Coupon = require('../model/couponSchema');
 const orderService = require('../services/orderService');
 
-const loadhome = async (req, res) => {
+// Helper function to get common header data
+const getCommonHeaderData = async (req) => {
+  let wishlistCount = 0;
+  let cartCount = 0;
+  const categories = await Category.find({ status: 'Active' });
 
+  if (req.session.user) {
+    const wishlist = await wishlistService.getWishlistByUser(req.session.user.id);
+    wishlistCount = wishlist.length;
+    const cart = await cartService.getCart(req.session.user.id);
+    cartCount = cart ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+  }
+  return { wishlistCount, cartCount, categories };
+};
+
+const loadhome = async (req, res, next) => {
   try {
-    let wishlistCount = 0;
-    let cartCount = 0;
+   // let wishlistCount = 0;
+    //let cartCount = 0;
+    const { wishlistCount, cartCount, categories } = await getCommonHeaderData(req);
     let wishlistIds = [];
-
     if (req.session.user) {
-        const wishlist = await wishlistService.getWishlistByUser(req.session.user.id);
-        wishlistCount = wishlist.length;
-        wishlistIds = wishlist.map(item => item.product._id.toString());
-        const cart = await cartService.getCart(req.session.user.id);
-        cartCount = cart ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+      const wishlist= await wishlistService.getWishlistByUser(req.session.user.id);
+      wishlistIds=wishlist.map(item=>item.product._id.toString());
     }
+    
+       // cartCount = cart ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+      // const wishlist = await wishlistService.getWishlistByUser(req.session.user.id);
+      // wishlistIds = wishlist.map(item => item.product._id.toString());
 
+    
     // Fetch up to 8 featured products that are currently active
     const featuredProducts = await productService.getProducts({ isFeatured: true, status: 'Active' }, 1, 8);
 
@@ -37,13 +54,15 @@ const loadhome = async (req, res) => {
         wishlistCount, 
         cartCount, 
         wishlistIds,
+        categories,
+        search: "",
+        featuredProducts ,
         session: req.session,
-        featuredProducts 
+        activePage: 'home'
     })
   }
   catch (error) {
-    console.log('home page not loading', error)
-    res.status(500).send('server error')
+   next(error)
   }
 }
 const loadOtp = (req, res) => {
@@ -66,16 +85,17 @@ const loadRegister = (req, res) => {
   res.render('auth/signup', { message })
 }
 
-const loadProfile = async (req, res) => {
+const loadProfile = async (req, res,next) => {
   try {
     const message = req.session.message
     delete req.session.message
+    const { wishlistCount, cartCount ,categories} = await getCommonHeaderData(req);
     const user = await userService.getUserById(req.session.user.id)
-    return res.render('account/profile', { user, message })
-
+   
+    // return res.render('account/profile', { user, message, wishlistCount, cartCount,categories, activePage: 'profile' });
+    return res.render('account/profile', { user, message, wishlistCount, cartCount, categories, search: "", activePage: 'profile', session: req.session });
   } catch (error) {
-    console.error('Error during profile loading:', error)
-    return res.redirect('/')
+    next(error)
   }
 }
 
@@ -86,20 +106,38 @@ const loadWishlist = async (req, res) => {
     
     const user = await userService.getUserById(req.session.user.id);
     const wishlist = await wishlistService.getWishlistByUser(req.session.user.id);
-    const wishlistItems = wishlist.filter(item => item.product !== null);
-    const cart = await cartService.getCart(req.session.user.id);
-    const cartCount = cart ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+  
+    const { wishlistCount, cartCount, categories } = await getCommonHeaderData(req);
+
+    const processedWishlist =wishlist.map(item =>{
+      const product=item.product;
+      if(!product) return item;
+      const variant=product.variants.find(v=>v._id.toString() === item.variantId.toString());
+      const productOffer=product.offer || 0;
+      const categoryOffer=(product.category && product.category.offer) || 0;
+      const maxOffer=Math.max(productOffer,categoryOffer);
+      
+      return {
+        ...item.toObject(),
+        displayVariant : variant,
+        maxOffer:maxOffer
+      }
+
+    })
 
     return res.render('account/wishlist', { 
-        user, 
+        user, // User is needed for sidebar
         message, 
         session: req.session,
-        wishlistItems,
-        wishlistCount: wishlistItems.length,
-        cartCount
+        wishlistCount,
+        cartCount,
+        categories,
+        search: "",
+        activePage: 'wishlist',
+        wishlistItems: processedWishlist
     });
   } catch (error) {
-    console.error('CRITICAL: Wishlist Render Error:', error.message);
+    console.error(' Wishlist Render Error:', error.message);
     // Temporarily send the error to the screen so you can see what's wrong
     if (process.env.NODE_ENV === 'development') return res.status(500).send(error.message);
     return res.redirect('/');
@@ -121,56 +159,70 @@ const toggleWishlist = async (req, res) => {
 };
 
 // Add to Cart from product listing/details
-const addToCart = async (req, res) => {
+const addToCart = async (req, res, next) => {
     try {
         const { productId, variantId, quantity } = req.body;
-        console.log('inside add to cart')
+       
         const userId = req.session.user.id;
-        const cart = await cartService.addToCart(userId, productId, variantId, quantity || 1);
+        const {cart,message} = await cartService.addToCart(userId, productId, variantId, quantity || 1);
         const totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-        res.json({ success: true, message: 'Added to Shopping Bag', cartCount: totalQuantity });
+        res.json({ success: true, message: message, cartCount: totalQuantity });
     } catch (error) {
-        console.error('Add to cart error:', error.message);
-        res.status(400).json({ success: false, message: error.message });
+       
+        next(error); 
     }
 };
 
 
-const loadCart = async (req, res) => {
+const loadCart = async (req, res, next) => {
   try {
    
     const message = req.session.message ;
     delete req.session.message;
     
     if (!req.session.user) return res.redirect('/signin');
+    const search=(req.query.search|| '').trim();
+    const query = { name: {$regex: search, $options:'i'}}
 
     const user = await userService.getUserById(req.session.user.id);
-    const cart = await cartService.getCart(req.session.user.id);
-    console.log('cart:', cart)
+    const cart = await cartService.getCart(req.session.user.id,query);
+    //console.log('____________cart_____:', cart)
 
     const wishlist = await wishlistService.getWishlistByUser(req.session.user.id);
-    const wishlistItems = wishlist.filter(item => item.product !== null);
+    const wishlistItems = wishlist.filter(item =>  item.product !== null );
+
     const wishlistCount = wishlistItems.length;
 
-    // Safety Check: Filter out items where the product might have been deleted/nullified
-    if (cart && cart.items) {
-        cart.items = cart.items.filter(item => item.product !== null);
-    }
-    const cartCount = cart ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
 
-    return res.render('account/cart', { user, cart, message, session: req.session, wishlistCount, cartCount });
+    const commonHeaderData = await getCommonHeaderData(req);
+    const cartCount = commonHeaderData.cartCount;
+
+    const categories=commonHeaderData.categories;
+
+    // Recalculate totals for AJAX response
+    let subtotal = 0;
+    if (cart && cart.items) {
+      subtotal = cart.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    }
+    const hasInvalidItem = cart && cart.items ? cart.items.some(item => item.status === 'out of stock') : false;
+    
+    if (req.query.ajax === 'true') {
+      return res.json({ cart, wishlistCount, cartCount, search, subtotal, hasInvalidItem });
+    }
+
+    return res.render('account/cart', { user, cart, message, session: req.session, wishlistCount, cartCount, categories, search });
   } catch (error) {
    
-    console.error('--- CART RENDER ERROR ---');
-    
-    return res.redirect('/');
+   
+    next(error); // The middleware will render the error page or 404
   }
 };
 
-const loadCheckout = async (req, res) => {
+const loadCheckout = async (req, res, next) => {
   try {
     const message = req.session.message;
     delete req.session.message;
+    const { wishlistCount, cartCount } = await getCommonHeaderData(req);
 
     if (!req.session.user) return res.redirect('/signin');
 
@@ -198,21 +250,27 @@ const loadCheckout = async (req, res) => {
     const shippingCharge = subtotal > 5000 ? 0 : 50; // Example: Free shipping over 5000
     const totalAmount = subtotal + shippingCharge; // No coupon logic yet
 
+    const categories=await Category.find({status:'Active'})
+    // const coupons = await Coupon.find({ status: 'Active', expiryDate: { $gte: new Date() } });
+  
     res.render('account/checkout', {
       user,
       cart,
       addresses: user.addresses,
       subtotal, shippingCharge, totalAmount,
       message,
-      session: req.session
+      session: req.session, wishlistCount, cartCount,
+      size:1,
+      categories,
+      search:" "
+
     });
   } catch (error) {
-    console.error('Error loading checkout page:', error);
-    res.redirect('/cart'); // Redirect to cart if there's an error
+    next(error);
   }
 };
 
-const placeOrder = async (req, res) => {
+const placeOrder = async (req, res, next) => {
   try {
     const { selectedAddress, paymentMethod } = req.body;
     const userId = req.session.user.id;
@@ -229,53 +287,91 @@ const placeOrder = async (req, res) => {
     res.redirect(`/order-success/${newOrder.orderId}`);
 
   } catch (error) {
-    console.error('Error placing order:', error);
-    req.session.message = error.message || 'Failed to place order. Please try again.';
-    res.redirect('/checkout');
+    next(error);
   }
 };
 
-const loadOrderSuccess = async (req, res) => {
+const loadOrderSuccess = async (req, res, next) => {
   try {
     const orderId = req.params.orderId; 
+    const { wishlistCount, cartCount ,categories} = await getCommonHeaderData(req);
     const order = await orderService.getOrderById(orderId);
 
     if (!order || order.user._id.toString() !== req.session.user.id) {
       req.session.message = 'Order not found or you do not have permission to view it.';
       return res.redirect('/');
     }
-
-    res.render('account/orderSuccess', { order, session: req.session });
-  } catch (error) {
-    console.error('Error loading order success page:', error);
-    res.redirect('/');
-  }
-};
-
-const loadMyOrders = async (req, res) => {
-  try {
-    const search = (req.query.search || '').trim();
-    const orders = await orderService.getOrdersByUser(req.session.user.id, search);
-    res.render('account/myOrders', { orders, search, session: req.session });
-  } catch (error) {
-    console.error('Error loading My Orders:', error);
-    res.redirect('/profile');
-  }
-};
-
-const cancelOrder = async (req, res) => {
-  try {
-    const { orderId, reason } = req.body;
-    // Reuse service logic - it already handles stock restoration
-    await orderService.updateOrderStatus(orderId, 'Cancelled');
-    // Update the reason specifically
-    await Order.updateOne({ orderId }, { cancelReason: reason });
     
-    res.json({ success: true, message: 'Order cancelled successfully' });
+
+    res.render('account/orderSuccess', { order, session: req.session , wishlistCount, cartCount,categories});
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    next(error);
   }
 };
+
+const loadMyOrders = async (req, res, next) => {
+  try {
+    
+    const { wishlistCount, cartCount, categories } = await getCommonHeaderData(req);
+    const user=await userService.getUserById(req.session.user.id)
+    const search = (req.query.search || '').trim();
+    const startDate = req.query.startDate || '';
+    const endDate = req.query.endDate || '';
+    const page=parseInt(req.query.page)|| 1;
+    const limit=2;
+    const {orders,totalPages,currentPage} = await orderService.getOrdersByUser(req.session.user.id, search, page, limit, startDate, endDate);
+   
+    res.render('account/myOrders', { user, wishlistCount, cartCount, categories, orders, search, totalPages, currentPage, session: req.session, activePage:'myorders', startDate, endDate });
+  } catch (error) {
+    next(error);
+  }
+};
+const loadOrderDetails= async(req,res,next)=>{
+  try {
+    const { orderId,itemId} = req.params;
+    
+    const { wishlistCount, cartCount, categories } = await getCommonHeaderData(req);
+    const user=await userService.getUserById(req.session.user.id)
+    const userId=req.session.user.id;
+    const order = await orderService.getOrderByIdAndUser(orderId,userId);
+    if(!order){
+      return res.redirect('/profile/myorders');
+    }
+    
+    const item= order.items.id(itemId);
+    const address=order.user.addresses.id(order.shippingAddress);
+
+    res.render('account/orderDetails',{
+      order,
+      item,
+      address,
+      session:req.session,
+      wishlistCount,
+      cartCount,
+      categories,
+      search: "",
+      activePage:'orderDetails',
+      user
+    })
+  } catch (error) {
+    next(error);
+  }
+
+}
+
+// const cancelOrder = async (req, res) => {
+//   try {
+//     const { orderId, reason } = req.body;
+//     // Reuse service logic - it already handles stock restoration
+//     await orderService.updateOrderStatus(orderId, 'Cancelled');
+//     // Update the reason specifically
+//     await Order.updateOne({ orderId }, { cancelReason: reason });
+    
+//     res.json({ success: true, message: 'Order cancelled successfully' });
+//   } catch (error) {
+//     res.status(400).json({ success: false, message: error.message });
+//   }
+// };
 
 const cancelOrderItem = async (req, res) => {
   try {
@@ -390,16 +486,16 @@ const downloadInvoice = async (req, res) => {
 };
 const wishlistToBag = async (req, res) => {
     try {
-        const { productId, variantId } = req.body;
+        const { productId, variantId, quantity } = req.body;
         const userId = req.session.user.id;
-        const cart = await cartService.addToCart(userId, productId, variantId, 1);
+        const { cart, message } = await cartService.addToCart(userId, productId, variantId, quantity || 1);
         await wishlistService.toggleWishlist(userId, productId, variantId);
         const wishlistItems = await wishlistService.getWishlistByUser(userId);
         const totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
 
         res.json({ 
             success: true, 
-            message: 'Moved to Shopping Bag',
+            message: message || 'Moved to Shopping Bag',
             cartCount: totalQuantity,
             wishlistCount: wishlistItems.length
         });
@@ -412,9 +508,11 @@ const loadManageAddress=async (req,res)=>{
   try {
     const userId=req.session.user.id
     const user=await userService.getUserAddresses(userId)
+    const { wishlistCount, cartCount } = await getCommonHeaderData(req);
     
     if(!user){
-      return res.redirect('/signin')
+      // If user not found, it's a critical error or session issue
+      throw new Error('User not found for managing addresses');
     }
     
     const message = req.session.message
@@ -423,7 +521,8 @@ const loadManageAddress=async (req,res)=>{
     res.render('account/manageaddress',{
       user,
       addresses:user.addresses,
-      message:message
+      message:message,
+      wishlistCount, cartCount, activePage: 'manageaddress'
     })
   } catch (error) {
     console.error(error)
@@ -574,7 +673,7 @@ const userLogin = async (req, res) => {
         email: user.email,
        // password:user.password
       }
-      console.log('user logged in successfully', user)
+      //console.log('user logged in successfully', user)
       return res.redirect('/')
     }
     else {
@@ -589,6 +688,7 @@ const userLogin = async (req, res) => {
 const loadProductDetails = async (req, res) => {
   try {
     const productId = req.params.id;
+    const { wishlistCount, cartCount, categories } = await getCommonHeaderData(req);
     const product = await productService.getProductById(productId);
     
     if (!product || product.status !== 'Active') {
@@ -600,28 +700,41 @@ const loadProductDetails = async (req, res) => {
       category: product.category._id, 
       _id: { $ne: product._id },
       status: 'Active' 
-    }, 1, 4);
-
-    res.render('account/productdetails', { product, relatedProducts, session: req.session });
+    }, 1, 4);                                          
+    
+    let wishlistIds = [];
+    if (req.session.user) {
+    const items = await wishlistService.getWishlistByUser(req.session.user.id);
+    wishlistIds = items.map(item => item.product._id.toString());
+    }
+   
+    res.render('account/productdetails', { 
+      product, 
+      relatedProducts, 
+      wishlistIds, 
+      session: req.session,
+      wishlistCount,
+      cartCount,
+      categories,
+      search: "",
+      activePage: 'productdetails'
+    });
   } catch (error) {
     console.error('Error loading product details:', error);
     res.redirect('/allfragrence');
   }
 };
 
-const updateProfile = async (req, res) => {
+const updateProfile = async (req, res, next) => {
   try {
     const userid = req.session.user.id
     const { name, phone } = req.body
     await userService.updateProfile(userid, name, phone)
     req.session.user.name = name
-    req.session.message = 'Profile updated'
-    return res.redirect('/profile')
-
+    req.session.user.phone = phone
+    res.json({ success: true, message: 'Profile updated successfully' });
   } catch (error) {
-    console.error('Profile update error', error)
-    return res.redirect('/profile')
-
+    next(error);
   }
 }
 
@@ -889,7 +1002,11 @@ const googleCallback = (req, res, next) => {
         email: user.email
       }
       console.log("Google login session created:", req.session.user)
-      return res.redirect('/')
+      
+      // Save session explicitly before redirecting to ensure returnTo is available
+      req.session.save(() => {
+        res.redirect('/');
+      });
     });
   })(req, res, next);
 }
@@ -945,7 +1062,7 @@ const logoutUser = (req, res) => {
     }
 
     res.clearCookie('connect.sid')  
-    return res.redirect('/signin')
+    return res.redirect('/')
 
   })
 
@@ -973,19 +1090,18 @@ const editAddress = async (req, res) => {
   }
 }
 
-const deleteAddress = async (req, res) => {
+const deleteAddress = async (req, res, next) => {
   try {
     const userId = req.session.user.id;
     const addressId = req.params.id;
 
     await userService.deleteAddress(userId, addressId);
 
-    req.session.message = "Address deleted successfully.";
-    res.redirect('/manageaddress');
-
+    // For a DELETE request, respond with JSON
+    res.json({ success: true, message: "Address deleted successfully." });
   } catch (err) {
-    console.error(err)
-    res.redirect('/profile')
+    // Pass error to the error handling middleware
+    next(err);
   }
 }
 
@@ -1005,25 +1121,25 @@ console.log("city and state fetched",result.city,result.state)
     state: result.state
   });
   }
-  const updateCartQuantity = async (req, res) => {
+  const updateCartQuantity = async (req, res, next) => {
     try {
         const { productId, variantId, change } = req.body;
         const userId = req.session.user.id;
         const result = await cartService.updateQuantity(userId, productId, variantId, change);
         res.json({ success: true, ...result });
     } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+        next(error);
     }
 };
 
-const removeCartItem = async (req, res) => {
+const removeCartItem = async (req, res, next) => {
     try {
         const { productId, variantId } = req.body;
         const userId = req.session.user.id;
         const result = await cartService.removeItem(userId, productId, variantId);
         res.json({ success: true, ...result });
     } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+        next(error);
     }
 };
-module.exports = { loadRegister, registerUser, loadhome, pageNotFound, verifyOtp, loadLogin, loadOtp, resendOtp, userLogin, loadProfile, updateProfile, editEmail, verifyEmailOtp, loadForgetPassword, passwordReset, verifyResetOtp, resetPassword ,changePassword,logoutUser,addAddress,editAddress,deleteAddress,loadManageAddress,googleCallback,getPincodeDetails, loadWishlist, toggleWishlist, loadProductDetails, addToCart,loadCart,updateCartQuantity,removeCartItem, loadCheckout, placeOrder, loadOrderSuccess, loadMyOrders, cancelOrder, cancelOrderItem, returnOrderItem, downloadInvoice,wishlistToBag }
+module.exports = { loadRegister, registerUser, loadhome, pageNotFound, verifyOtp, loadLogin, loadOtp, resendOtp, userLogin, loadProfile, updateProfile, editEmail, verifyEmailOtp, loadForgetPassword, passwordReset, verifyResetOtp, resetPassword ,changePassword,logoutUser,addAddress,editAddress,deleteAddress,loadManageAddress,googleCallback,getPincodeDetails, loadWishlist, toggleWishlist, loadProductDetails, addToCart,loadCart,updateCartQuantity,removeCartItem, loadCheckout, placeOrder, loadOrderSuccess, loadMyOrders, cancelOrderItem, returnOrderItem, downloadInvoice,wishlistToBag ,loadOrderDetails}

@@ -3,32 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <title>My Orders | Junoon Perfumes</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
-    <style>
+    <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&amp;family=Inter:wght@300;400;500;600&amp;family=Material+Symbols+Outlined&amp;display=swap"
+    rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                primary: "#D4AF37",
+                "background-light": "#F9F9F7",
+                "background-dark": "#0F0F0F",
+                "card-light": "#FFFFFF",
+                "card-dark": "#1A1A1A",
+                "accent-gold": "#C5A028",
+                "luxury-black": "#0a0a0a",
+                "luxury-ivory": "#fbfaf9",
+              },
+              fontFamily: {
+                display: ["Playfair Display", "serif"],
+                sans: ["Inter", "sans-serif"],
+              },
+              borderRadius: { DEFAULT: "16px" },
+            },
+          },
+        };
+      </script>
+    <style type="text/tailwindcss">
         body { font-family: 'Inter', sans-serif; }
-        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .sidebar-active {
+          background: linear-gradient(90deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0) 100%);
+          border-left: 4px solid #D4AF37;
+          color: #D4AF37;
+        }
     </style>
 </head>
-<body class="bg-[#fbfaf9]">
-    <header class="bg-black text-white py-6 px-12 flex justify-between items-center sticky top-0 z-50">
-        <a href="/" class="text-2xl font-serif font-bold tracking-widest text-[#d4af37]">JUNOON</a>
-        <nav class="flex gap-8 text-[10px] uppercase tracking-[0.2em] font-bold">
-            <a href="/" class="hover:text-[#d4af37]">Home</a>
-            <a href="/profile" class="text-[#d4af37]">Profile</a>
-        </nav>
-    </header>
+<body class="bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 transition-colors duration-300">
+    <%- include('partials/_mainheader', { session, wishlistCount, cartCount, categories, search, activePage: 'myorders' }) %>
 
-    <main class="max-w-5xl mx-auto px-6 py-16">
-        <div class="flex justify-between items-center mb-12">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <%- include('partials/_sidebar', { user, activePage }) %>
+        <main class="flex-grow p-6 md:p-12 space-y-8 max-w-5xl">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-12 gap-6">
             <h1 class="text-4xl font-serif font-bold">My Orders</h1>
-            <form action="/profile/myorders" method="GET" class="relative">
-                <input type="text" name="search" value="<%= search %>" placeholder="Search by Order ID..." class="pl-10 pr-4 py-2 border border-gray-200 rounded-full text-sm outline-none focus:ring-1 focus:ring-[#d4af37]">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+            <form action="/profile/myorders" method="GET" class="flex flex-wrap items-center gap-3">
+                <div class="relative">
+                    <input type="text" name="search" value="<%= search %>" placeholder="Search ID or Product..." class="pl-10 pr-4 py-2 border border-gray-200 rounded-full text-xs outline-none focus:ring-1 focus:ring-[#d4af37] w-48">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">search</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="date" name="startDate" value="<%= startDate %>" class="px-3 py-2 border border-gray-200 rounded-lg text-[10px] uppercase font-bold outline-none focus:ring-1 focus:ring-[#d4af37]">
+                    <span class="text-gray-400 text-xs font-bold uppercase">To</span>
+                    <input type="date" name="endDate" value="<%= endDate %>" class="px-3 py-2 border border-gray-200 rounded-lg text-[10px] uppercase font-bold outline-none focus:ring-1 focus:ring-[#d4af37]">
+                </div>
+                <button type="submit" class="bg-black text-white px-4 py-2 rounded-lg text-[10px] uppercase font-bold tracking-widest hover:bg-[#d4af37] transition-colors">Filter</button>
+                <a href="/profile/myorders" class="text-[10px] uppercase font-bold text-gray-400 hover:text-red-500 transition-colors">Clear</a>
             </form>
         </div>
-
+       
         <div class="space-y-8">
             <% if (orders.length === 0) { %>
                 <div class="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
@@ -57,9 +92,6 @@
                             <a href="/orders/download-invoice/<%= order.orderId %>" class="flex items-center gap-1 text-[10px] uppercase font-bold text-gray-400 hover:text-[#d4af37] transition-colors">
                                 <span class="material-symbols-outlined text-lg">download</span> Invoice
                             </a>
-                            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-amber-50 text-amber-600 border border-amber-100">
-                                <%= order.status %>
-                            </span>
                         </div>
                     </div>
                     
@@ -70,6 +102,7 @@
                                 <div class="flex-1">
                                     <h4 class="font-bold"><%= item.productName %></h4>
                                     <p class="text-xs text-gray-500"><%= item.variantSize %> × <%= item.quantity %></p>
+                                    <p class="text-sm font-bold text-primary mt-1">₹<%= item.price.toLocaleString() %></p>
                                     <p class="text-[10px] font-bold uppercase tracking-widest mt-1 text-gray-400">Status: <%= item.status %></p>
                                 </div>
                                 <div class="flex gap-3">
@@ -78,6 +111,7 @@
                                     <% } else if (item.status === 'Delivered') { %>
                                         <button onclick="handleAction('return', '<%= order.orderId %>', '<%= item._id %>')" class="text-[10px] font-bold uppercase border border-gray-200 px-4 py-2 rounded hover:bg-gray-50 transition-colors">Return</button>
                                     <% } %>
+                                    <a href="/profile/myorders/<%= order.orderId %>/<%= item._id %>" class="text-[10px] flex items-center justify-center font-bold uppercase border border-gray-200 text-gray-600 px-4 py-2 rounded hover:bg-gray-50 transition-colors">Details</a>
                                 </div>
                             </div>
                         <% }) %>
@@ -85,25 +119,64 @@
                 </div>
             <% }) %>
         </div>
+
+        <!-- Pagination -->
+        <div class="mt-12 flex justify-center">
+            <% if (totalPages > 1) { %>
+                <nav class="flex items-center space-x-2">
+                    <% if (currentPage > 1) { %>
+                        <a href="?page=<%= currentPage - 1 %>&search=<%= search %>&startDate=<%= startDate %>&endDate=<%= endDate %>" class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:border-primary hover:text-primary transition-all text-gray-400">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </a>
+                    <% } %>
+                    <span class="text-sm font-medium text-gray-600">Page <%= currentPage %> of <%= totalPages %></span>
+                    <% if (currentPage < totalPages) { %>
+                        <a href="?page=<%= currentPage + 1 %>&search=<%= search %>&startDate=<%= startDate %>&endDate=<%= endDate %>" class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:border-primary hover:text-primary transition-all text-gray-400">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </a>
+                    <% } %>
+                </nav>
+            <% } %>
+        </div>
     </main>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         async function handleAction(type, orderId, itemId) {
             const isReturn = type === 'return';
+
+            const cancelReasons = {
+                'Ordered by mistake': 'Ordered by mistake',
+                'Changed my mind': 'Changed my mind',
+                'Found better price elsewhere': 'Found better price elsewhere',
+                'Incorrect size/variant selected': 'Incorrect size/variant selected',
+                'Delivery is too slow': 'Delivery is too slow',
+                'Other': 'Other'
+            };
+
+            const returnReasons = {
+                'Damaged or leaking bottle': 'Damaged or leaking bottle',
+                'Fragrance doesn\'t match description': 'Fragrance doesn\'t match description',
+                'Received wrong item': 'Received wrong item',
+                'Defective sprayer/packaging': 'Defective sprayer/packaging',
+                'Changed my mind': 'Changed my mind',
+                'Other': 'Other'
+            };
+
             const { value: reason } = await Swal.fire({
                 title: isReturn ? 'Return Request' : 'Cancel Item',
-                input: 'textarea',
-                inputLabel: 'Please provide a reason',
-                inputPlaceholder: 'Enter your reason here...',
-                inputAttributes: { 'aria-label': 'Type your reason here' },
+                input: 'select',
+                inputOptions: isReturn ? returnReasons : cancelReasons,
+                inputLabel: 'Please select a reason',
+                inputPlaceholder: 'Select a reason',
                 showCancelButton: true,
                 inputValidator: (value) => {
-                    if (isReturn && !value) return 'You need to write a reason for return!';
+                    if (!value) return 'You need to select a reason!';
                 }
             });
 
-            if (reason !== undefined) {
+            if (reason) {
                 const url = isReturn ? '/orders/return-item' : '/orders/cancel-item';
                 try {
                     const response = await fetch(url, {

@@ -20,7 +20,7 @@ router.get('/signin',userauth.isLogin,userController.loadLogin)
 router.post('/signin',userController.userLogin)
 router.get('/logout', userController.logoutUser)
 router.get('/profile',userauth.checkSession,userController.loadProfile)
-router.post('/updateprofile',userauth.checkSession,userController.updateProfile)
+router.patch('/updateprofile',userauth.checkSession,userController.updateProfile)
 router.post('/edit-email',userauth.checkSession,userController.editEmail)
 router.post('/verify-email-otp',userauth.checkSession,userController.verifyEmailOtp)
 router.get('/forget-password',userauth.isLogin,userController.loadForgetPassword)
@@ -30,8 +30,8 @@ router.post('/reset-password',userController.resetPassword)
 router.post('/change-password',userauth.checkSession,userController.changePassword)
 router.get('/manageaddress',userauth.checkSession,userController.loadManageAddress)
 router.post('/add-address',userauth.checkSession,userController.addAddress)
-router.post('/edit-address/:id',userauth.checkSession,userController.editAddress)
-router.post('/delete-address/:id',userauth.checkSession,userController.deleteAddress)
+router.patch('/edit-address/:id',userauth.checkSession,userController.editAddress)
+router.delete('/delete-address/:id',userauth.checkSession,userController.deleteAddress)
 //router.post('/validate-pincode',userController.validatePincode)
 router.get('/api/pincode/:pincode', userController.getPincodeDetails);
 
@@ -57,7 +57,7 @@ router.get('/order-success/:orderId', userauth.checkSession, userController.load
 
 //my orders
 router.get('/profile/myorders', userauth.checkSession, userController.loadMyOrders)
-router.post('/orders/cancel', userauth.checkSession, userController.cancelOrder)
+router.get('/profile/myorders/:orderId/:itemId', userauth.checkSession, userController.loadOrderDetails)
 router.post('/orders/cancel-item', userauth.checkSession, userController.cancelOrderItem)
 router.post('/orders/return-item', userauth.checkSession, userController.returnOrderItem)
 router.get('/orders/download-invoice/:orderId', userauth.checkSession, userController.downloadInvoice)

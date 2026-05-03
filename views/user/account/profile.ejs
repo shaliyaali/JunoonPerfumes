@@ -7,7 +7,7 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Junoon Perfumes | User Profile</title>
   <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&amp;family=Inter:wght@300;400;500;600&amp;family=Material+Icons+Outlined&amp;display=swap"
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&amp;family=Inter:wght@300;400;500;600&amp;family=Material+Symbols+Outlined&amp;display=swap"
     rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -23,6 +23,8 @@
             "card-light": "#FFFFFF",
             "card-dark": "#1A1A1A",
             "accent-gold": "#C5A028",
+            "luxury-black": "#0a0a0a",
+            "luxury-ivory": "#fbfaf9",
           },
           fontFamily: {
             display: ["Playfair Display", "serif"],
@@ -54,88 +56,11 @@
 
 <body
   class="bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 transition-colors duration-300">
-  <header class="bg-black text-white py-4 px-6 md:px-12 flex items-center justify-between sticky top-0 z-50">
-    <div class="flex items-center space-x-2">
-      <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-md">
-        <span class="font-display text-2xl font-bold text-black">J</span>
-      </div>
-      <div>
-        <h1 class="font-display text-xl tracking-widest font-bold">JUNOON</h1>
-        <p class="text-[10px] tracking-[0.2em] uppercase opacity-70">Perfumes</p>
-      </div>
-    </div>
-    <nav class="hidden md:flex space-x-8 text-xs font-semibold tracking-widest uppercase">
-      <a class="hover:text-primary transition" href="/">Home</a>
-      <a class="text-primary" href="#">Best Seller</a>
-      <a class="hover:text-primary transition" href="/allfragrence">All Fragrance</a>
-      <a class="hover:text-primary transition" href="/allfragrence">Shop</a>
-    </nav>
-    <div class="flex items-center space-x-5">
-      <!-- <span class="material-icons-outlined cursor-pointer hover:text-primary">search</span>
-      <span class="material-icons-outlined cursor-pointer hover:text-primary">favorite_border</span> -->
-      <div class="relative cursor-pointer">
-        <!-- <span class="material-icons-outlined hover:text-primary">shopping_bag</span>
-        <span
-          class="absolute -top-2 -right-2 bg-primary text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full">2</span> -->
-      </div>
-      <!-- <span class="material-icons-outlined cursor-pointer text-primary">person</span> -->
-    </div>
-  </header>
-
+  <%- include('partials/_mainheader', { session, wishlistCount, cartCount,categories,search, activePage: 'profile'}) %>
   <div class="flex flex-col md:flex-row min-h-screen">
     <!-- <input type="text" id="message" value="<%= message %>" name="message" hidden> -->
     <input type="text" id="message" value="<%= typeof message !== 'undefined' ? message : '' %>" hidden>
-    <aside
-      class="w-full md:w-72 bg-card-light dark:bg-card-dark border-r border-gray-200 dark:border-gray-800 flex flex-col pt-8 pb-4">
-      <div class="px-8 mb-10 text-center md:text-left">
-        <div
-          class="w-20 h-20 rounded-full bg-gradient-to-tr from-primary to-accent-gold mx-auto md:mx-0 flex items-center justify-center mb-4 shadow-lg">
-          <!--<span class="text-white text-3xl font-display font-bold">S</span>!-->
-          <span class="text-white text-3xl font-display font-bold">
-            <%= user.name.charAt(0).toUpperCase() %>
-          </span>
-
-        </div>
-        <h2 class="text-lg font-bold font-display">
-          <%= user.name %>
-        </h2>
-        <span
-          class="inline-block px-2 py-0.5 mt-1 bg-gray-100 dark:bg-gray-800 text-[10px] font-bold tracking-widest uppercase rounded text-gray-500 dark:text-gray-400">User</span>
-      </div>
-      <nav class="flex-grow space-x-4">
-        <a class="flex items-center px-8 py-4 text-sm font-medium sidebar-active" href="/profile">
-          <span class="material-icons-outlined mr-3">person</span>
-          Profile Info
-        </a>
-        <a class="flex items-center px-8 py-4 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition"
-          href="/profile/myorders">
-          <span class="material-icons-outlined mr-3 text-gray-400"></span>
-          My Orders
-        </a>
-
-        <a class="flex items-center px-8 py-4 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition"
-          href="#">
-          <span class="material-icons-outlined mr-3 text-gray-400">confirmation_number</span>
-          My Coupons
-        </a>
-        <a class="flex items-center px-8 py-4 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition"
-          href="#">
-          <span class="material-icons-outlined mr-3 text-gray-400">star_outline</span>
-          My Reviews And Rating
-        </a>
-        <a class="flex items-center px-8 py-4 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition"
-          href="/wishlist">
-          <span class="material-icons-outlined mr-3 text-gray-400">favorite_border</span>
-          My Wish List
-        </a>
-      </nav>
-      <div class="mt-auto px-8 py-6 border-t border-gray-100 dark:border-gray-800">
-        <a class="flex items-center text-sm font-medium text-red-500 hover:opacity-80 transition" href="/logout">
-          <span class="material-icons-outlined mr-3">logout</span>
-          Logout
-        </a>
-      </div>
-    </aside>
+  <%- include('partials/_sidebar', { user, activePage }) %>
     <main class="flex-grow p-6 md:p-12 space-y-8 max-w-5xl">
       <header class="mb-8">
         <h1 class="text-3xl font-display font-bold text-gray-900 dark:text-white">Profile Information</h1>
@@ -144,12 +69,12 @@
       <section
         class="bg-card-light dark:bg-card-dark p-8 rounded-DEFAULT shadow-sm border border-gray-100 dark:border-gray-800">
 
-        <form action="/updateprofile" method="POST">
+        <form id="profileUpdateForm">
           <input type="text" id="message" value="<%= typeof message !== 'undefined' ? message : '' %>" hidden>
 
           <div class="flex justify-between items-start mb-6">
             <div class="flex items-center">
-              <span class="material-icons-outlined text-primary mr-2">badge</span>
+              <span class="material-symbols-outlined text-primary mr-2">badge</span>
               <h3 class="text-lg font-bold font-display tracking-tight">Personal Info</h3>
             </div>
 
@@ -202,7 +127,7 @@
         class="bg-card-light dark:bg-card-dark p-8 rounded-DEFAULT shadow-sm border border-gray-100 dark:border-gray-800">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div class="flex items-center">
-            <span class="material-icons-outlined text-primary mr-2">alternate_email</span>
+            <span class="material-symbols-outlined text-primary mr-2">alternate_email</span>
             <div>
               <h3 class="text-lg font-bold font-display tracking-tight">Email Settings</h3>
               <!-- <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">shaliya.user@example.com</p> -->
@@ -269,7 +194,7 @@
       <section
         class="bg-card-light dark:bg-card-dark p-8 rounded-DEFAULT shadow-sm border border-gray-100 dark:border-gray-800">
         <div class="flex items-center mb-8">
-          <span class="material-icons-outlined text-primary mr-2">lock</span>
+          <span class="material-symbols-outlined text-primary mr-2">lock</span>
           <h3 class="text-lg font-bold font-display tracking-tight">Change Password</h3>
         </div>
         <% if (isGoogleUser && !user.password) { %>
@@ -289,7 +214,7 @@
                   <div class="relative">
                     <input type="password" id="currentPassword" name="currentPassword" 
                       class="w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 pr-10" />
-                    <span class="material-icons-outlined absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
                       onclick="togglePassword('currentPassword', this)">visibility</span>
                   </div>
                   <p class="text-red-500 text-xs mt-1 hidden" id="currentpasswordError"></p>
@@ -302,7 +227,7 @@
                   <div class="relative">
                     <input type="password" name="newPassword" id="newPassword" 
                       class="w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 pr-10" />
-                    <span class="material-icons-outlined absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
                       onclick="togglePassword('newPassword', this)">visibility</span>
                   </div>
                   <p class="text-red-500 text-xs mt-1 hidden" id="newpasswordError"></p>
@@ -315,7 +240,7 @@
                   <div class="relative">
                     <input type="password" name="confirmPassword" id="confirmPassword" 
                       class="w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-3 pr-10" />
-                    <span class="material-icons-outlined absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
                       onclick="togglePassword('confirmPassword', this)">visibility</span>
                   </div>
                   <p class="text-red-500 text-xs mt-1 hidden" id="confirmPasswordError"></p>
@@ -336,7 +261,7 @@
       <section
         class="bg-card-light dark:bg-card-dark p-8 rounded-DEFAULT shadow-sm border border-gray-100 dark:border-gray-800">
         <div class="flex items-center mb-8">
-          <span class="material-icons-outlined text-primary mr-2">place</span>
+          <span class="material-symbols-outlined text-primary mr-2">place</span>
           <a href="/manageaddress" class="text-lg font-bold font-display tracking-tight underline">Manage Addresses</a>
         </div>
 
@@ -415,7 +340,7 @@
   <button
     class="fixed bottom-6 right-6 w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-full shadow-2xl flex items-center justify-center z-[100] transition-transform active:scale-95"
     onclick="document.documentElement.classList.toggle('dark')">
-    <span class="material-icons-outlined">dark_mode</span>
+    <span class="material-symbols-outlined">dark_mode</span>
   </button>
 
 </body>
@@ -428,15 +353,13 @@
   }
 
   //edit profile field validations
-  const profileForm = document.querySelector('form[action="/updateprofile"]');
+  const profileForm = document.getElementById("profileUpdateForm");
+  const nameInput = document.getElementById("nameInput");
+  const phoneInput = document.getElementById("phoneInput");
+  const nameError = document.getElementById("nameInputError");
+  const phoneError = document.getElementById("phoneInputError");
 
   if (profileForm) {
-
-    const nameInput = document.getElementById("nameInput");
-    const phoneInput = document.getElementById("phoneInput");
-
-    const nameError = document.getElementById("nameInputError");
-    const phoneError = document.getElementById("phoneInputError");
 
     function validateName() {
       const value = nameInput.value.trim();
@@ -473,9 +396,42 @@
     nameInput.addEventListener("input", validateName);
     phoneInput.addEventListener("input", validatePhone);
 
-    profileForm.addEventListener("submit", function (e) {
-      if (!validateName() || !validatePhone()) {
-        e.preventDefault();
+    profileForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      
+      if (!validateName() || !validatePhone()) return;
+
+      try {
+        const response = await fetch('/updateprofile', {
+          method: 'PATCH',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            name: nameInput.value,
+            phone: phoneInput.value
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Updated',
+            text: data.message,
+            showConfirmButton: false,
+            timer: 1500
+          }).then(() => {
+            location.reload(); // Reload to refresh the session-based header name
+          });
+        } else {
+          Swal.fire('Error', data.message || 'Update failed', 'error');
+        }
+      } catch (error) {
+        console.error('Update error:', error);
+        Swal.fire('Error', 'An unexpected error occurred', 'error');
       }
     });
   }
@@ -485,9 +441,6 @@
 
   const nameText = document.getElementById('nameText')
   const phoneText = document.getElementById('phoneText')
-
-  // const nameInput = document.getElementById('nameInput')
-  // const phoneInput = document.getElementById('phoneInput')
 
   editBtn.addEventListener('click', () => {
 

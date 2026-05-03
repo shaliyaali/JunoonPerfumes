@@ -24,7 +24,7 @@ const orderItemSchema = new mongoose.Schema({
   productImage: String,
   status: {
     type: String,
-    enum: ['Pending', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Return Requested', 'Returned'],
+    enum: ['Pending', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Return Requested', 'Return Rejected', 'Returned'],
     default: 'Pending'
   },
   reason: String
@@ -63,7 +63,7 @@ const orderSchema = new mongoose.Schema({
   cancelReason: String,
   paymentMethod: {
     type: String,
-    enum: ['COD', 'Online Payment'],
+    enum: ['COD', 'Razorpay'],
     required: true
   },
   paymentStatus: {

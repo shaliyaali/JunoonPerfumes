@@ -227,7 +227,7 @@
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
-        <form id="category-form" action="/admin/addCategory" method="POST">
+        <form id="category-form" action="/admin/addCategory" method="POST" data-mode="add">
             <div class="space-y-4">
                 <div>
                     <label for="categoryName" class="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Category Name</label>
@@ -268,6 +268,8 @@
     const modalSubmitBtn = document.getElementById('modal-submit-btn');
     const nameInput = document.getElementById('categoryName');
     const offerInput = document.getElementById('offer');
+    // Ensure statusInput is correctly defined if not already
+    // const statusInput = document.getElementById('categoryStatus'); 
     const statusInput = document.getElementById('categoryStatus');
 
     const openAddModal = () => {
@@ -275,6 +277,8 @@
         categoryForm.action = "/admin/addCategory";
         modalTitle.innerText = "Add New Category";
         modalSubmitBtn.innerText = "Save Category";
+        categoryForm.dataset.mode = 'add'; // Set mode to add
+        delete categoryForm.dataset.categoryId; // Clear categoryId for add mode
         addCategoryModal.classList.replace('hidden', 'flex');
     };
 
@@ -286,6 +290,8 @@
         offerInput.value = offer || 0;
         statusInput.value = status || 'Active';
         categoryForm.action = `/admin/editCategory/${id}`; // Ensure this route exists in your backend
+        categoryForm.dataset.mode = 'edit'; // Set mode to edit
+        categoryForm.dataset.categoryId = id; // Store the ID
         modalTitle.innerText = "Edit Category";
         modalSubmitBtn.innerText = "Update Category";
         addCategoryModal.classList.replace('hidden', 'flex');
@@ -319,7 +325,8 @@
         }
     });
 
-    categoryForm.addEventListener('submit', (e) => {
+    categoryForm.addEventListener('submit', async (e) => {
+        // Basic validation for category name
         const nameVal = nameInput.value.trim();
         
         if (!nameVal) {
@@ -330,6 +337,44 @@
                 text: 'Category name cannot be empty or contain only whitespace.',
                 confirmButtonColor: '#D4AF37'
             });
+            return; // Stop further execution
+        }
+
+        // If in edit mode, prevent default form submission and use fetch
+        if (categoryForm.dataset.mode === 'edit') {
+            e.preventDefault();
+            const categoryId = categoryForm.dataset.categoryId;
+            const url = `/admin/editCategory/${categoryId}`;
+
+            const formData = {
+                name: nameInput.value,
+                offer: offerInput.value,
+                status: statusInput.value
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({ icon: 'success', title: 'Category Updated!', text: data.message || 'Category updated successfully.', timer: 2500, showConfirmButton: false, toast: true, position: 'top-end' }).then(() => {
+                        window.location.reload(); // Reload to reflect changes
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Update Failed', text: data.message || 'Failed to update category.', confirmButtonColor: '#D4AF37' });
+                }
+            } catch (error) {
+                console.error('Error updating category:', error);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'An unexpected error occurred.', confirmButtonColor: '#D4AF37' });
+            }
         }
     });
 

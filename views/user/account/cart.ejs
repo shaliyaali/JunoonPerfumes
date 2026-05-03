@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Junoon Perfumes | Shopping Bag</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&amp;family=Inter:wght@300;400;500;600&amp;family=Material+Icons+Outlined&amp;display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&amp;family=Inter:wght@300;400;500;600&amp;family=Material+Symbols+Outlined&amp;display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
@@ -18,6 +18,8 @@
             "background-dark": "#0F0F0F",
             "card-light": "#FFFFFF",
             "card-dark": "#1A1A1A",
+            "luxury-black": "#0a0a0a",
+            "luxury-ivory": "#fbfaf9",
           },
           fontFamily: {
             display: ["Playfair Display", "serif"],
@@ -30,51 +32,16 @@
   </script>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100">
-  <header class="bg-black text-white py-4 px-6 md:px-12 flex items-center justify-between sticky top-0 z-50">
-    <div class="flex items-center space-x-2">
-      <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-md">
-        <span class="font-display text-2xl font-bold text-black">J</span>
-      </div>
-      <div>
-        <h1 class="font-display text-xl tracking-widest font-bold">JUNOON</h1>
-        <p class="text-[10px] tracking-[0.2em] uppercase opacity-70">Perfumes</p>
-      </div>
-    </div>
-    <nav class="hidden md:flex space-x-8 text-xs font-semibold tracking-widest uppercase">
-      <a class="hover:text-primary transition" href="/">Home</a>
-      <!-- <a class="hover:text-primary transition" href="#">Best Seller</a> -->
-      <a class="hover:text-primary transition" href="/allfragrence">All Fragrance</a>
-      <!-- <a class="hover:text-primary transition" href="#">Shop</a> -->
-    </nav>
-    <div class="flex items-center space-x-5">
-      <span class="material-icons-outlined cursor-pointer hover:text-primary">search</span>
-      <a href="/wishlist" class="relative">
-        <span class="material-icons-outlined cursor-pointer hover:text-primary">favorite_border</span>
-        <span id="wishlist-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof wishlistCount !== 'undefined' && wishlistCount > 0) ? '' : 'hidden' %>">
-          <%= typeof wishlistCount !== 'undefined' ? wishlistCount : 0 %>
-        </span>
-      </a>
-      <a href="/cart" class="relative cursor-pointer">
-        <span class="material-icons-outlined text-primary">shopping_bag</span>
-        <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof cartCount !== 'undefined' && cartCount > 0) ? '' : 'hidden' %>">
-          <%= typeof cartCount !== 'undefined' ? cartCount : 0 %>
-        </span>
-      </a>
-      <% if (session && session.user) { %>
-        <a href="/profile" class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-black font-bold uppercase text-xs">
-          <%= session.user.name.charAt(0) %>
-        </a>
-      <% } else { %>
-        <a href="/signin"><span class="material-icons-outlined cursor-pointer">person</span></a>
-      <% } %>
-    </div>
-  </header>
+
+  <%- include('partials/_mainheader', { session, wishlistCount, cartCount, categories, search, activePage: 'cart' }) %>
+
+  
 
   <div class="max-w-7xl mx-auto px-6 py-12">
     <h1 class="text-4xl font-display font-bold mb-12">Shopping Bag</h1>
     
     <div class="flex flex-col lg:flex-row gap-12">
-      <div class="lg:w-2/3 space-y-6">
+      <div id="cart-items-container" class="lg:w-2/3 space-y-6">
         <% if (cart && cart.items && cart.items.length > 0) { %>
           <% cart.items.forEach(item => { %>
             <div id="cart-item-<%= item.variantId %>" class="bg-card-light dark:bg-card-dark p-6 rounded-DEFAULT shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-6 items-center">
@@ -83,13 +50,26 @@
               </div>
               <div class="flex-grow text-center sm:text-left">
                 <h3 class="font-display font-bold text-xl"><%= item.product.name %></h3>
-                <% const variant = item.product.variants.find(v => v._id.toString() === item.variantId.toString()) %>
-                <p class="text-xs text-gray-500 uppercase tracking-widest mt-1"><%= variant ? variant.size : '' %></p>
+                <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">
+                  <%= item.variantSize %>
+                </p>
+                <% if (item.status === 'out of stock') { %>
+                <p class="text-red-500 text-xs mt-2">Out of stock</p>
+                <% } else if (item.status === 'limitted') { %>
+                <p class="text-yellow-500 text-xs mt-2">Only <%= item.stock %> left</p>
+                <% } %>
+                
                 <div class="mt-4 flex items-center justify-center sm:justify-start gap-6">
                   <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
-                    <button onclick="updateQty('<%= item.product._id %>', '<%= item.variantId %>', -1)" class="px-3 py-1 hover:bg-gray-100 transition-colors">-</button>
+                    <button id="minus-<%= item.variantId %>" 
+                            onclick="updateQty('<%= item.product._id %>', '<%= item.variantId %>', -1)" 
+                            class="px-3 py-1 hover:bg-gray-100 transition-colors <%= (item.quantity <= 1) ? 'opacity-50 cursor-not-allowed' : '' %>" 
+                            >-</button>
                     <span id="qty-<%= item.variantId %>" class="px-4 py-1 text-sm font-bold border-x border-gray-200"><%= item.quantity %></span>
-                    <button onclick="updateQty('<%= item.product._id %>', '<%= item.variantId %>', 1)" class="px-3 py-1 hover:bg-gray-100 transition-colors">+</button>
+                    <button id="plus-<%= item.variantId %>" 
+                            onclick="updateQty('<%= item.product._id %>', '<%= item.variantId %>', 1)" 
+                            class="px-3 py-1 hover:bg-gray-100 transition-colors <%= (item.status === 'out of stock' || item.quantity >= 5 || item.quantity >= item.stock) ? 'opacity-50 cursor-not-allowed' : '' %>"
+                            >+</button>
                   </div>
                   <button onclick="removeCartItem('<%= item.product._id %>', '<%= item.variantId %>')" class="text-[10px] font-bold text-red-500 uppercase tracking-[0.2em] hover:opacity-70 transition-opacity">Remove</button>
                 </div>
@@ -102,7 +82,7 @@
           <% }) %>
         <% } else { %>
           <div class="bg-card-light dark:bg-card-dark p-8 rounded-DEFAULT shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center py-20 text-center">
-            <span class="material-icons-outlined text-gray-200 dark:text-gray-700 text-9xl mb-6">shopping_bag</span>
+            <span class="material-symbols-outlined text-gray-200 dark:text-gray-700 text-9xl mb-6">shopping_bag</span>
             <h3 class="text-xl font-display font-bold mb-2">Your bag is empty</h3>
             <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-xs">Looks like you haven't added any luxury scents to your bag yet.</p>
             <a href="/allfragrence" class="px-8 py-3 bg-primary text-black font-bold text-sm rounded uppercase tracking-wider transition hover:opacity-90">
@@ -111,7 +91,7 @@
           </div>
         <% } %>
       </div>
-      
+      <% const hasInvalidItem = cart.items.some(item => item.status === 'out of stock');%>
       <div class="lg:w-1/3">
         <% 
           let subtotal = 0;
@@ -135,7 +115,7 @@
               <span id="summary-total" class="text-xl font-bold">₹<%= subtotal.toLocaleString() %></span>
             </div>
           </div>
-          <button id="checkoutBtn" <%= subtotal === 0 ? 'disabled' : '' %> class="w-full py-4 <%= subtotal === 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-black text-white hover:bg-primary' %> font-bold rounded uppercase tracking-widest text-xs transition-all" type="button">
+          <button id="checkoutBtn" <%= (subtotal === 0 || hasInvalidItem)? 'disabled' : '' %> class="w-full py-4 <%=( subtotal === 0 || hasInvalidItem)? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-black text-white hover:bg-primary' %> font-bold rounded uppercase tracking-widest text-xs transition-all" type="button">
             Checkout
           </button>
           <div class="mt-6 flex items-center justify-center gap-4 text-gray-400">
@@ -162,6 +142,86 @@
     const message = "<%= typeof message !== 'undefined' ? message : '' %>";
     if (message) { Swal.fire(message); }
 
+    // --- AJAX Search Logic ---
+    const headerSearchForm = document.getElementById('header-search-form');
+    const cartItemsContainer = document.getElementById('cart-items-container');
+
+    if (headerSearchForm) {
+        headerSearchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const searchInput = headerSearchForm.querySelector('input[name="search"]');
+            const searchValue = searchInput.value.trim();
+
+            const params = new URLSearchParams({ ajax: 'true', search: searchValue });
+            
+            try {
+                const response = await fetch(`/cart?${params.toString()}`);
+                const data = await response.json();
+                
+                renderCartItems(data.cart);
+                updateSummary(data.subtotal, data.hasInvalidItem);
+                
+                // Update header counts just in case
+                const cartBadge = document.getElementById('cart-count');
+                if (cartBadge) {
+                    cartBadge.textContent = data.cartCount;
+                    cartBadge.classList.toggle('hidden', data.cartCount === 0);
+                }
+
+                // Update URL state
+                window.history.pushState({}, '', `/cart?search=${searchValue}`);
+            } catch (error) {
+                console.error('Error fetching filtered cart:', error);
+            }
+        });
+    }
+
+    function renderCartItems(cart) {
+        if (!cart || !cart.items || cart.items.length === 0) {
+            cartItemsContainer.innerHTML = `
+                <div class="bg-card-light dark:bg-card-dark p-8 rounded-DEFAULT shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center py-20 text-center">
+                    <span class="material-symbols-outlined text-gray-200 dark:text-gray-700 text-9xl mb-6">shopping_bag</span>
+                    <h3 class="text-xl font-display font-bold mb-2">No items found</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-xs">Adjust your search to find your fragrances.</p>
+                </div>`;
+            return;
+        }
+
+        cartItemsContainer.innerHTML = cart.items.map(item => `
+            <div id="cart-item-${item.variantId}" class="bg-card-light dark:bg-card-dark p-6 rounded-DEFAULT shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row gap-6 items-center">
+              <div class="w-24 h-32 bg-gray-50 rounded flex items-center justify-center p-4">
+                <img src="${item.product.images[0]}" alt="${item.product.name}" class="max-h-full object-contain">
+              </div>
+              <div class="flex-grow text-center sm:text-left">
+                <h3 class="font-display font-bold text-xl">${item.product.name}</h3>
+                <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">${item.variantSize}</p>
+                ${item.status === 'out of stock' ? '<p class="text-red-500 text-xs mt-2">Out of stock</p>' : ''}
+                ${item.status === 'limitted' ? `<p class="text-yellow-500 text-xs mt-2">Only ${item.stock} left</p>` : ''}
+                <div class="mt-4 flex items-center justify-center sm:justify-start gap-6">
+                  <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white text-black">
+                    <button onclick="updateQty('${item.product._id}', '${item.variantId}', -1)" class="px-3 py-1 hover:bg-gray-100 ${item.quantity <= 1 ? 'opacity-50 cursor-not-allowed' : ''}">-</button>
+                    <span id="qty-${item.variantId}" class="px-4 py-1 text-sm font-bold border-x border-gray-200">${item.quantity}</span>
+                    <button onclick="updateQty('${item.product._id}', '${item.variantId}', 1)" class="px-3 py-1 hover:bg-gray-100 ${item.status === 'out of stock' || item.quantity >= 5 || item.quantity >= item.stock ? 'opacity-50 cursor-not-allowed' : ''}">+</button>
+                  </div>
+                  <button onclick="removeCartItem('${item.product._id}', '${item.variantId}')" class="text-[10px] font-bold text-red-500 uppercase tracking-[0.2em] hover:opacity-70 transition-opacity">Remove</button>
+                </div>
+              </div>
+              <div class="text-right">
+                <p id="total-${item.variantId}" class="text-xl font-bold text-primary">₹${(item.price * item.quantity).toLocaleString()}</p>
+                <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest">₹${item.price.toLocaleString()} each</p>
+              </div>
+            </div>`).join('');
+    }
+
+    function updateSummary(subtotal, hasInvalidItem) {
+        document.getElementById('summary-subtotal').innerText = '₹' + subtotal.toLocaleString();
+        document.getElementById('summary-total').innerText = '₹' + subtotal.toLocaleString();
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const isDisabled = subtotal === 0 || hasInvalidItem;
+        checkoutBtn.disabled = isDisabled;
+        checkoutBtn.className = `w-full py-4 ${isDisabled ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-black text-white hover:bg-primary'} font-bold rounded uppercase tracking-widest text-xs transition-all`;
+    }
+
     async function updateQty(productId, variantId, change) {
         try {
             const response = await fetch('/cart/update', {
@@ -175,10 +235,31 @@
                 document.getElementById(`total-${variantId}`).innerText = '₹' + data.itemTotal.toLocaleString();
                 document.getElementById('summary-subtotal').innerText = '₹' + data.subtotal.toLocaleString();
                 document.getElementById('summary-total').innerText = '₹' + data.subtotal.toLocaleString();
+                
+                // Update button states dynamically
+                const minusBtn = document.getElementById(`minus-${variantId}`);
+                const plusBtn = document.getElementById(`plus-${variantId}`);
+
+                if (minusBtn) {
+                    data.quantity <= 1 
+                        ? minusBtn.classList.add('opacity-50', 'cursor-not-allowed') 
+                        : minusBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                if (plusBtn) {
+                    (data.quantity >= 5 || data.quantity >= data.stock)
+                        ? plusBtn.classList.add('opacity-50', 'cursor-not-allowed')
+                        : plusBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+
                 const cartBadge = document.getElementById('cart-count');
                 if (cartBadge) {
                     cartBadge.textContent = data.cartCount;
                     cartBadge.classList.toggle('hidden', data.cartCount === 0);
+                }
+                
+                // Show toast if the quantity was capped/adjusted by the server
+                if (data.message && (data.message.includes('adjusted') || data.message.includes('Maximum'))) {
+                    Swal.fire({ icon: 'info', title: 'Quantity Notice', text: data.message, toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
                 }
             } else {
                 Swal.fire({ icon: 'warning', title: 'Limit Reached', text: data.message });

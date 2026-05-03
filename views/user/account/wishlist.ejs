@@ -6,7 +6,7 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Junoon Perfumes | User Profile</title>
   <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&amp;family=Inter:wght@300;400;500;600&amp;family=Material+Icons+Outlined&amp;display=swap"
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&amp;family=Inter:wght@300;400;500;600&amp;family=Material+Symbols+Outlined&amp;display=swap"
     rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -22,6 +22,8 @@
             "card-light": "#FFFFFF",
             "card-dark": "#1A1A1A",
             "accent-gold": "#C5A028",
+            "luxury-black": "#0a0a0a",
+            "luxury-ivory": "#fbfaf9",
           },
           fontFamily: {
             display: ["Playfair Display", "serif"],
@@ -53,88 +55,11 @@
 
 <body
   class="bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 transition-colors duration-300">
-  <header class="bg-black text-white py-4 px-6 md:px-12 flex items-center justify-between sticky top-0 z-50">
-    <div class="flex items-center space-x-2">
-      <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-md">
-        <span class="font-display text-2xl font-bold text-black">J</span>
-      </div>
-      <div>
-        <h1 class="font-display text-xl tracking-widest font-bold">JUNOON</h1>
-        <p class="text-[10px] tracking-[0.2em] uppercase opacity-70">Perfumes</p>
-      </div>
-    </div>
-    <nav class="hidden md:flex space-x-8 text-xs font-semibold tracking-widest uppercase">
-      <a class="hover:text-primary transition" href="/">Home</a>
-      <a class="text-primary" href="#">Best Seller</a>
-      <a class="hover:text-primary transition" href="/allfragrence">All Fragrance</a>
-      <a class="hover:text-primary transition" href="#">Shop</a>
-    </nav>
-    <div class="flex items-center space-x-5">
-      <span class="material-icons-outlined cursor-pointer hover:text-primary">search</span>
-      <a href="/wishlist" class="relative">
-        <span class="material-icons-outlined cursor-pointer text-primary">favorite</span>
-        <span id="wishlist-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof wishlistCount !== 'undefined' && wishlistCount > 0) ? '' : 'hidden' %>"><%= typeof wishlistCount !== 'undefined' ? wishlistCount : 0 %></span>
-      </a>
-      <div class="relative cursor-pointer">
-        <a href="/cart">
-          <span class="material-icons-outlined hover:text-primary">shopping_bag</span>
-          <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof cartCount !== 'undefined' && cartCount > 0) ? '' : 'hidden' %>"><%= typeof cartCount !== 'undefined' ? cartCount : 0 %></span>
-        </a>
-      </div>
-      <a href="/profile">
-        <span class="material-icons-outlined cursor-pointer">person</span>
-      </a>
-    </div>
-  </header>
+  <%- include('partials/_mainheader', { session, wishlistCount, cartCount, categories, search, activePage: 'wishlist'}) %>
 
   <div class="flex flex-col md:flex-row min-h-screen">
-    <!-- <input type="text" id="message" value="<%= message %>" name="message" hidden> -->
     <input type="text" id="message" value="<%= typeof message !== 'undefined' ? message : '' %>" hidden>
-    <aside
-      class="w-full md:w-72 bg-card-light dark:bg-card-dark border-r border-gray-200 dark:border-gray-800 flex flex-col pt-8 pb-4">
-      <div class="px-8 mb-10 text-center md:text-left">
-        <div
-          class="w-20 h-20 rounded-full bg-gradient-to-tr from-primary to-accent-gold mx-auto md:mx-0 flex items-center justify-center mb-4 shadow-lg">
-          <!--<span class="text-white text-3xl font-display font-bold">S</span>!-->
-          <span class="text-white text-3xl font-display font-bold">
-            <%= user.name.charAt(0).toUpperCase() %>
-          </span>
-
-        </div>
-        <h2 class="text-lg font-bold font-display">
-          <%= user.name %>
-        </h2>
-        <span
-          class="inline-block px-2 py-0.5 mt-1 bg-gray-100 dark:bg-gray-800 text-[10px] font-bold tracking-widest uppercase rounded text-gray-500 dark:text-gray-400">User</span>
-      </div>
-      <nav class="flex-grow space-y-1">
-        <a class="flex items-center px-8 py-4 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition" href="/profile">
-          <span class="material-icons-outlined mr-3 text-gray-400">person</span>
-          Profile Info
-        </a>
-        <a class="flex items-center px-8 py-4 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition"
-          href="#">
-          <span class="material-icons-outlined mr-3 text-gray-400">confirmation_number</span>
-          My Coupons
-        </a>
-        <a class="flex items-center px-8 py-4 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition"
-          href="#">
-          <span class="material-icons-outlined mr-3 text-gray-400">star_outline</span>
-          My Reviews And Rating
-        </a>
-        <a class="flex items-center px-8 py-4 text-sm font-medium sidebar-active"
-          href="/wishlist">
-          <span class="material-icons-outlined mr-3">favorite_border</span>
-          My Wish List
-        </a>
-      </nav>
-      <div class="mt-auto px-8 py-6 border-t border-gray-100 dark:border-gray-800">
-        <a class="flex items-center text-sm font-medium text-red-500 hover:opacity-80 transition" href="/logout">
-          <span class="material-icons-outlined mr-3">logout</span>
-          Logout
-        </a>
-      </div>
-    </aside>
+    <%- include('partials/_sidebar', { user, activePage }) %>
 
     <main class="flex-grow p-6 md:p-12 space-y-8 max-w-5xl">
       <header class="mb-8">
@@ -151,20 +76,35 @@
                 <img src="<%= item.product.images[0] %>" alt="<%= item.product.name %>" class="max-h-full object-contain group-hover:scale-105 transition-transform duration-500">
                 </a>
                 <button onclick="removeFromWishlist('<%= item.product._id %>', '<%= item.variantId %>')" class="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md text-primary hover:text-red-500 transition-colors" title="Remove from Wishlist">
-                  <span class="material-icons-outlined">favorite</span>
+                  <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">favorite</span>
                 </button>
+                <div class="absolute top-4 left-4">
+                    <% if (item.maxOffer > 0) { %>
+                        <span class="bg-primary text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider">
+                            <%= item.maxOffer %>% OFF
+                        </span>
+                    <% } %>
+                </div>
               </div>
               <div class="p-6">
                 <h3 class="font-display font-bold text-lg mb-1"><%= item.product.name %></h3>
                 <p class="text-xs text-gray-500 uppercase tracking-widest mb-4"><%= item.product.tagline %></p>
                 
-                <div class="flex items-center justify-between mt-auto">
-                  <span class="font-bold text-primary">
-                    <% const variant = item.product.variants.find(v => v._id.toString() === item.variantId.toString()) %>
-                    ₹<%= variant ? variant.price.toLocaleString() : 'N/A' %>
-                  </span>
-                  <button onclick="wishlisToCart('<%= item.product._id %>', '<%= item.variantId %>')" class="text-[10px] font-bold uppercase tracking-widest py-2 px-4 bg-primary text-black rounded hover:bg-black hover:text-primary transition-colors">
-                    Add To Bag
+                <div class="flex items-end justify-between mt-auto">
+                  <div class="flex flex-col">
+                    <% if (item.displayVariant) { %>
+                        <% if (item.displayVariant.salePrice < item.displayVariant.price) { %>
+                            <span class="text-xs text-gray-400 line-through">₹<%= item.displayVariant.price.toLocaleString() %></span>
+                            <span class="text-lg font-bold text-primary">₹<%= item.displayVariant.salePrice.toLocaleString() %></span>
+                        <% } else { %>
+                            <span class="text-lg font-bold text-primary">₹<%= item.displayVariant.price.toLocaleString() %></span>
+                        <% } %>
+                    <% } else { %>
+                        <span class="text-lg font-bold text-primary">N/A</span>
+                    <% } %>
+                  </div>
+                  <button type="button" onclick="VarientSelectionModal('<%= item.product._id %>')" class="text-[10px] font-bold uppercase tracking-widest py-2 px-4 bg-primary text-black rounded hover:bg-black hover:text-primary transition-colors">
+                    Add To Cart
                   </button>
                 </div>
               </div>
@@ -175,7 +115,7 @@
         <div id="empty-state">
           <section class="bg-card-light dark:bg-card-dark p-8 rounded-DEFAULT shadow-sm border border-gray-100 dark:border-gray-800">
             <div class="flex flex-col items-center justify-center py-20 text-center">
-              <span class="material-icons-outlined text-gray-200 dark:text-gray-700 text-9xl mb-6">favorite_border</span>
+              <span class="material-symbols-outlined text-gray-200 dark:text-gray-700 text-9xl mb-6">favorite_border</span>
               <h3 class="text-xl font-display font-bold mb-2">Your wishlist is currently empty</h3>
               <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-xs">Save the items you love to keep track of them here.</p>
               <a href="/allfragrence" class="px-8 py-3 bg-primary text-black font-bold text-sm rounded uppercase tracking-wider transition hover:opacity-90">
@@ -190,7 +130,7 @@
       <div id="dynamic-empty-state" class="hidden">
         <section class="bg-card-light dark:bg-card-dark p-8 rounded-DEFAULT shadow-sm border border-gray-100 dark:border-gray-800">
           <div class="flex flex-col items-center justify-center py-20 text-center">
-            <span class="material-icons-outlined text-gray-200 dark:text-gray-700 text-9xl mb-6">favorite_border</span>
+            <span class="material-symbols-outlined text-gray-200 dark:text-gray-700 text-9xl mb-6">favorite_border</span>
             <h3 class="text-xl font-display font-bold mb-2">Your wishlist is currently empty</h3>
             <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-xs">Save the items you love to keep track of them here.</p>
             <a href="/allfragrence" class="px-8 py-3 bg-primary text-black font-bold text-sm rounded uppercase tracking-wider transition hover:opacity-90">
@@ -202,7 +142,51 @@
     </main>
   </div>
 
+  <!-- Variant Selection Modal -->
+  <div id="variant-selection-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+      <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl transform transition-all">
+          <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+              <h3 class="text-xl font-serif font-bold text-gray-900" id="modal-product-name">Select Size</h3>
+              <button onclick="closeVariantModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                  <span class="material-symbols-outlined">close</span>
+              </button>
+          </div>
+          <div class="p-8">
+              <input type="hidden" id="modal-product-id">
+              <div class="mb-8">
+                  <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-4">Available Sizes</label>
+                  <div id="variant-options" class="grid grid-cols-2 gap-3">
+                      <!-- Variants injected via JS -->
+                  </div>
+              </div>
+              <div class="mb-8">
+                  <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-4">Quantity (Max 5)</label>
+                  <div class="flex items-center border border-gray-200 w-32">
+                      <button onclick="updateModalQty(-1)" class="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50">-</button>
+                      <input type="number" id="modal-qty" value="1" min="1" max="5" readonly class="w-12 h-10 border-none text-center focus:ring-0 text-sm font-bold">
+                      <button onclick="updateModalQty(1)" class="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50">+</button>
+                  </div>
+              </div>
+              <button id="confirm-add-btn" class="w-full py-4 bg-primary text-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-black hover:text-primary transition-all duration-300">
+                  Confirm Selection
+              </button>
+          </div>
+      </div>
+  </div>
+
+  <script src="/js/cart.js"></script>
   <script>
+    // Initialize the products data for the modal to use
+    window.allProducts = [
+        <% if (wishlistItems) { %>
+            <%- wishlistItems.map(item => JSON.stringify(item.product)).join(',') %>
+        <% } %>
+    ];
+
+    window.Junoon = {
+        isAuthenticated: <%= (typeof session !== 'undefined' && session && session.user) ? 'true' : 'false' %>
+    };
+
     async function removeFromWishlist(productId, variantId) {
       try {
         const response = await fetch('/wishlist/toggle', {
@@ -240,32 +224,37 @@
         console.error('Error removing from wishlist:', error);
       }
     }
-  async function wishlisToCart(productId, variantId) {
+  
+   async function wishlisToCart(productId, variantId, quantity = 1) {
     try {
-      // 1. Call the specific 'move to cart' endpoint
       const response = await fetch('/wishlist/to-cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, variantId })
+        body: JSON.stringify({ productId, variantId, quantity })
       });
-      console.log('................');
       const data = await response.json();
 
       if (data.success) {
         const cartBadge = document.getElementById('cart-count');
         const wishBadge = document.getElementById('wishlist-count');
-        
-        if (cartBadge) { cartBadge.textContent = data.cartCount; cartBadge.classList.remove('hidden'); }
-        if (wishBadge) { wishBadge.textContent = data.wishlistCount; if(data.wishlistCount === 0) wishBadge.classList.add('hidden'); }
+
+        if (cartBadge) {
+          cartBadge.textContent = data.cartCount;
+          cartBadge.classList.remove('hidden');
+        }
+        if (wishBadge) {
+          wishBadge.textContent = data.wishlistCount;
+          if (data.wishlistCount === 0) wishBadge.classList.add('hidden');
+        }
 
         Swal.fire({
           icon: 'success',
-          title:'Moved to Bag',
-          text:data.message,
-          toast:true,
-          position:'top-end',
-          showConfirmButton:false,
-          timer:3000
+          title: 'Moved to Bag',
+          text: data.message,
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000
         });
 
         // 3. Remove the item from the UI immediately
@@ -276,23 +265,108 @@
             itemElement.remove();
             if (data.wishlistCount === 0) {
               const grid = document.getElementById('wishlist-grid');
-              grid.classList.add('hidden');
+              if (grid) grid.classList.add('hidden');
               document.getElementById('dynamic-empty-state').classList.remove('hidden');
             }
           }, 500);
         }
-      } else {
+      }
+      else {
         throw new Error(data.message || 'Failed to move item');
       }
     } catch (error) {
       console.error('Error adding to cart:', error);
       Swal.fire({
-        icon: 'error',
         title: 'Error',
         text: error.message || 'Could not move item to bag'
       });
     }
   }
+        
+  
+ 
+
+ function VarientSelectionModal(productId) {
+        if (!window.Junoon.isAuthenticated) {
+            Swal.fire({
+                title: 'Sign In Required',
+                text: "Please sign in to your account to add items to your shopping bag.",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#d4af37',
+                cancelButtonColor: '#1a1a1a',
+                confirmButtonText: 'Go to Sign In',
+                cancelButtonText: 'Maybe Later'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/signin`;
+                }
+            });
+            return;
+        }
+
+        const product = window.allProducts.find(p => p._id === productId);
+        if (!product) return;
+
+        document.getElementById('modal-product-name').textContent = product.name;
+        document.getElementById('modal-product-id').value = productId;
+        document.getElementById('modal-qty').value = 1;
+
+        const optionsContainer = document.getElementById('variant-options');
+        optionsContainer.innerHTML = product.variants.map((v, index) => {
+            const priceDisplay = `<p class="text-[10px] font-bold text-primary">₹${v.salePrice.toLocaleString()}</p>`;
+            
+            const stockDisplay = v.stock > 0 
+                ? `<span class="text-[9px] text-gray-500 block">In Stock (${v.stock})</span>`
+                : `<span class="text-[9px] text-red-500 block">Sold Out</span>`;
+
+            return `
+            <label class="relative cursor-pointer group">
+                <input type="radio" name="variant-choice" value="${v._id}" class="peer hidden" ${index === 0 ? 'checked' : ''} data-stock="${v.stock}">
+                <div class="border border-gray-200 p-3 text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-gray-900">${v.size}</p>
+                    ${priceDisplay}
+                    ${stockDisplay}
+                </div>
+            </label>
+        `}).join('');
+
+        const modal = document.getElementById('variant-selection-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeVariantModal() {
+        const modal = document.getElementById('variant-selection-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function updateModalQty(change) {
+        const input = document.getElementById('modal-qty');
+        let val = parseInt(input.value) + change;
+        if (val < 1) val = 1;
+        if (val > 5) val = 5;
+        input.value = val;
+    }
+
+    document.getElementById('confirm-add-btn').addEventListener('click', () => {
+        const productId = document.getElementById('modal-product-id').value;
+        const variantRadio = document.querySelector('input[name="variant-choice"]:checked');
+        const quantity = parseInt(document.getElementById('modal-qty').value);
+
+        if (!variantRadio) return Swal.fire('Error', 'Please select a size', 'error');
+        
+        const stock = parseInt(variantRadio.dataset.stock);
+        if (stock <= 0) return Swal.fire('Error', 'Selected size is out of stock', 'error');
+        if (quantity > stock) return Swal.fire('Error', `Only ${stock} units available`, 'error');
+
+        wishlisToCart(productId, variantRadio.value, quantity);
+        closeVariantModal();
+    });
+
+
+
     const message = document.getElementById('message').value;
     if (message) { Swal.fire(message); }
   </script>

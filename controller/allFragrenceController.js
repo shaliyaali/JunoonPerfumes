@@ -7,7 +7,7 @@ const loadAllfragrence = async (req, res) => {
   try {
     const { category, price, sort: sortValue, search, page, note } = req.query;
     const currentPage = parseInt(page) || 1;
-    const limit =12;
+    const limit =6;
 
     // 1. Fetch Active Categories for the header dropdown
     const categories = await Category.find({ status: 'Active' });

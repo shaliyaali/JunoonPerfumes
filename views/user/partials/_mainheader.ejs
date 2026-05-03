@@ -1,0 +1,98 @@
+<header class="sticky top-0 z-50 w-full bg-[#050505] border-b border-primary/20 px-6 md:px-16 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-12">
+        <div class="flex items-center gap-4 group cursor-pointer" onclick="window.location.href='/'">
+            <div class="relative w-10 h-12 flex flex-col items-center justify-center">
+                <div class="w-6 h-1 bg-primary mb-[1px]"></div>
+                <div class="w-3 h-3 border-2 border-primary rounded-full mb-[1px]"></div>
+                <div class="w-8 h-8 border-r-4 border-b-4 border-l-4 border-primary rounded-b-sm flex items-end justify-start p-1">
+                    <div class="w-3 h-4 border-l-4 border-t-4 border-primary"></div>
+                </div>
+            </div>
+            <div class="flex flex-col leading-none">
+                <h1 class="text-primary font-serif text-3xl font-bold tracking-[0.1em] uppercase gold-text-effect">JUNOON</h1>
+                <div class="flex flex-col">
+                    <span class="text-primary font-serif text-[10px] tracking-[0.4em] uppercase ml-1 opacity-90">Perfumes</span>
+                    <span class="text-primary font-serif italic text-[8px] tracking-[0.15em] ml-1 opacity-80 mt-0.5">Anussatti smrti</span>
+                </div>
+            </div>
+        </div>
+        <nav class="hidden lg:flex items-center gap-8 ml-4">
+           <a class="text-xs font-bold tracking-[0.2em] <%= typeof activePage !== 'undefined' && activePage === 'home' ? 'text-primary border-b border-primary' : 'text-luxury-ivory' %> hover:text-primary transition-colors" href="/">HOME</a>
+           <a class="text-xs font-bold tracking-[0.2em] <%= typeof activePage !== 'undefined' && activePage === 'allfragrance' ? 'text-primary border-b border-primary' : 'text-luxury-ivory' %> hover:text-primary transition-colors" href="/allfragrence">ALL FRAGRANCE</a>
+            <div class="relative group">
+                <button class="flex items-center gap-1 text-xs font-bold tracking-[0.2em] text-luxury-ivory hover:text-primary transition-colors">
+                    SHOP <span class="material-symbols-outlined text-sm">expand_more</span>
+                </button>
+                <div class="absolute top-full left-0 pt-4 hidden group-hover:block w-48 z-50">
+                    <div class="bg-luxury-black border border-primary/20 p-4 rounded shadow-2xl">
+                        <ul class="space-y-3">
+                            <% if(typeof categories !== 'undefined' && categories) { %>
+                                <% categories.forEach(cat => { %>
+                                    <li><a class="text-[10px] tracking-widest text-luxury-ivory hover:text-primary block transition-colors" href="/allfragrence?category=<%= cat._id %>"><%= cat.name.toUpperCase() %></a></li>
+                                <% }) %>
+                            <% } %>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div class="flex items-center gap-6">
+        <% if (typeof activePage !== 'undefined' && !['checkout', 'orderSucess', 'productdetails', 'profile', 'manageaddress','myOrders','orderDetails'].includes(activePage)) { %>
+            <form id="header-search-form" action="<%= activePage === 'home' ? '/allfragrence' : '' %>" method="Get" class="hidden md:flex items-center border-b border-primary/30 py-1 ">
+                <button type="submit" class="material-symbols-outlined text-primary text-xl">search</button>
+                <div class="relative flex items-center">
+                    <input id="header-search-input" name="search" class="bg-transparent border-none text-[10px] tracking-widest text-luxury-ivory focus:ring-0 placeholder:text-gray-500 w-32 uppercase pr-6" placeholder="SEARCH PERFUMES" type="text" value="<%= typeof search !== 'undefined' ? search : '' %>"/>
+                    <button type="button" id="header-clear-search" class="<%= (typeof search === 'undefined' || !search) ? 'hidden' : '' %> absolute right-0 text-primary/50 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
+                </div>
+            </form>
+        <% } %>
+        <% if (typeof session !== 'undefined' && session && session.user) { %>
+            <a href="/profile" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold uppercase">
+                <%= session.user.name.charAt(0) %>
+            </a>
+        <% } else { %>
+            <a href="/signup" class="px-5 py-2 border border-primary text-primary font-semibold text-sm rounded-full hover:bg-primary hover:text-white transition">Sign UP</a>
+            <a href="/signin" class="px-5 py-2 border border-primary text-primary font-semibold text-sm rounded-full hover:bg-primary hover:text-white transition">Login</a>
+        <% } %>
+        <div class="flex items-center gap-5">
+            <% if (typeof session !== 'undefined' && session && session.user) { %>
+                <a href="/wishlist" class="text-luxury-ivory hover:text-primary transition-colors relative">
+                    <span class="material-symbols-outlined">favorite_border</span>
+                    <span id="wishlist-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof wishlistCount !== 'undefined' && wishlistCount > 0) ? '' : 'hidden' %>"><%= typeof wishlistCount !== 'undefined' ? wishlistCount : 0 %></span>
+                </a>
+                <a href="/cart" class="text-luxury-ivory hover:text-primary transition-colors relative">
+                    <span class="material-symbols-outlined">shopping_bag</span>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof cartCount !== 'undefined' && cartCount > 0) ? '' : 'hidden' %>"><%= typeof cartCount !== 'undefined' ? cartCount : 0 %></span>
+                </a>
+            <% } %>
+        </div>
+    </div>
+</header>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('header-search-input');
+        const clearBtn = document.getElementById('header-clear-search');
+        const searchForm = document.getElementById('header-search-form');
+
+        if (searchInput && clearBtn) {
+            searchInput.addEventListener('input', () => {
+                clearBtn.classList.toggle('hidden', !searchInput.value.trim());
+            });
+
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                clearBtn.classList.add('hidden');
+                
+                if (window.location.pathname === '/allfragrence' || window.location.pathname === '/cart') {
+                    searchForm.dispatchEvent(new Event('submit', { cancelable: true }));
+                } else if (new URLSearchParams(window.location.search).has('search')) {
+                    window.location.href = window.location.pathname;
+                }
+            });
+        }
+    });
+</script>

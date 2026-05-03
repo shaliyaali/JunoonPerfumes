@@ -1,0 +1,57 @@
+<aside
+  class="w-full md:w-72 bg-card-light dark:bg-card-dark border-r border-gray-200 dark:border-gray-800 flex flex-col pt-8 pb-4">
+  <div class="px-8 mb-10 text-center md:text-left">
+    <div
+      class="w-20 h-20 rounded-full bg-gradient-to-tr from-primary to-accent-gold mx-auto md:mx-0 flex items-center justify-center mb-4 shadow-lg">
+      <span class="text-white text-3xl font-display font-bold">
+        <%= user.name.charAt(0).toUpperCase() %>
+      </span>
+
+    </div>
+    <h2 class="text-lg font-bold font-display">
+      <%= user.name %>
+    </h2>
+    <span
+      class="inline-block px-2 py-0.5 mt-1 bg-gray-100 dark:bg-gray-800 text-[10px] font-bold tracking-widest uppercase rounded text-gray-500 dark:text-gray-400">User</span>
+  </div>
+
+
+    <nav class="flex-grow flex flex-col space-y-1">
+    <a class="flex items-center px-8 py-4 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition <%= activePage === 'profile' ? 'sidebar-active' : '' %>" href="/profile">
+      <span class="material-symbols-outlined mr-3 text-gray-400">person</span>
+      Profile Info
+    </a>
+    <a class="flex items-center px-8 py-4 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition <%= activePage === 'myorders' ? 'sidebar-active' : '' %>"
+      href="/profile/myorders">
+      <span class="material-symbols-outlined mr-3 text-gray-400">inventory_2</span>
+      My Orders
+    </a>
+
+    <a class="flex items-center px-8 py-4 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition <%= activePage === 'mycoupons' ? 'sidebar-active' : '' %>"
+      href="#">
+      <span class="material-symbols-outlined mr-3 text-gray-400">confirmation_number</span>
+      My Coupons
+    </a>
+    <a class="flex items-center px-8 py-4 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition <%= activePage === 'myreviews' ? 'sidebar-active' : '' %>"
+      href="#">
+      <span class="material-symbols-outlined mr-3 text-gray-400">star_outline</span>
+      My Reviews And Rating
+    </a>
+    <a class="flex items-center px-8 py-4 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition <%= activePage === 'wishlist' ? 'sidebar-active' : '' %>"
+      href="/wishlist">
+      <span class="material-symbols-outlined mr-3 text-gray-400">favorite_border</span>
+      My Wish List
+    </a>
+    <!-- <a class="flex items-center px-8 py-4 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition <%= activePage === 'manageaddress' ? 'sidebar-active' : '' %>"
+      href="/manageaddress">
+      <span class="material-symbols-outlined mr-3 text-gray-400">place</span>
+      Manage Addresses
+    </a> -->
+  </nav>
+  <div class="mt-auto px-8 py-6 border-t border-gray-100 dark:border-gray-800">
+    <a class="flex items-center text-sm font-medium text-red-500 hover:opacity-80 transition" href="/logout">
+      <span class="material-symbols-outlined mr-3">logout</span>
+      Logout
+    </a>
+  </div>
+</aside>

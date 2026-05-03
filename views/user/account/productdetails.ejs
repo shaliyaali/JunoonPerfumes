@@ -4,25 +4,48 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title><%= product.name %> | Junoon Perfumes</title>
+    <script>
+    window.Junoon = {
+        isAuthenticated: <%= (typeof session !== 'undefined' && session && session.user) ? 'true' : 'false' %>
+        // Add other global config here
+    };
+</script>
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af37",
+                        "luxury-black": "#0a0a0a",
+                        "luxury-ivory": "#fbfaf9",
+                    },
+                    fontFamily: {
+                       display: ["Playfair Display", "serif"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                },
+            },
+        }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <style>
+    <style type="text/tailwindcss">
         body { font-family: 'Inter', sans-serif; }
         .font-serif { font-family: 'Playfair Display', serif; }
         .gold-gradient { background: linear-gradient(to bottom, #f9f295, #e0aa3e, #b8860b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .gold-text-effect {
+            background: linear-gradient(to bottom, #f9f295, #e0aa3e, #b8860b, #5d4a1f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
     </style>
 </head>
 <body class="bg-[#fbfaf9] text-[#121212]">
-    <!-- Simple Luxury Header -->
-    <header class="bg-black text-white py-6 px-12 flex justify-between items-center sticky top-0 z-50">
-        <a href="/" class="text-2xl font-serif font-bold tracking-widest gold-gradient">JUNOON</a>
-        <nav class="flex gap-8 text-[10px] uppercase tracking-[0.2em] font-bold">
-            <a href="/" class="hover:text-[#d4af37]">Home</a>
-            <a href="/allfragrence" class="text-[#d4af37]">All Fragrence</a>
-           
-        </nav>
-    </header>
+
+   <%- include('partials/_mainheader', { session, wishlistCount, cartCount, categories, search, activePage: 'productdetails' }) %>
 
     <main class="max-w-7xl mx-auto px-6 py-16">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -49,9 +72,14 @@
                 <p class="text-primary uppercase tracking-[0.3em] text-xs font-bold mb-6"><%= product.tagline %></p>
                 
                 <div class="flex items-center gap-4 mb-8">
-                    <span id="displayPrice" class="text-3xl font-light">₹<%= product.variants[0].price.toLocaleString() %></span>
-                    <% if(product.offer > 0) { %>
-                        <span class="bg-primary/10 text-primary text-[10px] font-bold px-3 py-1 rounded-full"><%= product.offer %>% OFF</span>
+                    <div id="priceContainer" class="flex flex-col">
+                        <% if(product.variants[0].salePrice < product.variants[0].price) { %>
+                            <span id="displayOldPrice" class="text-lg text-gray-400 line-through">₹<%= product.variants[0].price.toLocaleString() %></span>
+                        <% } %>
+                        <span id="displayPrice" class="text-3xl font-light">₹<%= product.variants[0].salePrice.toLocaleString() %></span>
+                    </div>
+                    <% if(Math.max(product.offer || 0, (product.category && product.category.offer) || 0) > 0) { %>
+                        <span class="bg-primary/10 text-primary text-[10px] font-bold px-3 py-1 rounded-full"><%= Math.max(product.offer || 0, (product.category && product.category.offer) || 0) %>% OFF</span>
                     <% } %>
                 </div>
 
@@ -61,9 +89,13 @@
                             <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4">Select Size</h3>
                             <div class="flex gap-3">
                                 <% product.variants.forEach((v, i) => { %>
-                                    <button class="variant-btn px-6 py-3 border border-gray-200 rounded-xl text-xs font-bold hover:border-primary transition-all <%= i === 0 ? 'border-primary bg-primary/5 active-variant' : '' %>" 
-                                            onclick="updateVariant(this, '<%= v.price %>', '<%= v.stock %>', '<%= v._id %>')">
-                                        <%= v.size %>
+                                    <button class="variant-btn px-4 py-2 border rounded-xl text-xs font-bold hover:border-primary transition-all flex flex-col items-center min-w-[90px] <%= i === 0 ? 'border-primary bg-primary/5 active-variant' : 'border-transparent bg-gray-50' %>" 
+                                            onclick="updateVariant(this, '<%= v.price %>', '<%= v.salePrice %>', '<%= v.stock %>', '<%= v._id %>')">
+                                        <span class="uppercase"><%= v.size %></span>
+                                        <span class="text-[10px] text-primary mt-1">₹<%= v.salePrice.toLocaleString() %></span>
+                                        <span class="text-[9px] font-normal mt-1 <%= v.stock > 0 ? 'text-gray-500' : 'text-red-500' %>">
+                                            <%= v.stock > 0 ? `In Stock (${v.stock})` : 'Sold Out' %>
+                                        </span>
                                     </button>
                                 <% }) %>
                             </div>
@@ -71,9 +103,9 @@
                         <div class="text-right">
                             <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4">Quantity</h3>
                             <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden h-[46px]">
-                                <button type="button" onclick="changeQty(-1)" class="px-4 py-2 hover:bg-gray-50 transition-colors">-</button>
-                                <input type="number" id="purchaseQty" value="1" min="1" max="5" readonly class="w-12 text-center border-none focus:ring-0 font-bold text-sm bg-transparent">
-                                <button type="button" onclick="changeQty(1)" class="px-4 py-2 hover:bg-gray-50 transition-colors">+</button>
+                                <button type="button" id="qtyMinus" onclick="changeQty(-1)" class="px-4 py-2 hover:bg-gray-50 transition-colors" <%= product.variants[0].stock <= 0 ? 'disabled' : '' %>>-</button>
+                                <input type="number" id="purchaseQty" value="<%= product.variants[0].stock > 0 ? 1 : 0 %>" min="<%= product.variants[0].stock > 0 ? 1 : 0 %>" max="5" readonly class="w-12 text-center border-none focus:ring-0 font-bold text-sm bg-transparent">
+                                <button type="button" id="qtyPlus" onclick="changeQty(1)" class="px-4 py-2 hover:bg-gray-50 transition-colors" <%= product.variants[0].stock <= 0 ? 'disabled' : '' %>>+</button>
                             </div>
                         </div>
                     </div>
@@ -81,10 +113,16 @@
 
                 <div class="space-y-4 mb-12">
                     <div class="flex gap-4">
-                        <button type="button" id="bagBtn" onclick="addToBag()" class="flex-1 bg-black text-white py-5 rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-primary transition-all">Add to Shopping Bag</button>
-                        <!-- <button class="w-16 border border-gray-200 rounded-xl flex items-center justify-center hover:text-primary transition-all">
+                        <button type="button" id="bagBtn" onclick="addToBag()"
+                            <%= product.variants[0].stock <= 0 ? 'disabled' : '' %>
+                            class="flex-1 <%= product.variants[0].stock <= 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-black hover:bg-primary' %> text-white py-5 rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] transition-all">
+                            Add to Shopping Bag
+                        </button>
+                        <button type="button" 
+                                onclick="toggleWishlist('<%= product._id %>', currentVariantId)" 
+                                class="wishlist-btn-<%= product._id %> w-16 border border-gray-200 rounded-xl flex items-center justify-center hover:text-primary transition-all">
                             <span class="material-symbols-outlined">favorite</span>
-                        </button> -->
+                        </button>
                     </div>
                     <p id="stockStatus" class="text-center text-[10px] font-bold uppercase tracking-widest <%= product.variants[0].stock > 0 ? 'text-green-500' : 'text-red-500' %>">
                         <%= product.variants[0].stock > 0 ? 'In Stock - Ready to Ship' : 'Out of Stock' %>
@@ -112,21 +150,96 @@
         <!-- Related Products -->
         <section class="mt-32">
             <h2 class="text-3xl font-serif font-bold mb-12">Related Products</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
                 <% relatedProducts.forEach(rp => { %>
-                    <a href="/product/<%= rp._id %>" class="group">
-                        <div class="aspect-square bg-white border border-gray-50 rounded-2xl p-8 mb-4 overflow-hidden relative">
-                            <img src="<%= rp.images[0] %>" class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700">
+                    <div class="group flex flex-col bg-white border border-gray-100 product-card-shadow transition-all duration-500">
+                        <div class="aspect-[4/5] overflow-hidden relative bg-[#f4f3f1] flex items-center justify-center p-8">
+                            <div class="relative w-full h-full cursor-pointer">
+                                <a href="/product/<%= rp._id %>">
+                                    <img alt="<%= rp.name %>" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-1000" src="<%= rp.images && rp.images.length > 0 ? rp.images[0] : 'https://via.placeholder.com/400x500' %>"/>
+                                </a>
+                            </div>
+                            <div class="absolute top-4 left-4 right-4 flex justify-between items-start">
+                                 <%
+                        const pOffer=rp.offer || 0;
+                        const cOffer=(rp.category && rp.category.offer) || 0; 
+                        const currentMaxOffer=Math.max(pOffer,cOffer);
+                    %>
+                    <% if(currentMaxOffer > 0){ %>
+                    <span class="bg-primary" text-white text-[10px] fond-bold px-2 py-1 uppercase tracking-wider">
+                    <%=currentMaxOffer%>%OFF
+                </span> 
+                <% } else { %>
+                <div>   </div>
+                <% } %>
+                                <% const isInWishlist = typeof wishlistIds !== 'undefined' && wishlistIds.includes(rp._id.toString()) %>
+                                <button type="button" onclick="event.stopPropagation(); toggleWishlist('<%= rp._id %>', '<%= rp.variants[0]._id %>')" class="transition-colors wishlist-btn-<%= rp._id %> <%= isInWishlist ? 'text-primary' : 'text-gray-400' %>">
+                                    <span class="material-symbols-outlined" style="<%= isInWishlist ? "font-variation-settings: 'FILL' 1" : '' %>">favorite</span>
+                                </button>
+                            </div>
                         </div>
-                        <h4 class="text-sm font-bold uppercase tracking-widest text-center"><%= rp.name %></h4>
-                        <p class="text-[10px] text-gray-400 text-center mt-1">₹<%= rp.variants[0].price.toLocaleString() %></p>
-                    </a>
+                        <div class="p-8 flex flex-col flex-1 text-center">
+                            <p class="text-[9px] text-primary font-bold uppercase tracking-[0.3em] mb-3">Junoon Perfumes</p>
+                            <h4 class="text-xl font-serif font-medium text-gray-900 mb-2 tracking-wide"><%= rp.name %></h4>
+                            <p class="text-[10px] text-gray-500 mb-6 font-medium uppercase tracking-widest italic"><%= rp.tagline %></p>
+                            <div class="mt-auto space-y-4">
+                                <span class="text-lg font-bold text-gray-900 block">₹<%= Math.min(...rp.variants.map(v => v.price)).toLocaleString() %></span>
+                                <button type="button" onclick="VarientSelectionModal('<%= rp._id %>')" class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                                    Add to Cart
+                                </button> 
+                            </div>
+                        </div>
+                    </div>
                 <% }) %>
             </div>
         </section>
     </main>
 
+    <!-- Variant Selection Modal (Reused from allfragrence) -->
+    <div id="variant-selection-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl transform transition-all">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-xl font-serif font-bold text-gray-900" id="modal-product-name">Select Size</h3>
+                <button onclick="closeVariantModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="p-8">
+                <input type="hidden" id="modal-product-id">
+                <div class="mb-8">
+                    <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-4">Available Sizes</label>
+                    <div id="variant-options" class="grid grid-cols-2 gap-3"></div>
+                </div>
+                <div class="mb-8">
+                    <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-4">Quantity (Max 5)</label>
+                    <div class="flex items-center border border-gray-200 w-32">
+                        <button onclick="updateModalQty(-1)" class="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50">-</button>
+                        <input type="number" id="modal-qty" value="1" min="1" max="5" readonly class="w-12 h-10 border-none text-center focus:ring-0 text-sm font-bold">
+                        <button onclick="updateModalQty(1)" class="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50">+</button>
+                    </div>
+                </div>
+                <button id="confirm-add-btn" class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                    Confirm Selection
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        window.Junoon = {
+            isAuthenticated: <%= (typeof session !== 'undefined' && session && session.user) ? 'true' : 'false' %>
+        };
+    </script>
+    <script src="/js/wishlist.js"></script>
+    <script src="/js/cart.js"></script>
+
+    <script>
+        // Combine main product and related products for modal lookup
+        window.allProducts = [
+            <%- JSON.stringify(product) %>,
+            ...<%- JSON.stringify(relatedProducts) %>
+        ];
+
         let currentVariantId = '<%= product.variants[0]._id %>';
         let currentStock = <%= product.variants[0].stock %>;
         const purchaseQtyInput = document.getElementById('purchaseQty');
@@ -135,35 +248,64 @@
             const qtyInput = document.getElementById('purchaseQty');
             let current = parseInt(qtyInput.value);
             let next = current + amt;
-            if (next >= 1 && next <= 5) {
+            if (next >= 1 && next <= 5 && next <= currentStock) {
                 qtyInput.value = next;
-                // Ensure quantity doesn't exceed available stock
-                if (next > currentStock) {
-                    qtyInput.value = currentStock;
-                }
             }
         }
 
-        function updateVariant(btn, price, stock, id) {
+        function updateVariant(btn, price,salePrice, stock, id) {
             currentVariantId = id;
+            currentStock = parseInt(stock);
+            const priceContainer = document.getElementById('priceContainer');
             const stockStatus = document.getElementById('stockStatus');
-            if (parseInt(stock) > 0) {
+            const bagBtn = document.getElementById('bagBtn');
+            const qtyInput = document.getElementById('purchaseQty');
+            const qtyPlus = document.getElementById('qtyPlus');
+            const qtyMinus = document.getElementById('qtyMinus');
+            
+            if (currentStock > 0) {
                 stockStatus.innerText = 'In Stock - Ready to Ship';
-                stockStatus.classList.remove('text-red-500');
-                stockStatus.classList.add('text-green-500');
+                stockStatus.classList.replace('text-red-500', 'text-green-500');
+                bagBtn.disabled = false;
+                bagBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                bagBtn.classList.add('bg-black', 'hover:bg-primary');
+                qtyInput.value = 1;
+                qtyPlus.disabled = false;
+                qtyMinus.disabled = false;
             } else {
                 stockStatus.innerText = 'Out of Stock';
-                stockStatus.classList.remove('text-green-500');
-                stockStatus.classList.add('text-red-500');
+                stockStatus.classList.replace('text-green-500', 'text-red-500');
+                bagBtn.disabled = true;
+                bagBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                bagBtn.classList.remove('bg-black', 'hover:bg-primary');
+                qtyInput.value = 0;
+                qtyPlus.disabled = true;
+                qtyMinus.disabled = true;
             }
-            currentStock = parseInt(stock); // Update currentStock for quantity checks
-            document.getElementById('displayPrice').innerText = '₹' + parseInt(price).toLocaleString();
+            
+            // Update Price Display
+            if (parseFloat(salePrice) < parseFloat(price)) {
+                priceContainer.innerHTML = `
+                    <div class="flex flex-col">
+                        <span id="displayOldPrice" class="text-lg text-gray-400 line-through">₹${parseInt(price).toLocaleString()}</span>
+                        <span id="displayPrice" class="text-3xl font-light">₹${parseInt(salePrice).toLocaleString()}</span>
+                    </div>
+                `;
+            } else {
+                priceContainer.innerHTML = `<span id="displayPrice" class="text-3xl font-light">₹${parseInt(price).toLocaleString()}</span>`;
+            }
             
             // UI feedback for selection
-            document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('border-primary', 'bg-primary/5', 'active-variant'));
+           document.querySelectorAll('.variant-btn').forEach(b => {
+                b.classList.remove('border-primary', 'bg-primary/5', 'active-variant');
+                b.classList.add('border-transparent', 'bg-gray-50');
+            });
             btn.classList.add('border-primary', 'bg-primary/5', 'active-variant');
+            btn.classList.remove('border-transparent', 'bg-gray-50');
+
 
             // Adjust purchase quantity if it exceeds new variant's stock
+            console.log("_____qty",parseInt(purchaseQtyInput.value),currentStock)
             if (parseInt(purchaseQtyInput.value) > currentStock) {
                 purchaseQtyInput.value = currentStock > 0 ? 1 : 0; // Reset to 1 or 0 if out of stock
                 if (currentStock === 0) {
@@ -174,42 +316,81 @@
 
         async function addToBag() {
             const quantity = document.getElementById('purchaseQty').value;
-            try {
-                const response = await fetch('/cart/add', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        productId: '<%= product._id %>', 
-                        variantId: currentVariantId,
-                        quantity: quantity
-                    })
-                });
-
-                if (response.redirected) {
-                    window.location.href = '/signin';
-                    return;
-                }
-
-                const data = await response.json();
-                if (data.success) {
-                    Swal.fire({ 
-                        icon: 'success', 
-                        title: 'Added to Cart', 
-                        showConfirmButton: false, 
-                        toast: true, 
-                        position: 'top-end', 
-                        timer: 1500 
-                    }).then(() => {
-                        window.location.href = '/cart';
-                    });
-                } else {
-                    Swal.fire({ icon: 'warning', title: 'Notice', text: data.message, confirmButtonColor: '#D4AF37' });
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                window.location.href = '/signin';
-            }
+            handleAddToCart('<%=product._id%>',currentVariantId,quantity)
         }
+
+        // Reusable Modal Logic
+        function VarientSelectionModal(productId) {
+            if (!window.Junoon.isAuthenticated) {
+                Swal.fire({
+                    title: 'Sign In Required',
+                    text: "Please sign in to your account to add items to your shopping bag.",
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d4af37',
+                    cancelButtonColor: '#1a1a1a',
+                    confirmButtonText: 'Go to Sign In'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = `/signin`;
+                    }
+                });
+                return;
+            }
+
+            const product = window.allProducts.find(p => p._id === productId);
+            if (!product) return;
+
+            document.getElementById('modal-product-name').textContent = product.name;
+            document.getElementById('modal-product-id').value = productId;
+            document.getElementById('modal-qty').value = 1;
+
+            const optionsContainer = document.getElementById('variant-options');
+            optionsContainer.innerHTML = product.variants.map((v, index) => {
+                const priceDisplay = `<p class="text-[10px] font-bold text-primary">₹${v.salePrice.toLocaleString()}</p>`;
+                
+                const stockDisplay = v.stock > 0 
+                    ? `<span class="text-[9px] text-gray-500 block">In Stock (${v.stock})</span>`
+                    : `<span class="text-[9px] text-red-500 block">Sold Out</span>`;
+
+                return `
+                <label class="relative cursor-pointer group">
+                    <input type="radio" name="variant-choice" value="${v._id}" class="peer hidden" ${index === 0 ? 'checked' : ''} data-stock="${v.stock}">
+                    <div class="border border-gray-200 p-3 text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                        <p class="text-[11px] font-bold uppercase tracking-widest text-gray-900">${v.size}</p>
+                        ${priceDisplay}
+                        ${stockDisplay}
+                    </div>
+                </label>
+            `}).join('');
+
+            document.getElementById('variant-selection-modal').classList.replace('hidden', 'flex');
+        }
+
+        function closeVariantModal() {
+            document.getElementById('variant-selection-modal').classList.replace('flex', 'hidden');
+        }
+
+        function updateModalQty(change) {
+            const input = document.getElementById('modal-qty');
+            let val = parseInt(input.value) + change;
+            if (val >= 1 && val <= 5) input.value = val;
+        }
+
+        document.getElementById('confirm-add-btn').addEventListener('click', () => {
+            const productId = document.getElementById('modal-product-id').value;
+            const variantRadio = document.querySelector('input[name="variant-choice"]:checked');
+            const quantity = parseInt(document.getElementById('modal-qty').value);
+
+            if (!variantRadio) return;
+            
+            const stock = parseInt(variantRadio.dataset.stock);
+            if (stock <= 0) return Swal.fire('Error', 'Selected size is out of stock', 'error');
+            if (quantity > stock) return Swal.fire('Error', `Only ${stock} units available`, 'error');
+
+            handleAddToCart(productId, variantRadio.value, quantity);
+            closeVariantModal();
+        });
 
         // Magnifying Glass Hover Effect
         const mainImageContainer = document.getElementById('mainImageContainer');

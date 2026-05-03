@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Item Details | Junoon Perfumes</title>
+    <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&amp;family=Inter:wght@300;400;500;600&amp;family=Material+Symbols+Outlined&amp;display=swap"
+    rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                primary: "#D4AF37",
+                "background-light": "#F9F9F7",
+                "background-dark": "#0F0F0F",
+                "card-light": "#FFFFFF",
+                "card-dark": "#1A1A1A",
+                "accent-gold": "#C5A028",
+                "luxury-black": "#0a0a0a",
+                "luxury-ivory": "#fbfaf9",
+              },
+              fontFamily: {
+                display: ["Playfair Display", "serif"],
+                sans: ["Inter", "sans-serif"],
+              },
+              borderRadius: { DEFAULT: "16px" },
+            },
+          },
+        };
+      </script>
+    <style type="text/tailwindcss">
+        body { font-family: 'Inter', sans-serif; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .sidebar-active {
+          background: linear-gradient(90deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0) 100%);
+          border-left: 4px solid #D4AF37;
+          color: #D4AF37;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 transition-colors duration-300">
+     <%- include('partials/_mainheader', { session, wishlistCount, cartCount, categories, search, activePage: 'orderDetails' }) %>
+
+     <div class="flex flex-col md:flex-row min-h-screen">
+    <!-- Include the sidebar here -->
+    <%- include('partials/_sidebar', { user, activePage }) %>
+    <main class="max-w-4xl mx-auto px-6 py-16">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Product Image -->
+                <div class="w-full md:w-1/3">
+                    <img src="<%= item.productImage %>" alt="<%= item.productName %>" class="w-full h-auto rounded-lg bg-gray-50 p-4 border border-gray-100">
+                </div>
+
+                <!-- Main Info -->
+                <div class="w-full md:w-2/3 flex flex-col justify-between">
+                    <div>
+                        <span class="text-primary font-bold text-[10px] uppercase tracking-widest">Order #<%= order.orderId %></span>
+                        <h1 class="text-3xl font-serif font-bold mt-2 mb-1"><%= item.productName %></h1>
+                        <p class="text-gray-500 italic text-sm mb-4">Size: <%= item.variantSize %></p>
+                        
+                        <% if (['Cancelled', 'Returned', 'Return Requested'].includes(item.status)) { %>
+                            <div class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-red-50 text-red-600 mb-6 border border-red-100">
+                                <%= item.status %>
+                            </div>
+                            <% if (item.reason) { %>
+                                <p class="text-sm text-gray-500 italic mt-1">Reason: <%= item.reason %></p>
+                            <% } %>
+                        <% } else { %>
+                            <!-- Progress Tracker -->
+                            <div class="mt-8 mb-16 relative">
+                                <div class="flex justify-between items-center relative">
+                                    <!-- Progress Line Background -->
+                                    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-gray-200 z-0"></div>
+                                    
+                                    <!-- Active Progress Line -->
+                                    <% 
+                                        const statusSteps = ['Pending', 'Shipped', 'Out for Delivery', 'Delivered'];
+                                        const currentStepIndex = statusSteps.indexOf(item.status);
+                                        const progressWidth = (currentStepIndex / (statusSteps.length - 1)) * 100;
+                                    %>
+                                    <div class="absolute left-0 top-1/2 -translate-y-1/2 h-0.5 bg-primary z-0 transition-all duration-500" style="width: <%= progressWidth %>%"></div>
+
+                                    <!-- Step Indicators -->
+                                    <% statusSteps.forEach((step, index) => { %>
+                                        <div class="relative z-10 flex flex-col items-center">
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-500 
+                                                <%= index <= currentStepIndex ? 'bg-primary border-primary text-black' : 'bg-white border-gray-300 text-gray-400' %>">
+                                                <% if (index < currentStepIndex || item.status === 'Delivered') { %>
+                                                    <span class="material-symbols-outlined text-sm font-bold">check</span>
+                                                <% } else { %>
+                                                    <span class="text-xs"><%= index + 1 %></span>
+                                                <% } %>
+                                            </div>
+                                            <span class="absolute top-10 text-[9px] font-bold uppercase tracking-tight text-center whitespace-nowrap <%= index <= currentStepIndex ? 'text-black' : 'text-gray-400' %>">
+                                                <%= step === 'Pending' ? 'Ordered' : step %>
+                                            </span>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 border-t pt-6">
+                        <div>
+                            <p class="text-[10px] uppercase font-bold text-gray-400">Unit Price</p>
+                            <p class="text-xl font-bold text-primary">₹<%= item.price.toLocaleString() %></p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase font-bold text-gray-400">Quantity</p>
+                            <p class="text-xl font-bold"><%= item.quantity %></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 border-t pt-8">
+                <!-- Shipping Address -->
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-widest mb-4">Shipping Address</h3>
+                    <div class="text-sm text-gray-600 space-y-1">
+                        <p class="font-bold text-gray-900"><%= address.name %></p>
+                        <p><%= address.house %></p>
+                        <p><%= address.street %></p>
+                        <p><%= address.city %>, <%= address.state %> - <%= address.pincode %></p>
+                        <p>Phone: <%= address.phone %></p>
+                    </div>
+                </div>
+
+                <!-- Payment Summary -->
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-widest mb-4">Payment Information</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Payment Method</span>
+                            <span class="font-medium"><%= order.paymentMethod %></span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Payment Status</span>
+                            <span class="font-medium"><%= order.paymentStatus %></span>
+                        </div>
+                        <div class="flex justify-between text-sm border-t pt-2 mt-2">
+                            <span class="font-bold">Total Amount</span>
+                            <span class="font-bold text-primary">₹<%= (item.price * item.quantity).toLocaleString() %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

@@ -24,20 +24,19 @@ router.get('/', adminauth.checkSession, (req, res) => {
 //category management
 router.get('/categoryManagement',adminauth.checkSession ,categoryController.manageCategory)
 router.post('/addCategory',adminauth.checkSession,categoryController.addCategory)
-router.post('/editCategory/:id',adminauth.checkSession,categoryController.editCategory)
+router.patch('/editCategory/:id',adminauth.checkSession,categoryController.editCategory)
 router.post('/deleteCategory/:id',adminauth.checkSession,categoryController.deleteCategory)  
 //product management  
 router.get('/productManagement',adminauth.checkSession,productController.manageProduct)
 router.get('/addProduct', adminauth.checkSession,productController.loadAddProduct)
-router.post('/addProduct', upload.array('images', 5), productController.addProduct)
-router.get('/editProduct/:id', productController.loadEditProduct)
-router.post('/editProduct/:id', upload.array('images', 5), productController.editProduct)
-router.post('/deleteProduct/:id', productController.deleteProduct)
+router.post('/addProduct', upload.array('images', 5),adminauth.checkSession, productController.addProduct)
+router.get('/editProduct/:id',adminauth.checkSession, productController.loadEditProduct)
+router.post('/editProduct/:id', upload.array('images', 5),adminauth.checkSession, productController.editProduct)
+router.post('/deleteProduct/:id',adminauth.checkSession, productController.deleteProduct)
 
 //order management
-router.get('/orders', adminOrderController.loadOrders);
-router.get('/orders/:orderId', adminOrderController.loadOrderDetails);
-router.post('/orders/update-status', adminOrderController.changeStatus);
-router.post('/orders/update-item-status',adminOrderController.changeItemStatus)
+router.get('/orders', adminauth.checkSession, adminOrderController.loadOrders);
+router.get('/orders/:orderId', adminauth.checkSession, adminOrderController.loadOrderDetails);
+router.post('/orders/update-item-status', adminauth.checkSession, adminOrderController.changeItemStatus)
 
 module.exports=router

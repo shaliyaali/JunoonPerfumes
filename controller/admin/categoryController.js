@@ -81,30 +81,26 @@ catch(error){
 
 }
 }
-const editCategory=async(req,res)=>{
+const editCategory=async(req,res,next)=>{
   try{
     const id=req.params.id
     const { name, offer, status } = req.body;
 
+
+    
     if (!name || name.trim() === "") {
-      req.session.message = "Category name is required";
-      return res.redirect('/admin/categoryManagement');
+      return res.status(400).json({ success: false, message: "Category name is required" });
     }
 
     const slug = slugify(name, { lower: true, strict: true });
     const categoryOffer = parseFloat(offer) || 0;
 
     await categoryService.editCategory(id, name, categoryOffer, slug, status);
-    req.session.message = "Category updated successfully";
-    res.redirect('/admin/categoryManagement'); 
+    res.json({ success: true, message: "Category updated successfully" });
   }
   
   catch(error){
-    console.error("Edit Category Error:", error.message);
-    req.session.message = error.message.includes("exists") 
-        ? "Category with this name already exists" 
-        : "Failed to update category";
-    res.redirect('/admin/categoryManagement');
-  }
+   next(error)
+}
 }
 module.exports={manageCategory,addCategory,deleteCategory,editCategory}    

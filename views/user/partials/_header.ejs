@@ -1,0 +1,39 @@
+<header class="bg-black text-white py-4 px-6 md:px-12 flex items-center justify-between sticky top-0 z-50">
+  <div class="flex items-center space-x-2">
+    <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-md">
+      <span class="font-display text-2xl font-bold text-black">J</span>
+    </div>
+    <div>
+      <h1 class="font-display text-xl tracking-widest font-bold">JUNOON</h1>
+      <p class="text-[10px] tracking-[0.2em] uppercase opacity-70">Perfumes</p>
+    </div>
+  </div>
+  <nav class="hidden md:flex space-x-8 text-xs font-semibold tracking-widest uppercase">
+    <a class="hover:text-primary transition" href="/">Home</a>
+    <!-- <a class="hover:text-primary transition" href="#">Best Seller</a> -->
+    <a class="hover:text-primary transition" href="/allfragrence">All Fragrance</a>
+    <!-- <a class="hover:text-primary transition" href="#">Shop</a> -->
+  </nav>
+  <div class="flex items-center space-x-5">
+    <span class="material-icons-outlined cursor-pointer hover:text-primary">search</span>
+    <a href="/wishlist" class="relative">
+      <span class="material-icons-outlined cursor-pointer hover:text-primary">favorite_border</span>
+      <span id="wishlist-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof wishlistCount !== 'undefined' && wishlistCount > 0) ? '' : 'hidden' %>">
+        <%= typeof wishlistCount !== 'undefined' ? wishlistCount : 0 %>
+      </span>
+    </a>
+    <a href="/cart" class="relative cursor-pointer">
+      <span class="material-icons-outlined text-primary">shopping_bag</span>
+      <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof cartCount !== 'undefined' && cartCount > 0) ? '' : 'hidden' %>">
+        <%= typeof cartCount !== 'undefined' ? cartCount : 0 %>
+      </span>
+    </a>
+    <% if (session && session.user) { %>
+      <a href="/profile" class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-black font-bold uppercase text-xs">
+        <%= session.user.name.charAt(0) %>
+      </a>
+    <% } else { %>
+      <a href="/signin"><span class="material-icons-outlined cursor-pointer">person</span></a>
+    <% } %>
+  </div>
+</header>

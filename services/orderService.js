@@ -4,6 +4,8 @@ const Cart = require('../model/cartSchema');
 const Product = require('../model/productSchema');
 const User = require('../model/userSchema');
 
+
+
 const createOrder = async (userId, addressId, paymentMethod, couponDiscount = 0, shippingCharge = 0) => {
   const cart = await Cart.findOne({ user: userId }).populate('items.product');
   if (!cart || cart.items.length === 0) {
@@ -83,7 +85,11 @@ const getOrderById = async (orderId) => {
     });
 };
 
-const getOrdersByUser = async (userId, search = '') => {
+const getOrderByIdAndUser= async (orderId,userId)=>{
+  return await Order.findOne({orderId: orderId,user:userId}).populate('user');
+}
+
+const getOrdersByUser = async (userId, search = '', page = 1, limit = 2, startDate = '', endDate = '') => {
     // Ensure userId is a proper ObjectId for query reliability
     const userObjectId = new mongoose.Types.ObjectId(userId);
     let query = { user: userObjectId };
@@ -96,23 +102,42 @@ const getOrdersByUser = async (userId, search = '') => {
             { "items.productName": searchRegex }
     ];
   }
+  if(startDate || endDate){
+    query.orderDate={};
+    if(startDate){
+      query.orderDate.$gte=new Date(startDate);
+    }
+    if(endDate){
+      const end=new Date(endDate);
+      end.setHours(23,59,59,999);
+      query.orderDate.$lte=end;
+    }
+  }
 
-  return await Order.find(query)
+  const skip = (page - 1) * limit;
+
+  const orders = await Order.find(query)
     .sort({ orderDate: -1 })
     .populate('user')
     .populate({
       path: 'items.product',
       model: 'Product'
-    });
+    })
+    .skip(skip)
+    .limit(limit);
+
+  const totalOrders = await Order.countDocuments(query);
+
+  return {
+    orders,
+    totalPages: Math.ceil(totalOrders / limit),
+    currentPage: page
+  };
 };
 
-const getAllOrdersAdmin = async (page = 1, limit = 10, search = '', status = '') => {
+const getAllOrdersAdmin = async (page = 1, limit = 10, search = '',startDate='',endDate='') => {
   const skip = (page - 1) * limit;
   let query = {};
-
-  if (status && status !== 'all') {
-    query.status = status;
-  }
 
   // Advanced search for OrderID or User Name
   if (search) {
@@ -121,6 +146,18 @@ const getAllOrdersAdmin = async (page = 1, limit = 10, search = '', status = '')
       { orderId: { $regex: search, $options: 'i' } },
       { user: { $in: userIds } }
     ];
+  }
+  if(startDate || endDate){
+    query.orderDate={};
+    if(startDate){
+      query.orderDate.$gte=new Date(startDate);
+
+    }
+    if(endDate){
+      const end=new Date(endDate);
+      end.setHours(23,59,59,999);
+      query.orderDate.$lte=end;
+    }
   }
 
   const orders = await Order.find(query)
@@ -182,7 +219,7 @@ const updateOrderItemStatus = async (orderId, itemId, status, reason = null) => 
   if (reason) item.reason = reason;
 
   // Handle stock restoration for individual item cancellation/return
-  if ((status === 'Cancelled' ) && (oldStatus !== 'Cancelled' && oldStatus !== 'Returned')) {
+  if ((status === 'Cancelled' || status === 'Returned') && (oldStatus !== 'Cancelled' && oldStatus !== 'Returned')) {
     await Product.updateOne(
       { _id: item.product, "variants._id": item.variantId },
       { $inc: { "variants.$.stock": item.quantity } }
@@ -215,5 +252,6 @@ module.exports = {
   getOrdersByUser,
   getAllOrdersAdmin,
   updateOrderStatus,
-  updateOrderItemStatus
+  updateOrderItemStatus,
+  getOrderByIdAndUser
 };

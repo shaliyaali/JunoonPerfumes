@@ -20,7 +20,10 @@ const toggleWishlist = async (userId, productId, variantId) => {
 
 const getWishlistByUser = async (userId) => {
   return await Wishlist.find({ user: userId })
-    .populate('product')
+    .populate({
+      path: 'product',
+      populate: { path: 'category' }
+    })
     .sort({ createdAt: -1 });
 };
 

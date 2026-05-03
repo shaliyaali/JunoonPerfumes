@@ -1,20 +1,23 @@
 const orderService = require('../../services/orderService');
+const order=require('../../model/orderSchema')
 
 const loadOrders = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const search = req.query.search || '';
-        const status = req.query.status || 'all';
         const limit = 10;
+        const startDate=req.query.startDate || '';
+        const endDate=req.query.endDate || '';
 
-        const { orders, totalPages, currentPage } = await orderService.getAllOrdersAdmin(page, limit, search, status);
+        const { orders, totalPages, currentPage } = await orderService.getAllOrdersAdmin(page, limit, search,startDate,endDate);
 
         res.render('orderManagement', {
             orders,
             totalPages,
             currentPage,
             search,
-            status
+            startDate,
+            endDate
         });
     } catch (error) {
         console.error('Error loading admin orders:', error);
@@ -22,25 +25,16 @@ const loadOrders = async (req, res) => {
     }
 };
 
-const changeStatus = async (req, res) => {
-    try {
-        const { orderId, status } = req.body;
-        await orderService.updateOrderStatus(orderId, status);
-        res.json({ success: true });
-    } catch (error) {
-        console.error('Error updating order status:', error);
-        res.status(400).json({ success: false, message: error.message });
-    }
-};
+
 
 const changeItemStatus = async (req, res) => {
     try {
-        const { orderId, itemId, status } = req.body;
-        await orderService.updateOrderItemStatus(orderId, itemId, status);
-        res.json({ success: true });
+        const { orderId, itemId, status ,reason} = req.body;
+        await orderService.updateOrderItemStatus(orderId, itemId, status,reason);
+        res.json({ success: true ,message:'Item status updated'});
     } catch (error) {
         console.error('Error updating item status:', error);
-        res.status(400).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -48,11 +42,12 @@ const loadOrderDetails = async (req, res) => {
     try {
         const order = await orderService.getOrderById(req.params.orderId);
         if (!order) return res.redirect('/admin/orders');
-        res.render('orderDetails', { order });
+        const address=order.user.addresses.id(order.shippingAddress);
+        res.render('orderDetails', { order,address });
     } catch (error) {
         console.error('Error loading order details:', error);
         res.redirect('/admin/orders');
     }
 };
 
-module.exports = { loadOrders, changeStatus, loadOrderDetails, changeItemStatus };
+module.exports = { loadOrders,loadOrderDetails, changeItemStatus };

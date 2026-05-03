@@ -4,6 +4,12 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>All Fragrances | Junoon Perfumes</title>
+<!-- Global Logic -->
+<script src="/js/wishlist.js"></script>
+<script src="/js/cart.js"></script>
+
+
+
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
@@ -63,115 +69,8 @@
     </style>
 </head>
 <body class="bg-warm-ivory text-rich-black antialiased">
-<!-- <header class="sticky top-0 z-50 w-full bg-deep-black border-b border-primary/20 px-6">
-<div class="max-w-[1550px] mx-auto flex items-center justify-between py-4">
-<a class="flex items-center gap-3 group" href="#">
-<div class="text-primary">
-<svg class="w-8 h-8" fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-<path d="M24 4C24 4 42 4 42 17.3333C42 30.6667 42 30.6667 42 30.6667H24V44H6V30.6667C6 30.6667 6 30.6667 6 17.3333C6 4 24 4 24 4Z"></path>
-</svg>
-</div>
-<div class="flex flex-col">
-<h1 class="text-white text-xl font-display font-bold tracking-[0.1em] leading-tight">JUNOON <span class="font-light">Perfumes</span></h1>
-<span class="text-[8px] text-primary tracking-[0.4em] uppercase font-medium">Anussatti smrti</span>
-</div>
-</a>
-<nav class="hidden lg:flex items-center gap-10">
-<a class="text-gray-300 hover:text-primary text-xs font-bold tracking-[0.2em] transition-colors" href="#">HOME</a>
-<a class="text-gray-300 hover:text-primary text-xs font-bold tracking-[0.2em] transition-colors" href="#">BEST SELLER</a>
-<a class="text-primary text-xs font-bold tracking-[0.2em] border-b border-primary" href="#">ALL FRAGRANCE</a>
-<a class="text-gray-300 hover:text-primary text-xs font-bold tracking-[0.2em] transition-colors" href="#">SHOP</a>
-</nav>
-<div class="flex items-center gap-6">
-<div class="hidden md:flex items-center border-b border-white/20 pb-1">
-<span class="material-symbols-outlined text-primary text-xl">search</span>
-<input class="bg-transparent border-none focus:ring-0 text-xs text-white placeholder-gray-500 w-32 ml-2" placeholder="SEARCH SCENT" type="text"/>
-</div>
-<div class="flex items-center gap-5">
-<button class="text-gray-300 hover:text-primary transition-colors">
-<span class="material-symbols-outlined">favorite</span>
-</button>
-<button class="relative text-gray-300 hover:text-primary transition-colors">
-<span class="material-symbols-outlined">shopping_bag</span>
-<span class="absolute -top-1 -right-1 bg-primary text-deep-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
-</button>
-</div>
-</div>
-</div>
-</header> -->
-<header class="sticky top-0 z-50 w-full bg-[var(--deep-black)] border-b border-primary/20 px-6 md:px-16 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-12">
-        <div class="flex items-center gap-4 group cursor-pointer">
-            <div class="relative w-10 h-12 flex flex-col items-center justify-center">
-                <div class="w-6 h-1 bg-primary mb-[1px]"></div>
-                <div class="w-3 h-3 border-2 border-primary rounded-full mb-[1px]"></div>
-                <div class="w-8 h-8 border-r-4 border-b-4 border-l-4 border-primary rounded-b-sm flex items-end justify-start p-1">
-                    <div class="w-3 h-4 border-l-4 border-t-4 border-primary"></div>
-                </div>
-            </div>
-            <div class="flex flex-col leading-none">
-                <h1 class="text-primary font-serif text-3xl font-bold tracking-[0.1em] uppercase gold-text-effect">JUNOON</h1>
-                <div class="flex flex-col">
-                    <span class="text-primary font-serif text-[10px] tracking-[0.4em] uppercase ml-1 opacity-90">Perfumes</span>
-                    <span class="text-primary font-serif italic text-[8px] tracking-[0.15em] ml-1 opacity-80 mt-0.5">Anussatti smrti</span>
-                </div>
-            </div>
-        </div>
-        <nav class="hidden lg:flex items-center gap-8 ml-4">
-           <a class="text-xs font-bold tracking-[0.2em] text-luxury-ivory hover:text-primary transition-colors" href="/">HOME</a>
-          <a class="text-xs font-bold tracking-[0.2em] text-luxury-ivory hover:text-primary transition-colors" href="#">BEST SELLER</a>
-          <a class="text-xs font-bold tracking-[0.2em] text-primary border-b border-primary" href="/allfragrence">ALL FRAGRANCE</a>
-            <div class="relative group">
-                <button class="flex items-center gap-1 text-xs font-bold tracking-[0.2em] text-luxury-ivory hover:text-primary transition-colors">
-                    SHOP <span class="material-symbols-outlined text-sm">expand_more</span>
-                </button>
-                <!-- Added a wrapper with pt-4 to bridge the hover gap -->
-                <div class="absolute top-full left-0 pt-4 hidden group-hover:block w-48 z-50">
-                    <div class="bg-luxury-black border border-primary/20 p-4 rounded shadow-2xl">
-                        <ul class="space-y-3">
-                            <% if(typeof categories !== 'undefined') { %>
-                                <% categories.forEach(cat => { %>
-                                    <li><a class="text-[10px] tracking-widest text-luxury-ivory hover:text-primary block transition-colors" href="/allfragrence?category=<%= cat._id %>"><%= cat.name.toUpperCase() %></a></li>
-                                <% }) %>
-                            <% } %>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    </div>
-    <div class="flex items-center gap-6">
-        <!-- <div class="hidden md:flex items-center border-b border-primary/30 py-1">
-            <span class="material-symbols-outlined text-primary text-xl">search</span>
-            <input name="search" class="bg-transparent border-none text-[10px] tracking-widest text-luxury-ivory focus:ring-0 placeholder:text-gray-500 w-32 uppercase" placeholder="SEARCH PERFUMES" type="text" value="<%= search %>"/>
-        </div> -->
-        <form id="header-search-form" action="/allfragrence" method="Get" class="hidden md:flex items-center border-b border-primary/30 py-1 ">
-             <button type="submit" class="material-symbols-outlined text-primary text-xl">search</button>
-            <input name="search" class="bg-transparent border-none text-[10px] tracking-widest text-luxury-ivory focus:ring-0 placeholder:text-gray-500 w-32 uppercase" placeholder="SEARCH PERFUMES" type="text" value="<%= search %>"/>
-        
-        </form>
-        <% if (typeof session !== 'undefined' && session && session.user) { %>
-            <a href="/profile" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold uppercase">
-                <%= session.user.name.charAt(0) %>
-            </a>
-        <% } else { %>
-            <a href="/signup" class="px-5 py-2 border border-primary text-primary font-semibold text-sm rounded-full hover:bg-primary hover:text-white transition">Sign UP</a>
-            <a href="/signin" class="px-5 py-2 border border-primary text-primary font-semibold text-sm rounded-full hover:bg-primary hover:text-white transition">Login</a>
-        <% } %>
-        <div class="flex items-center gap-5">
-            <% if (typeof session !== 'undefined' && session && session.user) { %>
-                <a href="/wishlist" class="text-luxury-ivory hover:text-primary transition-colors relative">
-                    <span class="material-symbols-outlined">favorite_border</span>
-                    <span id="wishlist-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof wishlistCount !== 'undefined' && wishlistCount > 0) ? '' : 'hidden' %>"><%= typeof wishlistCount !== 'undefined' ? wishlistCount : 0 %></span>
-                </a>
-                <a href="/cart" class="text-luxury-ivory hover:text-primary transition-colors relative">
-                    <span class="material-symbols-outlined">shopping_bag</span>
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-primary text-black text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center <%= (typeof cartCount !== 'undefined' && cartCount > 0) ? '' : 'hidden' %>"><%= typeof cartCount !== 'undefined' ? cartCount : 0 %></span>
-                </a>
-            <% } %>
-        </div>
-    </div>
-</header>
+
+<%- include('partials/_mainheader', { session, wishlistCount, cartCount, categories, search, activePage: 'allfragrance' }) %>
 
 <input type="hidden" id="success-message" value="<%= typeof message !== 'undefined' ? message : '' %>">
 <section class="hero-gradient pt-20 pb-24 px-6 text-center relative overflow-hidden">
@@ -295,16 +194,23 @@
                         </div>
                     </div>
                     <div class="absolute top-4 left-4 right-4 flex justify-between items-start">
-                        <% if (prod.offer > 0) { %>
-                            <span class="bg-primary text-luxury-black text-[10px] font-bold px-2 py-1 uppercase tracking-wider">
-                                <%= prod.offer %>% OFF
-                            </span>
-                        <% } else { %>
-                            <div></div>
-                        <% } %>
+                     <%
+                        const pOffer=prod.offer || 0;
+                        const cOffer=(prod.category && prod.category.offer) || 0; 
+                        const currentMaxOffer=Math.max(pOffer,cOffer);
+                    %>
+                    <% if(currentMaxOffer > 0){ %>
+                            <span class="bg-primary text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider">
+                    <%= currentMaxOffer %>%OFF
+                </span> 
+                <% } else { %>
+                <div>   </div>
+                <% } %>
+                           
+                        
                         <% const isInWishlist = typeof wishlistIds !== 'undefined' && wishlistIds.includes(prod._id.toString()) %>
-                        <button type="button" onclick="event.stopPropagation(); toggleWishlist('<%= prod._id %>', '<%= prod.variants[0]._id %>')" class="text-gray-400 hover:text-primary transition-colors wishlist-btn-<%= prod._id %> <%= isInWishlist ? 'hidden' : '' %>">
-                            <span class="material-symbols-outlined">favorite</span>
+                        <button type="button" onclick="event.stopPropagation(); toggleWishlist('<%= prod._id %>', '<%= prod.variants[0]._id %>')" class="transition-colors wishlist-btn-<%= prod._id %> <%= isInWishlist ? 'text-primary' : 'text-gray-400' %>">
+                            <span class="material-symbols-outlined" style="<%= isInWishlist ? "font-variation-settings: 'FILL' 1" : '' %>">favorite</span>
                         </button>
                     </div>
                 </div>
@@ -313,14 +219,19 @@
                     <h4 class="text-xl font-serif font-medium text-gray-900 mb-2 tracking-wide"><%= prod.name %></h4>
                     <p class="text-[10px] text-gray-500 mb-6 font-medium uppercase tracking-widest italic"><%= prod.tagline %></p>
                     <div class="mt-auto space-y-4">
-                        <span class="text-lg font-bold text-gray-900 block">
-                            <% if (prod.variants && prod.variants.length > 0) { %>
-                                ₹<%= Math.min(...prod.variants.map(v => v.price)).toLocaleString() %>
+                        <div class="flex flex-col items-center">
+                        <% if(prod.variants && prod.variants.length > 0) {
+                            const cheapestVariant = prod.variants.reduce((prev, curr) => prev.salePrice < curr.salePrice ? prev : curr);
+                        %>
+                            <% if(cheapestVariant.salePrice < cheapestVariant.price){ %>
+                                <span class="text-sm text-gray-400 line-through">₹<%= cheapestVariant.price.toLocaleString() %></span>
+                                <span class="text-lg font-bold text-gray-900">₹<%= cheapestVariant.salePrice.toLocaleString() %></span>
                             <% } else { %>
-                                N/A
+                                <span class="text-lg font-bold text-gray-900">₹<%= cheapestVariant.price.toLocaleString() %></span>
                             <% } %>
-                        </span>
-                        <button type="button" onclick="handleAddToCart('<%= prod._id %>', '<%= prod.variants[0]._id %>')" class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                        <% } %>
+                        </div>
+                        <button type="button" onclick="VarientSelectionModal('<%= prod._id %>')" class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
                             Add to Cart
                         </button> 
                     </div>
@@ -361,6 +272,39 @@
 </section>
 
 </main>
+
+<!-- Variant Selection Modal -->
+<div id="variant-selection-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl transform transition-all">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-xl font-serif font-bold text-gray-900" id="modal-product-name">Select Size</h3>
+            <button onclick="closeVariantModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-8">
+            <input type="hidden" id="modal-product-id">
+            <div class="mb-8">
+                <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-4">Available Sizes</label>
+                <div id="variant-options" class="grid grid-cols-2 gap-3">
+                    <!-- Variants injected via JS -->
+                </div>
+            </div>
+            <div class="mb-8">
+                <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-4">Quantity (Max 5)</label>
+                <div class="flex items-center border border-gray-200 w-32">
+                    <button onclick="updateModalQty(-1)" class="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50">-</button>
+                    <input type="number" id="modal-qty" value="1" min="1" max="5" readonly class="w-12 h-10 border-none text-center focus:ring-0 text-sm font-bold">
+                    <button onclick="updateModalQty(1)" class="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50">+</button>
+                </div>
+            </div>
+            <button id="confirm-add-btn" class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                Confirm Selection
+            </button>
+        </div>
+    </div>
+</div>
+
 <footer class="bg-luxury-black text-luxury-ivory pt-24 pb-12 px-6 md:px-16">
     <div class="max-w-7xl mx-auto">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
@@ -440,7 +384,16 @@
 </div> -->
 
 <script>
+    
+
+    window.allProducts= <%- JSON.stringify(product || []) %>;
+    window.Junoon={
+        isAuthenticated: <%= (typeof session !== 'undefined' && session && session.user)? 'true' : 'false' %>
+
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+        // Existing DOMContentLoaded logic
         const applyBtn = document.getElementById('apply-filters');
         const clearBtn = document.getElementById('clear-filters');
         const productGrid = document.getElementById('product-grid');
@@ -489,6 +442,7 @@
                 const response = await fetch(`/allfragrence?${params.toString()}`);
                 const data = await response.json();
                 
+                window.allProducts = data.product;
                 renderProducts(data.product, data.wishlistIds || []);
                 productCount.textContent = data.product.length;
                 updateHeaderCounts(data.cartCount, data.wishlistCount);
@@ -510,12 +464,19 @@
             }
 
             productGrid.innerHTML = products.map(prod => {
-                const minPrice = prod.variants && prod.variants.length > 0 
-                    ? Math.min(...prod.variants.map(v => v.price)).toLocaleString() 
-                    : 'N/A';
+                const cheapestVariant= (prod.variants && prod.variants.length >0)?
+                prod.variants.reduce((prev, curr) => prev.salePrice < curr.salePrice ? prev : curr) : null;
+
+                const pOffer=prod.offer || 0;
+                const cOffer=(prod.category && prod.category.offer) || 0; 
+                const maxOffer=Math.max(pOffer,cOffer);
                 const categoryName = prod.category ? prod.category.name : 'Perfume';
                 const image = prod.images && prod.images.length > 0 ? prod.images[0] : 'https://via.placeholder.com/400x500';
                 const isHidden = wishlistIds.includes(prod._id.toString()) ? 'hidden' : '';
+                const isInWishlist=wishlistIds.includes(prod._id.toString());
+                const btnColor = isInWishlist ? 'text-primary' : 'text-gray-400';
+                const fillStyle = isInWishlist ? 'font-variation-settings: "FILL" 1' : '';
+                
 
                 return `
                     <div class="group flex flex-col bg-white border border-gray-100 product-card-shadow transition-all duration-500">
@@ -529,12 +490,12 @@
                                 </div>
                             </div>
                             <div class="absolute top-4 left-4 right-4 flex justify-between items-start">
-                                ${prod.offer > 0 
-                                    ? `<span class="bg-primary text-luxury-black text-[10px] font-bold px-2 py-1 uppercase tracking-wider">${prod.offer}% OFF</span>` 
+                               ${maxOffer > 0 ? `<span class="bg-primary text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider">${maxOffer}% OFF</span>` 
+
                                     : '<div></div>'}
-                                <button type="button" onclick="event.stopPropagation(); toggleWishlist('${prod._id}', '${prod.variants[0]._id}')" class="text-gray-400 hover:text-primary transition-colors wishlist-btn-${prod._id} ${isHidden}">
-                                    <span class="material-symbols-outlined">favorite</span>
-                                </button>
+                                <button type="button" onclick="event.stopPropagation(); toggleWishlist('${prod._id}', '${prod.variants[0]._id}')" class="${btnColor} transition-colors wishlist-btn-${prod._id}">
+                                    <span class="material-symbols-outlined" ${fillStyle}>favorite</span>
+                                    </button>
                             </div>
                         </div>
                         <div class="p-8 flex flex-col flex-1 text-center">
@@ -542,8 +503,13 @@
                             <h4 class="text-xl font-serif font-medium text-gray-900 mb-2 tracking-wide">${prod.name}</h4>
                             <p class="text-[10px] text-gray-500 mb-6 font-medium uppercase tracking-widest italic">${prod.tagline || ''}</p>
                             <div class="mt-auto space-y-4">
-                                <span class="text-lg font-bold text-gray-900 block">₹${minPrice}</span>
-                                <button type="button" onclick="handleAddToCart('${prod._id}', '${prod.variants[0]._id}')" class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
+                             <div class="flex flex-col items-center">
+                                ${cheapestVariant ?(cheapestVariant.salePrice < cheapestVariant.price ?`<span class="text-sm text-gray-400 line-through">₹${cheapestVariant.price.toLocaleString()}</span>
+                                          <span class="text-lg font-bold text-gray-900">₹${cheapestVariant.salePrice.toLocaleString()}</span>`
+                                       : `<span class="text-lg font-bold text-gray-900">₹${cheapestVariant.price.toLocaleString()}</span>`
+                                   ) : '<span class="text-lg font-bold text-gray-900">Out of Stock</span>'}
+                                </div>
+                                <button type="button" onclick="VarientSelectionModal('${prod._id}')" class="w-full py-4 bg-primary text-deep-black text-[10px] font-bold uppercase tracking-widest border border-primary hover:bg-deep-black hover:text-primary transition-all duration-300">
                                     Add to Cart
                                 </button>
                             </div>
@@ -578,69 +544,174 @@
         });
     });
 
-    async function toggleWishlist(productId, variantId) {
-        try {
-            const response = await fetch('/wishlist/toggle', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId, variantId })
-            });
-
-            if (response.status === 401) return window.location.href = '/signin';
-
-            const data = await response.json();
-            if (data.success) {
-                const wishBadge = document.getElementById('wishlist-count');
-                if (wishBadge) { wishBadge.textContent = data.wishlistCount; wishBadge.classList.remove('hidden'); }
-
-                const icon = document.querySelector(`.wishlist-btn-${productId} span`);
-                if (data.added) {
-                    icon.style.fontVariationSettings = "'FILL' 1";
-                    Swal.fire({ icon: 'success', title: 'Added to Wishlist', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
-                } else {
-                    icon.classList.remove('text-primary');
-                    icon.style.fontVariationSettings = "'FILL' 0";
-                    Swal.fire({ icon: 'info', title: 'Removed from Wishlist', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+    function VarientSelectionModal(productId) {
+        if (!window.Junoon.isAuthenticated) {
+            Swal.fire({
+                title: 'Sign In Required',
+                text: "Please sign in to your account to add items to your shopping bag.",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#d4af37',
+                cancelButtonColor: '#1a1a1a',
+                confirmButtonText: 'Go to Sign In',
+                cancelButtonText: 'Maybe Later'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/signin`;
                 }
-            }
-        } catch (error) {
-            console.error('Wishlist error:', error);
-            // Avoid forced redirect unless explicitly necessary
-        }
-    }
-
-    async function handleAddToCart(productId, variantId) {
-        try {
-            const response = await fetch('/cart/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId, variantId , quantity: 1})
             });
-
-            if (response.status === 401) return window.location.href = '/signin';
-
-            const data = await response.json();
-            if (data.success) {
-                const cartBadge = document.getElementById('cart-count');
-                const floatBadge = document.getElementById('floating-cart-count');
-                if (cartBadge) { cartBadge.textContent = data.cartCount; cartBadge.classList.remove('hidden'); }
-                if (floatBadge) { floatBadge.textContent = data.cartCount; }
-
-                Swal.fire({ 
-                    icon: 'success', 
-                    title: 'Added to Cart', 
-                    toast: true, 
-                    position: 'top-end', 
-                    showConfirmButton: false, 
-                    timer: 1500 
-                });
-            } else {
-                Swal.fire({ icon: 'error', title: 'Action Failed', text: data.message });
-            }
-        } catch (error) {
-            console.error('Cart error:', error);
+            return;
         }
+
+        const product = window.allProducts.find(p => p._id === productId);
+        if (!product) return;
+
+        document.getElementById('modal-product-name').textContent = product.name;
+        document.getElementById('modal-product-id').value = productId;
+        document.getElementById('modal-qty').value = 1;
+
+        const optionsContainer = document.getElementById('variant-options');
+        optionsContainer.innerHTML = product.variants.map((v, index) => {
+            const priceDisplay = `<p class="text-[10px] font-bold text-primary">₹${v.salePrice.toLocaleString()}</p>`;
+            
+            const stockDisplay = v.stock > 0 
+                ? `<span class="text-[9px] text-gray-500 block">In Stock (${v.stock})</span>`
+                : `<span class="text-[9px] text-red-500 block">Sold Out</span>`;
+
+            return `
+            <label class="relative cursor-pointer group">
+                <input type="radio" name="variant-choice" value="${v._id}" class="peer hidden" ${index === 0 ? 'checked' : ''} data-stock="${v.stock}">
+                <div class="border border-gray-200 p-3 text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-gray-900">${v.size}</p>
+                    ${priceDisplay}
+                    ${stockDisplay}
+                </div>
+            </label>
+        `}).join('');
+
+        const modal = document.getElementById('variant-selection-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     }
+
+    function closeVariantModal() {
+        const modal = document.getElementById('variant-selection-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function updateModalQty(change) {
+        const input = document.getElementById('modal-qty');
+        let val = parseInt(input.value) + change;
+        if (val < 1) val = 1;
+        if (val > 5) val = 5;
+        input.value = val;
+    }
+
+    document.getElementById('confirm-add-btn').addEventListener('click', () => {
+        const productId = document.getElementById('modal-product-id').value;
+        const variantRadio = document.querySelector('input[name="variant-choice"]:checked');
+        const quantity = parseInt(document.getElementById('modal-qty').value);
+
+        if (!variantRadio) return Swal.fire('Error', 'Please select a size', 'error');
+        
+        const stock = parseInt(variantRadio.dataset.stock);
+        if (stock <= 0) return Swal.fire('Error', 'Selected size is out of stock', 'error');
+        if (quantity > stock) return Swal.fire('Error', `Only ${stock} units available`, 'error');
+
+        handleAddToCart(productId, variantRadio.value, quantity);
+        closeVariantModal();
+    });
+
+    // async function toggleWishlist(productId, variantId) {
+    //     if (!isAuthenticated) {
+    //         Swal.fire({
+    //             title: 'Sign In Required',
+    //             text: "Please sign in to your account to add items to your wishlist.",
+    //             icon: 'info',
+    //             showCancelButton: true,
+    //             confirmButtonColor: '#d4af37',
+    //             cancelButtonColor: '#1a1a1a',
+    //             confirmButtonText: 'Go to Sign In',
+    //             cancelButtonText: 'Maybe Later'
+    //         }).then((result) => {
+    //             if (result.isConfirmed) {
+    //                 // localStorage.setItem('pendingProductId', productId); // Store product ID before redirect
+    //                 // const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+    //                 window.location.href = '/signin';
+    //             }
+    //         });
+    //         return;
+    //     }
+
+    //     try {
+    //         const response = await fetch('/wishlist/toggle', {
+    //             method: 'POST',
+    //             headers: { 'Content-Type': 'application/json' },
+    //             body: JSON.stringify({ productId, variantId })
+    //         });
+
+    //         if (response.status === 401) return window.location.href = '/signin';
+
+    //         const data = await response.json();
+    //         if (data.success) {
+    //             const wishBadge = document.getElementById('wishlist-count');
+    //             if (wishBadge) { wishBadge.textContent = data.wishlistCount; wishBadge.classList.remove('hidden'); }
+
+
+
+    //             const btn = document.querySelector(`.wishlist-btn-${productId}`);
+    //             const icon = btn.querySelector('span');
+    //             if (data.added) {
+    //                 btn.classList.remove('text-gray-400');
+    //                 btn.classList.add('text-primary');
+    //                 icon.style.fontVariationSettings = "'FILL' 1";
+    //                 Swal.fire({ icon: 'success', title: 'Added to Wishlist', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+    //             } else {
+    //                 btn.classList.remove('text-primary');
+    //                 btn.classList.add('text-gray-400');
+    //                 icon.style.fontVariationSettings = "'FILL' 0";
+    //                 Swal.fire({ icon: 'info', title: 'Removed from Wishlist', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+    //             }
+    //         }
+    //     } catch (error) {
+    //         console.error('Wishlist error:', error);
+    //         // Avoid forced redirect unless explicitly necessary
+    //     }
+    // }
+
+    // async function handleAddToCart(productId, variantId, quantity = 1) {
+    //     try {
+    //         const response = await fetch('/cart/add', {
+    //             method: 'POST',
+    //             headers: { 'Content-Type': 'application/json' },
+    //             body: JSON.stringify({ productId, variantId, quantity })
+    //         });
+
+    //         if (response.status === 401) return window.location.href = '/signin';
+
+    //         const data = await response.json();
+    //         if (data.success) {
+    //             const cartBadge = document.getElementById('cart-count');
+    //             const floatBadge = document.getElementById('floating-cart-count');
+    //             if (cartBadge) { cartBadge.textContent = data.cartCount; cartBadge.classList.remove('hidden'); }
+    //             if (floatBadge) { floatBadge.textContent = data.cartCount; }
+
+    //             Swal.fire({ 
+    //                 icon: 'success', 
+    //                 title: 'Added to Cart', 
+    //                 toast: true, 
+    //                 position: 'top-end', 
+    //                 showConfirmButton: false, 
+    //                 timer: 1500 
+    //             });
+    //         } else {
+    //             Swal.fire({ icon: 'error', title: 'Action Failed', text: data.message });
+    //         }
+    //     } catch (error) {
+    //         console.error('Cart error:', error);
+    //     }
+    // }
 
      const msg = document.getElementById('success-message').value;
 if (msg) {

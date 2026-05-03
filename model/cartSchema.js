@@ -16,6 +16,7 @@ const cartSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       required: true
     },
+    variantSize: { type: String },
     quantity: { type: Number, default: 1, max: 5 },
     price: { type: Number, required: true } // Price at the time of adding (best offer applied)
   }]

@@ -11,6 +11,7 @@ const nocache = require('nocache')
 const connectDB = require("./config/db")
 const passport = require('./config/passport')
 const flash = require('connect-flash')
+const errorHandler = require('./middlewares/errorHandler');
 
 app.use(nocache())
 
@@ -52,10 +53,7 @@ app.set('views', [path.join(__dirname, 'views/user'), path.join(__dirname, 'view
 app.use(express.static(path.join(__dirname, "public")));
 
 
-
-
-
-
+app.use(errorHandler);
 
 
 const PORT = process.env.PORT
