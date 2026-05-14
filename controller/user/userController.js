@@ -1,20 +1,22 @@
 const PDFDocument = require('pdfkit');
 
-const userService = require('../services/userService')
+const userService = require('../../services/userService')
 const nodemailer = require('nodemailer')
 require('dotenv').config()
-const { createOtpSession,getRemainingTime } = require('../utils/otpManager')
-const { verifyOtpSession, clearOtpSession } = require('../utils/otpManager')
+const { createOtpSession,getRemainingTime } = require('../../utils/otpManager')
+const { verifyOtpSession, clearOtpSession } = require('../../utils/otpManager')
 const bcrypt = require('bcrypt')
-const { validatePincodeMatch } = require('../utils/pincodeValidator')
+const { validatePincodeMatch } = require('../../utils/pincodeValidator')
 const passport = require('passport')
-const wishlistService = require('../services/wishlistService')
-const productService = require('../services/productService')
-const cartService = require('../services/cartService')
-const Category=require('../model/categorySchema')
-const Order = require('../model/orderSchema');
-const Coupon = require('../model/couponSchema');
-const orderService = require('../services/orderService');
+const wishlistService = require('../../services/wishlistService')
+const productService = require('../../services/productService')
+const cartService = require('../../services/cartService')
+const Category=require('../../model/categorySchema')
+const Order = require('../../model/orderSchema');
+const Coupon = require('../../model/couponSchema');
+const Wallet = require('../../model/walletSchema');
+const orderService = require('../../services/orderService');
+const Cart = require('../../model/cartSchema');
 
 // Helper function to get common header data
 const getCommonHeaderData = async (req) => {
@@ -33,8 +35,7 @@ const getCommonHeaderData = async (req) => {
 
 const loadhome = async (req, res, next) => {
   try {
-   // let wishlistCount = 0;
-    //let cartCount = 0;
+  
     const { wishlistCount, cartCount, categories } = await getCommonHeaderData(req);
     let wishlistIds = [];
     if (req.session.user) {
@@ -42,13 +43,8 @@ const loadhome = async (req, res, next) => {
       wishlistIds=wishlist.map(item=>item.product._id.toString());
     }
     
-       // cartCount = cart ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
-      // const wishlist = await wishlistService.getWishlistByUser(req.session.user.id);
-      // wishlistIds = wishlist.map(item => item.product._id.toString());
-
-    
-    // Fetch up to 8 featured products that are currently active
-    const featuredProducts = await productService.getProducts({ isFeatured: true, status: 'Active' }, 1, 8);
+    // Fetch up to 6 featured products that are currently active
+    const featuredProducts = await productService.getProducts({ isFeatured: true, status: 'Active' }, 1, 6);
 
     res.render('account/home', { 
         wishlistCount, 
@@ -92,7 +88,6 @@ const loadProfile = async (req, res,next) => {
     const { wishlistCount, cartCount ,categories} = await getCommonHeaderData(req);
     const user = await userService.getUserById(req.session.user.id)
    
-    // return res.render('account/profile', { user, message, wishlistCount, cartCount,categories, activePage: 'profile' });
     return res.render('account/profile', { user, message, wishlistCount, cartCount, categories, search: "", activePage: 'profile', session: req.session });
   } catch (error) {
     next(error)
@@ -126,7 +121,7 @@ const loadWishlist = async (req, res) => {
     })
 
     return res.render('account/wishlist', { 
-        user, // User is needed for sidebar
+        user, 
         message, 
         session: req.session,
         wishlistCount,
@@ -141,6 +136,20 @@ const loadWishlist = async (req, res) => {
     // Temporarily send the error to the screen so you can see what's wrong
     if (process.env.NODE_ENV === 'development') return res.status(500).send(error.message);
     return res.redirect('/');
+  }
+};
+
+const loadRefer = async (req, res, next) => {
+  try {
+    const { wishlistCount, cartCount, categories } = await getCommonHeaderData(req);
+    const user = await userService.getUserById(req.session.user.id);
+    
+    res.render('account/refer', {
+      user, wishlistCount, cartCount, categories,
+      session: req.session, search: "", activePage: 'refer'
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -229,6 +238,7 @@ const loadCheckout = async (req, res, next) => {
     const userId = req.session.user.id;
     const user = await userService.getUserAddresses(userId);
     const cart = await cartService.getCart(userId);
+    const wallet = await Wallet.findOne({ user: userId });
 
     if (!cart || cart.items.length === 0) {
       req.session.message = 'Your cart is empty. Please add items before checking out.';
@@ -247,23 +257,39 @@ const loadCheckout = async (req, res, next) => {
     for (const item of cart.items) {
         subtotal += item.price * item.quantity;
     }
-    const shippingCharge = subtotal > 5000 ? 0 : 50; // Example: Free shipping over 5000
-    const totalAmount = subtotal + shippingCharge; // No coupon logic yet
+    const shippingCharge = 0; 
+    const couponDiscount = 0;
+
+    // Find coupons already used by this user
+    const usedCoupons = await Order.find({ 
+        user: userId, 
+        couponCode: { $ne: null },
+        status: { $ne: 'Cancelled' } // Optional: allow reuse if previous order was cancelled
+    }).distinct('couponCode');
 
     const categories=await Category.find({status:'Active'})
-    // const coupons = await Coupon.find({ status: 'Active', expiryDate: { $gte: new Date() } });
+    // Filter available coupons by checking if they are NOT in the usedCoupons array
+    const coupons = await Coupon.find({ 
+        status: 'Active', 
+        expiryDate: { $gte: new Date() },
+        minPurchase: { $lte: subtotal },
+        code: { $nin: usedCoupons }
+    });
+    const totalAmount = subtotal 
   
     res.render('account/checkout', {
       user,
       cart,
       addresses: user.addresses,
-      subtotal, shippingCharge, totalAmount,
+      subtotal, totalAmount, shippingCharge, couponDiscount,
       message,
-      session: req.session, wishlistCount, cartCount,
+      session: req.session, wishlistCount, cartCount, couponMessage: '',
       size:1,
       categories,
-      search:" "
-
+      search:" ",
+      activePage:'checkout',
+      coupons,
+      wallet: wallet || { balance: 0 }
     });
   } catch (error) {
     next(error);
@@ -272,22 +298,98 @@ const loadCheckout = async (req, res, next) => {
 
 const placeOrder = async (req, res, next) => {
   try {
-    const { selectedAddress, paymentMethod } = req.body;
     const userId = req.session.user.id;
+    const { selectedAddress, paymentMethod, couponCode } = req.body;
 
     if (!selectedAddress || !paymentMethod) {
       req.session.message = 'Please select a shipping address and payment method.';
       return res.redirect('/checkout');
     }
 
-    // no coupon or shipping charge logic here, will be calculated in service
-    const newOrder = await orderService.createOrder(userId, selectedAddress, paymentMethod);
+    // 1. Recalculate Subtotal from Cart (Security: ignore client-side totals)
+    const cart = await cartService.getCart(userId);
+    if (!cart || cart.items.length === 0) {
+      return res.redirect('/cart');
+    }
+
+    const subtotal=cart.items.reduce((acc,item)=> acc + (item.price * item.quantity),0)
+    const shippingCharge = 0;
+    let couponDiscount =0;
+
+    if(couponCode) {
+      const coupon = await Coupon.findOne({
+        code :couponCode,
+        status: 'Active',
+        expiryDate: {$gte :new Date()}
+      });
+
+      if (coupon && subtotal >= coupon.minPurchase) {
+        if (coupon.offerType === 'Percentage') {
+          couponDiscount = Math.min((subtotal * coupon.offerValue) / 100, coupon.maxDiscount || Infinity);
+        } else {
+          couponDiscount = coupon.offerValue;
+        }
+      }
+    }
+    const newOrder = await orderService.createOrder(userId, selectedAddress, paymentMethod, couponDiscount, shippingCharge, couponCode);
+
+    // Clear cart for COD/Wallet as payment is immediate/confirmed
+    await Cart.findOneAndUpdate({ user: userId }, { $set: { items: [] } });
 
     //req.session.message = 'Order placed successfully!';
     res.redirect(`/order-success/${newOrder.orderId}`);
 
   } catch (error) {
     next(error);
+  }
+};
+
+const applyCouponAjax = async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const { couponCode } = req.body;
+    const cart = await cartService.getCart(userId);
+    const subtotal = cart.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    
+    let couponDiscount = 0;
+    let couponMessage = '';
+    
+    const coupon = await Coupon.findOne({ 
+      code: couponCode, 
+      status: 'Active', 
+      expiryDate: { $gte: new Date() } 
+    });
+    
+    if (coupon) {
+       // Security check: Check if user has already used this specific coupon
+        const alreadyUsed = await Order.findOne({ 
+            user: userId, 
+            couponCode: couponCode,
+            status: { $ne: 'Cancelled' } 
+        });
+
+        if (alreadyUsed) {
+            return res.json({ success: false, couponDiscount: 0, couponMessage: 'You have already used this coupon.' });
+        }
+
+      if (subtotal >= coupon.minPurchase) {
+        if (coupon.offerType === 'Percentage') {
+          couponDiscount = Math.min((subtotal * coupon.offerValue) / 100, coupon.maxDiscount || Infinity);
+        } else {
+          couponDiscount = coupon.offerValue;
+        }
+        couponMessage = 'Coupon applied successfully!';
+      } else {
+        couponMessage = `Minimum purchase of ₹${coupon.minPurchase} required.`;
+      }
+    } else {
+      couponMessage = 'Invalid or expired coupon.';
+    }
+
+    const totalAmount = subtotal - couponDiscount;
+    res.json({ success: couponDiscount > 0, subtotal, shippingCharge: 0, couponDiscount, totalAmount, couponMessage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -303,7 +405,7 @@ const loadOrderSuccess = async (req, res, next) => {
     }
     
 
-    res.render('account/orderSuccess', { order, session: req.session , wishlistCount, cartCount,categories});
+    res.render('account/orderSuccess', { order, session: req.session , wishlistCount, cartCount,categories,search:"",activePage:'orderSuccess'});
   } catch (error) {
     next(error);
   }
@@ -318,7 +420,7 @@ const loadMyOrders = async (req, res, next) => {
     const startDate = req.query.startDate || '';
     const endDate = req.query.endDate || '';
     const page=parseInt(req.query.page)|| 1;
-    const limit=2;
+    const limit=4;
     const {orders,totalPages,currentPage} = await orderService.getOrdersByUser(req.session.user.id, search, page, limit, startDate, endDate);
    
     res.render('account/myOrders', { user, wishlistCount, cartCount, categories, orders, search, totalPages, currentPage, session: req.session, activePage:'myorders', startDate, endDate });
@@ -341,6 +443,12 @@ const loadOrderDetails= async(req,res,next)=>{
     const item= order.items.id(itemId);
     const address=order.user.addresses.id(order.shippingAddress);
 
+    // Calculate proportional coupon discount for this specific item
+    const orderSubtotal = order.items.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+    const itemTotal = item.price * item.quantity;
+    const itemCouponDiscount = orderSubtotal > 0 ? Math.round((itemTotal / orderSubtotal) * (order.couponDiscount || 0)) : 0;
+    const finalItemAmount = itemTotal - itemCouponDiscount;
+
     res.render('account/orderDetails',{
       order,
       item,
@@ -349,6 +457,9 @@ const loadOrderDetails= async(req,res,next)=>{
       wishlistCount,
       cartCount,
       categories,
+      itemTotal,
+      itemCouponDiscount,
+      finalItemAmount,
       search: "",
       activePage:'orderDetails',
       user
@@ -392,9 +503,10 @@ const returnOrderItem = async (req, res) => {
     res.json({ success: true, message: 'Return request submitted ' });
   }
   catch(error){
-
+    res.status(400).json({ success: false, message: error.message });
   }
 }
+
 const downloadInvoice = async (req, res) => {
   try {
     const orderId = req.params.orderId;
@@ -570,12 +682,12 @@ const loadForgetPassword = async (req, res) => {
   res.render('auth/forgetpassword', { message })
 }
 
-const registerUser = async (req, res) => {
+const registerUser = async (req, res, next) => {
  try {
   const message = req.session.message
   delete req.session.message
 
-  const { name, email, password, cpassword } = req.body
+  const { name, email, password, cpassword, referralCode } = req.body
 
   if (!name || !email || !password || !cpassword) {
     return res.render('auth/signup', { message: "All fields required" })
@@ -592,20 +704,29 @@ const registerUser = async (req, res) => {
     return res.render('auth/signup', { message: "Passwords do not match" })
   }
 
+    if (referralCode) {
+      const referrer = await userService.findByReferralCode(referralCode);
+      if (!referrer) {
+        return res.render('auth/signup', { message: "Invalid referral code" });
+      }
+     
+      if (referrer.email === email) {
+        return res.render('auth/signup', { message: "You cannot use your own referral code." });
+      }
+
+    }
+
     await userService.checkEmailExist(email)
 
-
     const otp = createOtpSession(req, "signup",
-      { name, email, password })
-      const subject='verify your account';
+      { name, email, password, referralCode })
+
+    const subject='verify your account';
     await sendVerificationEmail(email, otp,subject)
-    console.log("Remaining time:", getRemainingTime(req));
     return res.render('auth/otp', {
        message: 'OTP sent to email', 
        otpRoute: 'verify-otp', 
        remainingTime :60})
-
-
 
   } catch (err) {
     console.error(' sign up error ', err)
@@ -613,53 +734,91 @@ const registerUser = async (req, res) => {
   }
 
 }
-const verifyOtp = async (req, res) => {
-  const { otp } = req.body
-  console.log('inside verify otp')
-  const result = verifyOtpSession(req, otp, "signup")
-  console.log("Remaining time:", getRemainingTime(req));
-  if (!result.sucess)
-    return res.render('auth/otp',  {
-  message: result.message ,
-  otpRoute:'verify-otp',
-  remainingTime :getRemainingTime(req)})
+const verifyOtp = async (req, res, next) => {
+  try {
+    const { otp } = req.body
+    console.log('inside verify otp')
+    const result = verifyOtpSession(req, otp, "signup")
+    
+    if (!result.sucess) {
+      return res.render('auth/otp', {
+        message: result.message,
+        otpRoute: 'verify-otp',
+        remainingTime: getRemainingTime(req)
+      })
+    }
 
-  const userData = result.payload
+    const userData = result.payload
+    console.log('____inside verify otp, usrdata:',userData)
+    const newUser = await userService.createUser(userData)
+    console.log('____inside verify otp',newUser)
+    
+    if (userData.referralCode) {
+      const referrer = await userService.findByReferralCode(userData.referralCode);
+      console.log('____referrer:____',referrer)
+      if (referrer) {
+        const rewardAmount = 100;
 
-  await userService.createUser(userData)
-  clearOtpSession(req)
-  req.session.message='registered sucessfull'
-  return res.redirect('/signin')
+        // Credit Referrer's Wallet
+        await Wallet.findOneAndUpdate(
+          { user: referrer._id },
+          {
+            $inc: { balance: rewardAmount },
+            $push: { transactions: { amount: rewardAmount, type: 'Credit', description: `Referral Reward for inviting ${newUser.name}`, date: new Date() } }
+          },
+          { upsert: true }
+        );
 
+        // Signup Bonus
+        const rewardAmount1=50
+        await Wallet.findOneAndUpdate(
+          { user: newUser._id },
+          {
+            $inc: { balance: rewardAmount1 },
+            $push: { transactions: { amount: rewardAmount1, type: 'Credit', description: 'Referral Signup Bonus', date: new Date() } }
+          },
+          { upsert: true }
+        );
+      }
+    }
 
-}
-
-const resendOtp = async (req, res) => {
-
-  const otpData = req.session.otp
-
-  if (!otpData)
-    return res.redirect('/signup')
-
-  const otp = createOtpSession(req, otpData.purpose, otpData.payload)
-
-  await sendVerificationEmail(
-    otpData.payload.email,
-    otp
-  )
-
-  const routeMap = {
-    "signup": "verify-otp",
-    "change-email": "verify-email-otp",
-    "reset-password": "verify-reset-otp"
+    clearOtpSession(req)
+    req.session.message = 'registered sucessfull'
+    return res.redirect('/signin')
+  } catch (error) {
+    next(error);
   }
+};
 
-  return res.render('auth/otp', {
-    message: "New OTP sent",
-    otpRoute: routeMap[otpData.purpose],
-    remainingTime :getRemainingTime(req)
-  })
-}
+const resendOtp = async (req, res, next) => {
+  try {
+    const otpData = req.session.otp
+
+    if (!otpData)
+      return res.redirect('/signup')
+
+    const otp = createOtpSession(req, otpData.purpose, otpData.payload)
+
+    await sendVerificationEmail(
+      otpData.payload.email,
+      otp
+    )
+
+    const routeMap = {
+      "signup": "verify-otp",
+      "change-email": "verify-email-otp",
+      "reset-password": "verify-reset-otp"
+    }
+
+    return res.render('auth/otp', {
+      message: "New OTP sent",
+      otpRoute: routeMap[otpData.purpose],
+      remainingTime: getRemainingTime(req)
+    })
+  } catch (error) {
+    next(error);
+  }
+};
 
 const userLogin = async (req, res) => {
   try {
@@ -1142,4 +1301,4 @@ const removeCartItem = async (req, res, next) => {
         next(error);
     }
 };
-module.exports = { loadRegister, registerUser, loadhome, pageNotFound, verifyOtp, loadLogin, loadOtp, resendOtp, userLogin, loadProfile, updateProfile, editEmail, verifyEmailOtp, loadForgetPassword, passwordReset, verifyResetOtp, resetPassword ,changePassword,logoutUser,addAddress,editAddress,deleteAddress,loadManageAddress,googleCallback,getPincodeDetails, loadWishlist, toggleWishlist, loadProductDetails, addToCart,loadCart,updateCartQuantity,removeCartItem, loadCheckout, placeOrder, loadOrderSuccess, loadMyOrders, cancelOrderItem, returnOrderItem, downloadInvoice,wishlistToBag ,loadOrderDetails}
+module.exports = { loadRegister, registerUser, loadhome, pageNotFound, verifyOtp, loadLogin, loadOtp, resendOtp, userLogin, loadProfile, updateProfile, editEmail, verifyEmailOtp, loadForgetPassword, passwordReset, verifyResetOtp, resetPassword ,changePassword,logoutUser,addAddress,editAddress,deleteAddress,loadManageAddress,googleCallback,getPincodeDetails, loadWishlist, toggleWishlist, loadProductDetails, addToCart,loadCart,updateCartQuantity,removeCartItem, loadCheckout, placeOrder, loadOrderSuccess, loadMyOrders, cancelOrderItem, returnOrderItem, downloadInvoice,wishlistToBag ,loadOrderDetails, applyCouponAjax, loadRefer}

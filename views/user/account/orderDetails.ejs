@@ -143,13 +143,31 @@
                             <span class="text-gray-500">Payment Status</span>
                             <span class="font-medium"><%= order.paymentStatus %></span>
                         </div>
-                        <div class="flex justify-between text-sm border-t pt-2 mt-2">
-                            <span class="font-bold">Total Amount</span>
-                            <span class="font-bold text-primary">₹<%= (item.price * item.quantity).toLocaleString() %></span>
+                        <div class="flex justify-between text-sm border-t pt-4 mt-2">
+                            <span class="text-gray-500">Item Total (Gross)</span>
+                            <span class="font-medium">₹<%= itemTotal.toLocaleString() %></span>
+                        </div>
+                        <% if (itemCouponDiscount > 0) { %>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">Coupon Discount</span>
+                                <span class="text-green-600 font-medium">- ₹<%= itemCouponDiscount.toLocaleString() %></span>
+                            </div>
+                        <% } %>
+                        <div class="flex justify-between text-lg font-bold border-t pt-2">
+                            <span>Total Amount</span>
+                            <span class="text-primary">₹<%= finalItemAmount.toLocaleString() %></span>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Back to Orders Link -->
+        <div class="mt-8 flex justify-center md:justify-start">
+            <a href="/profile/myorders" class="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Back to My Orders
+            </a>
         </div>
     </main>
 </div>

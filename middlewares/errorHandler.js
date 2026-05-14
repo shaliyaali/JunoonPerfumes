@@ -23,7 +23,7 @@ const errorHandler = (err, req, res, next) => {
         return res.status(404).render('page404', { session: req.session });
     }
 
-    res.status(statusCode).render('account/error', { 
+    res.status(statusCode).render('error', { 
         message, 
         error: process.env.NODE_ENV === 'development' ? err : {} 
     });

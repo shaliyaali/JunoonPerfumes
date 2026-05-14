@@ -30,16 +30,8 @@
     </style>
 </head>
 <body class="bg-[#fbfaf9] text-[#121212]">
-    <!-- Simple Luxury Header -->
-    <!-- <header class="bg-black text-white py-6 px-12 flex justify-between items-center sticky top-0 z-50">
-        <a href="/" class="text-2xl font-serif font-bold tracking-widest gold-gradient">JUNOON</a>
-        <nav class="flex gap-8 text-[10px] uppercase tracking-[0.2em] font-bold">
-            <a href="/" class="hover:text-[#d4af37]">Home</a>
-            <a href="/allfragrence" class="hover:text-[#d4af37]">All Fragrance</a>
-            <a href="/cart" class="text-[#d4af37]">Cart</a>
-        </nav>
-    </header> -->
-    <%- include('partials/_mainheader', { session, wishlistCount, cartCount, categories, search, activePage: 'checkout' }) %>
+    
+<%- include('partials/_mainheader', { session, wishlistCount, cartCount, categories, search, activePage: 'checkout' }) %>
 
 
     <main class="max-w-7xl mx-auto px-6 py-16">
@@ -84,6 +76,16 @@
                         <h2 class="text-2xl font-serif font-bold mb-6">Payment Method</h2>
                         <div class="space-y-4">
                             <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+
+
+
+                                <input type="radio" name="paymentMethod" value="Wallet" class="mt-1 mr-4 text-primary focus:ring-primary">
+                                <div class="flex flex-col">
+                                    <span class="font-bold">My Wallet</span>
+                                    <span class="text-[10px] text-gray-500 uppercase tracking-widest">Wallet Balance: ₹<%= (wallet.balance || 0).toLocaleString() %></span>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                                 <input type="radio" name="paymentMethod" value="Razorpay" class="mt-1 mr-4 text-primary focus:ring-primary">
                                 <div class="flex flex-col">
                                     <span class="font-bold">Razorpay</span>
@@ -91,7 +93,7 @@
                                 </div>
                             </label>
                             <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                                <input type="radio" name="paymentMethod" value="COD" class="mt-1 mr-4 text-primary focus:ring-primary" checked>
+                                <input type="radio" name="paymentMethod" value="COD" class="mt-1 mr-4 text-primary focus:ring-primary">
                                 <span class="font-bold">Cash on Delivery</span>
                             </label>
                         </div>
@@ -106,17 +108,27 @@
                     <div class="mb-8 p-5 bg-gray-50 rounded-xl border border-dashed border-primary/40">
                         <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-3">Applicable Coupons</label>
                         <div class="flex gap-2">
-                            <select id="couponSelect" name="couponCode" class="flex-1 bg-white border border-gray-200 rounded-lg text-xs font-bold outline-none focus:ring-1 focus:ring-primary p-2">
+                            <select id="couponSelect" name="couponCode" class="flex-1 bg-white border border-gray-200 rounded-lg text-xs font-bold outline-none focus:ring-1 focus:ring-primary p-2 cursor-pointer">
                                 <option value="">Select a coupon</option>
                                 <% if (typeof coupons !== 'undefined' && coupons.length > 0) { %>
                                     <% coupons.forEach(coupon => { %>
-                                        <option value="<%= coupon.code %>"><%= coupon.code %> - <%= coupon.offerDescription || 'Save more' %></option>
+                                        <option value="<%= coupon.code %>">
+                                           <%= coupon.code %> - 
+                                            <% if (coupon.offerType === 'Percentage') { %>
+                                                <%= coupon.offerValue %>% OFF (Max: ₹<%= coupon.maxDiscount.toLocaleString() %>)
+                                            <% } else { %>
+                                                ₹<%= coupon.offerValue.toLocaleString() %> OFF
+                                            <% } %>
+                                            (Min. Purchase: ₹<%= coupon.minPurchase.toLocaleString() %>)
+                                            </option>
                                     <% }) %>
                                 <% } %>
                             </select>
                             <button type="button" id="applyCouponBtn" class="bg-black text-white px-5 py-2 rounded-lg text-[10px] uppercase font-bold tracking-widest hover:bg-primary hover:text-black transition-all">Apply</button>
                         </div>
-                        <p id="couponStatus" class="mt-2 text-[9px] font-bold uppercase hidden"></p>
+
+                        <% let displayMsg = typeof couponMessage !== 'undefined' ? couponMessage : ''; %>
+                        <p id="couponMessage" class="mt-2 text-[9px] font-bold uppercase <%= displayMsg ? 'block' : 'hidden' %> <%= displayMsg.includes('successfully') ? 'text-green-600' : 'text-red-600' %>"><%= displayMsg %></p>
                     </div>
 
                     <div class="space-y-4 mb-8">
@@ -141,9 +153,13 @@
                             <span>Shipping:</span>
                             <span class="font-semibold">₹<%= shippingCharge.toLocaleString() %></span>
                         </div>
+                        <div class="flex justify-between <%= couponDiscount > 0 ? 'block' : 'hidden' %>" id="couponDiscountRow">
+                            <span>Coupon Discount:</span>
+                            <span class="font-semibold text-green-600">- ₹<span id="displayCouponDiscount"><%= couponDiscount.toLocaleString() %></span></span>
+                        </div>
                         <div class="flex justify-between font-bold text-xl border-t border-gray-200 pt-4 mt-4">
                             <span>Total:</span>
-                            <span>₹<%= totalAmount.toLocaleString() %></span>
+                            <span>₹<span id="displayTotalAmount"><%= totalAmount.toLocaleString() %></span></span>
                         </div>
                     </div>
 
@@ -159,17 +175,152 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-        document.getElementById('checkoutForm').addEventListener('submit', function(event) {
+        const displayTotalAmount = document.getElementById('displayTotalAmount');
+        const displayCouponDiscount = document.getElementById('displayCouponDiscount');
+        const couponDiscountRow = document.getElementById('couponDiscountRow');
+        const couponMessageElement = document.getElementById('couponMessage');
+        document.getElementById('checkoutForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
             const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
             if (!selectedAddress) {
-                event.preventDefault();
-                Swal.fire({
+                return Swal.fire({
                     icon: 'warning',
                     title: 'Selection Required',
                     text: 'Please select a shipping address.',
                     confirmButtonColor: '#D4AF37'
                 });
+            }
+           
+
+
+            if (paymentMethod === 'Razorpay') {
+                try {
+                    const couponCode = document.getElementById('couponSelect').value || '';
+
+                    // 1. Create Razorpay Order on Server
+                    const response = await fetch('/create-razorpay-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            addressId: selectedAddress.value,
+                            couponCode:couponCode
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error('Server returned an error. Please try again later.');
+                    }
+
+                    const data = await response.json();
+                    if (!data.success) throw new Error(data.message);
+
+                    // 2. Open Razorpay Modal
+                    const options = {
+                        key: data.key_id,
+                        amount: data.order.amount,
+                        currency: "INR",
+                        name: "Junoon Perfumes",
+                        description: "Luxury Scent Purchase",
+                        order_id: data.order.id,
+                        handler: function (response) {
+                            // 3. Verify Payment and Place Final Order
+                            
+                            verifyAndPlaceOrder(response, data.order, selectedAddress.value, couponCode);
+                        },
+                        prefill: {
+                            name: "<%= session.user.name %>",
+                            email: "<%= session.user.email %>"
+                        },
+                        theme: { color: "#d4af37" }
+                    };
+
+                    const rzp = new Razorpay(options);
+                    rzp.on('payment.failed', function (response) {
+                        Swal.fire('Payment Failed', response.error.description, 'error');
+                    });
+                    rzp.open();
+                    rzp.on('payment.failed', function (response) {
+                        window.location.href=`/payment-failure/${data.order.id}`;
+                        });
+                    
+                    
+
+                } catch (error) {
+                    console.error(error);
+                    Swal.fire('Error', error.message, 'error');
+                }
+            } else {
+                
+                this.submit();
+            }
+        });
+
+        async function verifyAndPlaceOrder(rzpResponse, rzpOrder, addressId, couponCode) {
+            try {
+                const response = await fetch('/verify-razorpay-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        razorpay_payment_id: rzpResponse.razorpay_payment_id,
+                        razorpay_order_id: rzpResponse.razorpay_order_id,
+                        razorpay_signature: rzpResponse.razorpay_signature,
+                        addressId: addressId,
+                        paymentMethod: 'Razorpay',
+                        couponCode: couponCode
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = '/order-success/' + data.orderId;
+                } else {
+                    Swal.fire('Verification Failed', data.message, 'error');
+                }
+            } catch (error) {
+                Swal.fire('Error', 'Something went wrong during verification', 'error');
+            }
+        }
+
+        document.getElementById('applyCouponBtn').addEventListener('click', async function() {
+            const couponCode = document.getElementById('couponSelect').value;
+            if (!couponCode) {
+                couponMessageElement.textContent = 'Please select a coupon.';
+                couponMessageElement.className = 'mt-2 text-[9px] font-bold uppercase text-red-600 block';
+                return;
+            }
+
+            try {
+                const response = await fetch('/apply-coupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ couponCode: couponCode })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    displayTotalAmount.textContent = data.totalAmount.toLocaleString();
+                    displayCouponDiscount.textContent = data.couponDiscount.toLocaleString();
+                    
+                    if (data.couponDiscount > 0) {
+                        couponDiscountRow.classList.remove('hidden');
+                    } else {
+                        couponDiscountRow.classList.add('hidden');
+                    }
+                    couponMessageElement.textContent = data.couponMessage;
+                    couponMessageElement.className = 'mt-2 text-[9px] font-bold uppercase text-green-600 block';
+                } else {
+                    couponMessageElement.textContent = data.couponMessage || 'Failed to apply coupon.';
+                    couponMessageElement.className = 'mt-2 text-[9px] font-bold uppercase text-red-600 block';
+                    couponDiscountRow.classList.add('hidden'); // Hide discount if coupon failed
+                }
+            } catch (error) {
+                Swal.fire('Error', 'Failed to apply coupon. Please try again.', 'error');
             }
         });
     </script>

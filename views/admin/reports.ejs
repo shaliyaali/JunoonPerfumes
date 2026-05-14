@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Sales Report | Junoon Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#D4AF37",
+                        "background-light": "#FAFAFA",
+                        "background-dark": "#0F0F0F",
+                        "sidebar-light": "#FDFBF7",
+                        "sidebar-dark": "#1A1A1A",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#242424",
+                    },
+                    fontFamily: {
+                        display: ["Playfair Display", "serif"],
+                        sans: ["Inter", "sans-serif"],
+                    }
+                },
+            },
+        };
+    </script>
+    <style type="text/tailwindcss">
+        .luxury-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 transition-colors duration-200">
+<div class="flex min-h-screen max-w-[1550px] mx-auto shadow-2xl">
+    <%- include('partials/_sidebar', { activePage: 'reports' }) %>
+
+    <main class="flex-1 flex flex-col bg-background-light dark:bg-background-dark">
+        <!-- Header -->
+        <header class="h-24 px-10 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-sidebar-dark">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Sales Report</h2>
+            <div class="flex items-center space-x-4">
+                <button onclick="exportReport('pdf')" class="bg-rose-600 hover:bg-opacity-90 text-white px-6 py-2.5 rounded-lg flex items-center space-x-2 transition-all font-semibold shadow-md">
+                    <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+                    <span>Export PDF</span>
+                </button>
+                <button onclick="exportReport('excel')" class="bg-emerald-600 hover:bg-opacity-90 text-white px-6 py-2.5 rounded-lg flex items-center space-x-2 transition-all font-semibold shadow-md">
+                    <span class="material-symbols-outlined text-sm">table_view</span>
+                    <span>Export Excel</span>
+                </button>
+                <button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500" onclick="document.documentElement.classList.toggle('dark')">
+                    <span class="material-symbols-outlined">contrast</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="p-10 space-y-8 flex-1 flex flex-col">
+            <!-- Search and Filter Bar -->
+            <form id="reportForm" action="/admin/reports" method="GET" class="flex flex-col gap-4">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1 relative">
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                        <input name="search" id="searchInput" class="w-full pl-12 pr-12 py-3 bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-xl outline-none text-sm" placeholder="Search by Order ID or Customer..." type="text" value="<%= search %>"/>
+                        <% if (search) { %>
+                            <button type="button" onclick="clearSearch()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                <span class="material-symbols-outlined text-xl">close</span>
+                            </button>
+                        <% } %>
+                    </div>
+                    <div class="w-full md:w-64 relative">
+                        <select name="reportFilter" id="reportFilter" class="w-full pl-4 pr-10 py-3 bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-xl outline-none appearance-none cursor-pointer text-sm font-medium" onchange="handleFilterChange(this.value)">
+                            <option value="today" <%= reportFilter === 'today' ? 'selected' : '' %>>Today</option>
+                            <option value="this_week" <%= reportFilter === 'this_week' ? 'selected' : '' %>>This Week</option>
+                            <option value="this_month" <%= reportFilter === 'this_month' ? 'selected' : '' %>>This Month</option>
+                            <option value="this_year" <%= reportFilter === 'this_year' ? 'selected' : '' %>>This Year</option>
+                            <option value="custom" <%= reportFilter === 'custom' ? 'selected' : '' %>>Custom Range</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                    </div>
+                    <button type="submit" class="bg-primary hover:bg-opacity-90 text-white px-8 py-3 rounded-xl font-semibold shadow-md">Apply Filters</button>
+                </div>
+
+                <!-- Custom Date Range -->
+                <div id="customRangeGroup" class="<%= reportFilter === 'custom' ? 'flex' : 'hidden' %> flex-col md:flex-row gap-4 items-center bg-slate-50 dark:bg-slate-800/30 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">From</label>
+                        <input type="date" name="startDate" value="<%= startDate %>" class="px-4 py-2 bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-lg outline-none text-sm">
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">To</label>
+                        <input type="date" name="endDate" value="<%= endDate %>" class="px-4 py-2 bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-lg outline-none text-sm">
+                    </div>
+                </div>
+            </form>
+
+            <!-- Report Table -->
+            <div class="bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden luxury-shadow">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 dark:bg-slate-800/50">
+                        <tr class="text-[10px] uppercase font-bold text-slate-500 tracking-widest">
+                            <th class="px-8 py-5">Order ID</th>
+                            <th class="px-8 py-5">Date</th>
+                            <th class="px-8 py-5">Customer</th>
+                            <th class="px-8 py-5">Products</th>
+                            <th class="px-8 py-5">Payment Method</th>
+                            <th class="px-8 py-5 text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                        <% if (orders && orders.length > 0) { %>
+                            <% orders.forEach(order => { %>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                    <td class="px-8 py-5 font-bold text-sm">#<%= order.orderId %></td>
+                                    <td class="px-8 py-5 text-sm text-slate-500"><%= new Date(order.orderDate).toLocaleDateString('en-GB') %></td>
+                                    <td class="px-8 py-5">
+                                        <div class="text-sm font-semibold"><%= order.user ? order.user.name : 'Guest' %></div>
+                                        <div class="text-[10px] text-slate-400 truncate w-32"><%= order.user ? order.user.email : '' %></div>
+                                    </td>
+                                    <td class="px-8 py-5">
+                                        <div class="max-w-[180px] truncate text-xs text-slate-600 dark:text-slate-400">
+                                            <%= order.items.map(i => i.productName).join(', ') %>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-5">
+                                        <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                                            <%= order.paymentMethod %>
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-5 text-right font-bold text-primary text-sm">₹<%= order.totalAmount.toLocaleString() %></td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6" class="px-8 py-20 text-center text-slate-500 dark:text-slate-400">No transactions found for the selected period.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-8 flex justify-center">
+                <% if (totalPages > 1) { %>
+                    <nav class="flex items-center space-x-2">
+                        <% if (currentPage > 1) { %>
+                            <a href="?page=<%= currentPage - 1 %>&search=<%= search %>&reportFilter=<%= reportFilter %>&startDate=<%= startDate %>&endDate=<%= endDate %>" class="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 hover:border-primary hover:text-primary transition-all text-gray-400">
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </a>
+                        <% } %>
+                        <span class="text-sm font-medium text-slate-600">Page <%= currentPage %> of <%= totalPages %></span>
+                        <% if (currentPage < totalPages) { %>
+                            <a href="?page=<%= currentPage + 1 %>&search=<%= search %>&reportFilter=<%= reportFilter %>&startDate=<%= startDate %>&endDate=<%= endDate %>" class="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 hover:border-primary hover:text-primary transition-all text-gray-400">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </a>
+                        <% } %>
+                    </nav>
+                <% } %>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function handleFilterChange(value) {
+        const customRangeGroup = document.getElementById('customRangeGroup');
+        if (value === 'custom') {
+            customRangeGroup.classList.remove('hidden');
+            customRangeGroup.classList.add('flex');
+        } else {
+            customRangeGroup.classList.add('hidden');
+            customRangeGroup.classList.remove('flex');
+            document.getElementById('reportForm').submit();
+        }
+    }
+
+    function clearSearch() {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('search');
+        window.location.href = url.toString();
+    }
+
+    function exportReport(format) {
+        const url = new URL(window.location.href);
+        url.pathname = `/admin/reports/export/${format}`;
+        window.location.href = url.toString();
+    }
+</script>
+</body>
+</html>

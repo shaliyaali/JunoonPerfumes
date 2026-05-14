@@ -55,6 +55,10 @@ const userLogin=async(email,password)=>{
   return user
 }
 
+const findByReferralCode = async (referralCode) => {
+  return await userSchema.findOne({ referralCode });
+};
+
 const getUserById=async(userid)=>{
   const user=await userSchema.findById(userid)
   if(!user){
@@ -152,4 +156,4 @@ const getUserAddresses = async (userId) => {
   return await userSchema.findById(userId).select('name email addresses')
 }
 
-module.exports = { checkEmailExist,createUser,userLogin ,getUserById,updateProfile,findByEmail,updateEmail,updatePassword,addAddress,editAddress,deleteAddress,getUserAddresses}
+module.exports = { checkEmailExist,createUser,userLogin ,getUserById,updateProfile,findByEmail,updateEmail,updatePassword,addAddress,editAddress,deleteAddress,getUserAddresses, findByReferralCode}

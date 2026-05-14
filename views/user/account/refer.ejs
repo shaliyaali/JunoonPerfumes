@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refer & Earn | Junoon Perfumes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af37",
+                        "luxury-black": "#0a0a0a",
+                        "luxury-ivory": "#fbfaf9",
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        .font-serif { font-family: 'Playfair Display', serif; }
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-active { @apply bg-gray-50 text-primary border-r-4 border-primary; }
+    </style>
+</head>
+<body class="bg-luxury-ivory text-luxury-black">
+    
+    <%- include('partials/_mainheader', { session, wishlistCount, cartCount, categories, search, activePage: 'refer' }) %>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="flex flex-col md:flex-row gap-8">
+            
+            <!-- Sidebar -->
+            <%- include('partials/_sidebar', { user, activePage: 'refer' }) %>
+
+            <!-- Main Content -->
+            <main class="flex-1">
+                <div class="mb-10">
+                    <h1 class="text-4xl font-serif font-bold mb-2">Refer & Earn</h1>
+                    <p class="text-gray-500 text-sm">Spread the scent of luxury and get rewarded.</p>
+                </div>
+
+                <!-- Box 1: How it works -->
+                <div class="bg-white rounded-2xl p-8 mb-8 shadow-sm border border-gray-100">
+                    <h2 class="text-xl font-serif font-bold mb-8 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">info</span>
+                        How It Works
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-luxury-ivory rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20">
+                                <span class="material-symbols-outlined text-primary text-3xl">send</span>
+                            </div>
+                            <h3 class="font-bold text-sm mb-2 uppercase tracking-widest">1. Invite Friends</h3>
+                            <p class="text-xs text-gray-500 leading-relaxed">Share your unique referral code with your inner circle.</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-luxury-ivory rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20">
+                                <span class="material-symbols-outlined text-primary text-3xl">person_add</span>
+                            </div>
+                            <h3 class="font-bold text-sm mb-2 uppercase tracking-widest">2. They Sign Up</h3>
+                            <p class="text-xs text-gray-500 leading-relaxed">Your friends use your code when creating their new account.</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-luxury-ivory rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20">
+                                <span class="material-symbols-outlined text-primary text-3xl">wallet</span>
+                            </div>
+                            <h3 class="font-bold text-sm mb-2 uppercase tracking-widest">3. Both Get Rewards</h3>
+                            <p class="text-xs text-gray-500 leading-relaxed">You both receive ₹100 in your wallets instantly!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Box 2: Referral Code -->
+                <div class="bg-luxury-black rounded-2xl p-10 text-center relative overflow-hidden shadow-2xl">
+                    <div class="relative z-10">
+                        <h2 class="text-primary uppercase tracking-[0.3em] text-xs font-bold mb-6">Your Personal Invitation Code</h2>
+                        <div class="inline-flex items-center gap-4 bg-white/5 border border-white/10 p-2 pl-8 rounded-full backdrop-blur-sm">
+                            <span id="referralCode" class="text-3xl font-serif font-bold text-white tracking-widest"><%= user.referralCode || 'JUNOON' + user._id.toString().slice(-4).toUpperCase() %></span>
+                            <button onclick="copyToClipboard()" class="bg-primary text-black w-12 h-12 rounded-full flex items-center justify-center hover:bg-white transition-all duration-300 group">
+                                <span class="material-symbols-outlined group-active:scale-90 transition-transform">content_copy</span>
+                            </button>
+                        </div>
+                        <p class="text-gray-400 text-[10px] mt-6 uppercase tracking-widest">Click the icon to copy and share via WhatsApp or Email</p>
+                    </div>
+                    <!-- Decorative Gold Glow -->
+                    <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <%- include('partials/_footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function copyToClipboard() {
+            const code = document.getElementById('referralCode').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Code Copied!',
+                    text: 'Your referral code is ready to share.',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    toast: true,
+                    position: 'top-end'
+                });
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,15 +1,18 @@
 const express=require('express')
 const router=express.Router()
-const userController=require('../controller/userController.js')
+const userController=require('../controller/user/userController.js')
+const paymentController=require('../controller/user/paymentController')
 const userauth=require('../middlewares/userauth')
 const passport = require('passport')
 const { all } = require('axios')
-const allFragerenceController=require('../controller/allFragrenceController')
+const allFragerenceController=require('../controller/user/allFragrenceController.js')
+const orderController=require('../controller/user/orderController')
+
 
 
 console.log('router page')
 
-router.get('/',userController.loadhome)
+router.get('/', userauth.checkSession, userController.loadhome)
 router.get('/signup',userauth.isLogin,userController.loadRegister)
 router.post('/signup',userController.registerUser)
 router.get('/otp',userauth.isLogin,userController.loadOtp)
@@ -54,6 +57,11 @@ router.post('/cart/remove', userauth.checkSession, userController.removeCartItem
 router.get('/checkout', userauth.checkSession, userController.loadCheckout)
 router.post('/place-order', userauth.checkSession, userController.placeOrder)
 router.get('/order-success/:orderId', userauth.checkSession, userController.loadOrderSuccess)
+router.post('/create-razorpay-order',userauth.checkSession,paymentController.createRazorpayOrder)
+
+
+router.get('/payment-failure/:orderId', userauth.checkSession, paymentController.loadPaymentFailure)
+router.post('/verify-razorpay-payment',userauth.checkSession,paymentController.verifyRazorpayPayment)
 
 //my orders
 router.get('/profile/myorders', userauth.checkSession, userController.loadMyOrders)
@@ -61,4 +69,11 @@ router.get('/profile/myorders/:orderId/:itemId', userauth.checkSession, userCont
 router.post('/orders/cancel-item', userauth.checkSession, userController.cancelOrderItem)
 router.post('/orders/return-item', userauth.checkSession, userController.returnOrderItem)
 router.get('/orders/download-invoice/:orderId', userauth.checkSession, userController.downloadInvoice)
+//coupon
+router.post('/apply-coupon', userauth.checkSession, userController.applyCouponAjax)
 module.exports=router
+
+//wallet
+router.get('/profile/mywallet', userauth.checkSession,orderController.loadWallet)
+ //refer
+router.get('/refer', userauth.checkSession, userController.loadRefer)

@@ -1,0 +1,39 @@
+<aside class="w-64 bg-sidebar-light dark:bg-sidebar-dark border-r border-slate-200 dark:border-slate-800 flex flex-col sticky top-0 h-screen">
+    <div class="p-8">
+        <div class="flex items-center space-x-3 mb-12">
+            <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-lg text-white">
+                <span class="material-symbols-outlined">spa</span>
+            </div>
+            <div>
+                <h1 class="font-display text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">Junoon</h1>
+                <p class="text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-semibold">Admin Suite</p>
+            </div>
+        </div>
+        <nav class="space-y-1">
+            <% 
+            const links = [
+                { id: 'dashboard', name: 'Dashboard', icon: 'dashboard', href: '/admin/dashboard' },
+                { id: 'products', name: 'Products', icon: 'inventory_2', href: '/admin/productManagement' },
+                { id: 'categories', name: 'Categories', icon: 'category', href: '/admin/categoryManagement' },
+                { id: 'orders', name: 'Orders', icon: 'shopping_cart', href: '/admin/orders' },
+                { id: 'users', name: 'Users', icon: 'people', href: '/admin/usermanagement' },
+                { id: 'coupons', name: 'Coupons', icon: 'local_offer', href: '/admin/coupons' },
+                { id: 'reports', name: 'Sales Report', icon: 'bar_chart', href: '/admin/reports' }
+            ];
+            %>
+
+            <% links.forEach(link => { %>
+                <a class="flex items-center px-4 py-3 transition-all group <%= activePage === link.id ? 'bg-primary text-white rounded-lg shadow-lg shadow-primary/20' : 'text-slate-500 dark:text-slate-400 hover:text-primary' %>" 
+                   href="<%= link.href %>">
+                    <span class="material-symbols-outlined mr-3 text-xl"><%= link.icon %></span>
+                    <span class="text-sm font-medium"><%= link.name %></span>
+                </a>
+            <% }) %>
+
+            <a class="flex items-center px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-rose-500 transition-colors group mt-10" href="/admin/logout">
+                <span class="material-symbols-outlined mr-3 text-xl">logout</span>
+                <span class="text-sm font-medium">Logout</span>
+            </a>
+        </nav>
+    </div>
+</aside>

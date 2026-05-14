@@ -1,270 +1,151 @@
 <!DOCTYPE html>
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Junoon Luxury Admin Dashboard Suite</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@300;400;500;600&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-<script>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Dashboard | Junoon Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
-                    colors: {
-                        primary: "#D4AF37", // Classic Gold
-                        "background-light": "#FDFCFB", // Ivory/Off-white
-                        "background-dark": "#121212",
-                        "sidebar-light": "#F8F5F2",
-                        "sidebar-dark": "#1A1A1A",
-                        "card-light": "#FFFFFF",
-                        "card-dark": "#242424",
-                    },
-                    fontFamily: {
-                        display: ["Playfair Display", "serif"],
-                        sans: ["Inter", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "12px",
-                        'xl': "20px",
-                    },
+                    colors: { primary: "#D4AF37", "background-light": "#FAFAFA", "card-light": "#FFFFFF", "card-dark": "#242424" },
+                    fontFamily: { display: ["Playfair Display", "serif"], sans: ["Inter", "sans-serif"] }
                 },
             },
         };
     </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-        }
-        .active-nav .material-symbols-outlined {
-            font-variation-settings: 'FILL' 1;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+    <style type="text/tailwindcss">
+        .luxury-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 min-h-screen">
-<div class="flex max-w-[1600px] mx-auto min-h-screen">
-<aside class="w-64 bg-sidebar-light dark:bg-sidebar-dark border-r border-stone-200 dark:border-stone-800 flex flex-col fixed h-full transition-colors duration-300">
-<div class="p-8">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 bg-primary flex items-center justify-center rounded-lg text-white">
-<span class="material-symbols-outlined">temp_lines</span>
-</div>
-<div>
-<h1 class="font-display text-xl font-bold text-stone-900 dark:text-white leading-none">Junoon</h1>
-<p class="text-[10px] uppercase tracking-widest text-primary font-bold mt-1">Admin Suite</p>
-</div>
-</div>
-</div>
-<nav class="flex-1 px-4 mt-4 space-y-1">
-<a class="active-nav flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-xl shadow-lg shadow-primary/20 transition-all" href="#">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="font-medium">Dashboard</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all" href="/admin/productManagement">
-<!-- <span class="material-symbols-outlined"> -->
-<span class="material-symbols-outlined">inventory_2</span>
-<span class="font-medium">Products</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all" href="/admin/categoryManagement">
-<span class="material-symbols-outlined">category</span>
-<span class="font-medium">Categories</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all" href="/admin/orders">
-<span class="material-symbols-outlined">shopping_cart</span>
-<span class="font-medium">Orders</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all" href="/admin/usermanagement">
-<span class="material-symbols-outlined">group</span>
-<span class="font-medium">Users</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all" href="#">
-<span class="material-symbols-outlined">confirmation_number</span>
-<span class="font-medium">Coupons</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all" href="#">
-<span class="material-symbols-outlined">query_stats</span>
-<span class="font-medium">Sales &amp; Revenue</span>
-</a>
-</nav>
-<div class="p-6 border-t border-stone-200 dark:border-stone-800">
-<a class="flex items-center gap-3 px-4 py-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl transition-all" href="#">
-<span class="material-symbols-outlined">logout</span>
-<span class="font-medium">Logout</span>
-</a>
-</div>
-</aside>
-<main class="flex-1 ml-64 p-8">
-<header class="flex justify-between items-center mb-10">
-<div>
-<h2 class="font-display text-4xl text-stone-900 dark:text-white font-bold">Admin Dashboard</h2>
-</div>
-<div class="flex items-center gap-8">
-<div class="flex bg-stone-100 dark:bg-stone-800 p-1 rounded-full border border-stone-200 dark:border-stone-700">
-<button class="px-6 py-1.5 bg-primary text-white rounded-full text-sm font-semibold shadow-md transition-all">Today</button>
-<button class="px-6 py-1.5 text-stone-500 dark:text-stone-400 text-sm font-medium hover:text-stone-800 dark:hover:text-stone-200 transition-all">Week</button>
-<button class="px-6 py-1.5 text-stone-500 dark:text-stone-400 text-sm font-medium hover:text-stone-800 dark:hover:text-stone-200 transition-all">Month</button>
-</div>
-<div class="flex items-center gap-3 border-l pl-8 border-stone-200 dark:border-stone-800">
-<div class="text-right">
-<p class="text-sm font-bold text-stone-900 dark:text-white">Shaliya</p>
-<p class="text-[10px] uppercase font-bold text-stone-400 tracking-wider">Super Admin</p>
-</div>
-<div class="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-700 border-2 border-primary/20 flex items-center justify-center overflow-hidden">
-<img alt="Admin Profile" class="object-cover w-full h-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzsoQmiCx9dAqVEZIItE8VOpa-MB0GeVR4hxGD5G-qgNb0tp5AT5OGR8OVhzxJOYu88gJ_LAbAjUMwHviWpSUtAkSatfikKk214WnjqbBzscphvUQh-iebBnNJUFBGsApPuQ6do11a79TDA7qtTVmnZJiJPM-m9zQguSCOLjZJhBjJR59IMTZNTpK5c8T7b5LFf9YrT7JjS9AOxPAnJJxFUR1R7YtcQNwxmxb1Kcs8tBL3Mu33EbuHbHqBkgL3l3ZU9797iEy0oRE"/>
-</div>
-</div>
-</div>
-</header>
-<section class="mb-10">
-<h3 class="text-xs uppercase font-bold tracking-[0.2em] text-stone-400 mb-6">Performance Overview</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-md transition-shadow">
-<p class="text-[10px] uppercase tracking-widest text-stone-400 font-bold mb-2">Total Orders</p>
-<p class="text-3xl font-display font-bold text-stone-900 dark:text-white">124</p>
-<div class="mt-4 flex items-center text-emerald-500 text-xs font-bold">
-<span class="material-symbols-outlined text-sm mr-1">trending_up</span>
-<span>+12.5%</span>
-</div>
-</div>
-<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-md transition-shadow">
-<p class="text-[10px] uppercase tracking-widest text-stone-400 font-bold mb-2">Revenue</p>
-<p class="text-3xl font-display font-bold text-stone-900 dark:text-white">₹11,62,400</p>
-<div class="mt-4 flex items-center text-emerald-500 text-xs font-bold">
-<span class="material-symbols-outlined text-sm mr-1">trending_up</span>
-<span>+8.2%</span>
-</div>
-</div>
-<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-md transition-shadow">
-<p class="text-[10px] uppercase tracking-widest text-stone-400 font-bold mb-2">Pending Orders</p>
-<p class="text-3xl font-display font-bold text-stone-900 dark:text-white">18</p>
-<div class="mt-4 flex items-center text-stone-400 text-xs font-bold">
-<span>Same as yesterday</span>
-</div>
-</div>
-<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-md transition-shadow">
-<p class="text-[10px] uppercase tracking-widest text-stone-400 font-bold mb-2">Low Stock</p>
-<p class="text-3xl font-display font-bold text-rose-500">05</p>
-<div class="mt-4 flex items-center text-rose-500 text-xs font-bold">
-<span class="material-symbols-outlined text-sm mr-1">warning</span>
-<span>Critical Action</span>
-</div>
-</div>
-</div>
-</section>
-<section class="mb-10">
-<div class="bg-card-light dark:bg-card-dark rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm overflow-hidden">
-<div class="p-6 border-b border-stone-100 dark:border-stone-800 flex justify-between items-center">
-<h3 class="font-display font-bold text-xl text-stone-900 dark:text-white">Recent Orders</h3>
-<button class="text-sm font-semibold text-primary hover:underline">View All</button>
-</div>
-<table class="w-full text-left">
-<thead class="bg-stone-50 dark:bg-stone-900/50">
-<tr>
-<th class="px-8 py-4 text-[11px] uppercase tracking-widest font-bold text-stone-400">Order ID</th>
-<th class="px-8 py-4 text-[11px] uppercase tracking-widest font-bold text-stone-400">Customer Name</th>
-<th class="px-8 py-4 text-[11px] uppercase tracking-widest font-bold text-stone-400">Status</th>
-<th class="px-8 py-4 text-[11px] uppercase tracking-widest font-bold text-stone-400">Amount</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-<tr class="hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors">
-<td class="px-8 py-4 font-mono font-bold text-stone-900 dark:text-stone-300">#ORD-9412</td>
-<td class="px-8 py-4 text-stone-600 dark:text-stone-400 font-medium">S. Ahmed</td>
-<td class="px-8 py-4">
-<span class="px-3 py-1 bg-sky-100 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 rounded-full text-[10px] font-bold tracking-widest uppercase">Shipped</span>
-</td>
-<td class="px-8 py-4 font-bold text-stone-900 dark:text-stone-300">₹20,400</td>
-</tr>
-<tr class="hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors">
-<td class="px-8 py-4 font-mono font-bold text-stone-900 dark:text-stone-300">#ORD-9411</td>
-<td class="px-8 py-4 text-stone-600 dark:text-stone-400 font-medium">M. Khan</td>
-<td class="px-8 py-4">
-<span class="px-3 py-1 bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 rounded-full text-[10px] font-bold tracking-widest uppercase">Pending</span>
-</td>
-<td class="px-8 py-4 font-bold text-stone-900 dark:text-stone-300">₹9,500</td>
-</tr>
-</tbody>
-</table>
-<div class="p-6 bg-stone-50/50 dark:bg-stone-900/20 flex justify-center items-center gap-4 border-t border-stone-100 dark:border-stone-800">
-<button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors">
-<span class="material-symbols-outlined text-sm">chevron_left</span>
-</button>
-<div class="flex gap-2">
-<button class="w-8 h-8 text-xs font-bold bg-primary text-white rounded-lg">01</button>
-<button class="w-8 h-8 text-xs font-bold text-stone-400 hover:text-stone-900 dark:hover:text-white rounded-lg">02</button>
-<button class="w-8 h-8 text-xs font-bold text-stone-400 hover:text-stone-900 dark:hover:text-white rounded-lg">03</button>
-</div>
-<button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors">
-<span class="material-symbols-outlined text-sm">chevron_right</span>
-</button>
-</div>
-</div>
-</section>
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-10">
-<div class="lg:col-span-2 bg-card-light dark:bg-card-dark p-8 rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm">
-<div class="flex justify-between items-center mb-8">
-<h3 class="font-display font-bold text-xl text-stone-900 dark:text-white">Orders Trend</h3>
-<span class="material-symbols-outlined text-stone-400">more_vert</span>
-</div>
-<div class="h-64 relative flex items-end justify-between px-2">
-<div class="absolute inset-0 flex flex-col justify-between py-2 text-[10px] text-stone-400 font-bold opacity-50">
-<div class="border-b border-stone-100 dark:border-stone-800 flex justify-between items-center w-full"><span>1000</span></div>
-<div class="border-b border-stone-100 dark:border-stone-800 flex justify-between items-center w-full"><span>750</span></div>
-<div class="border-b border-stone-100 dark:border-stone-800 flex justify-between items-center w-full"><span>500</span></div>
-<div class="border-b border-stone-100 dark:border-stone-800 flex justify-between items-center w-full"><span>250</span></div>
-<div class="flex justify-between items-center w-full"><span>0</span></div>
-</div>
-<svg class="absolute inset-0 w-full h-full px-8 py-2 overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100">
-<path d="M0,80 L10,30 L20,20 L30,50 L40,90 L50,40 L60,20 L70,60 L80,85 L90,75 L100,50" fill="none" stroke="#D4AF37" stroke-width="2" vector-effect="non-scaling-stroke"></path>
-<circle cx="0" cy="80" fill="white" r="1.5" stroke="#D4AF37" stroke-width="1"></circle>
-<circle cx="10" cy="30" fill="white" r="1.5" stroke="#D4AF37" stroke-width="1"></circle>
-<circle cx="20" cy="20" fill="white" r="1.5" stroke="#D4AF37" stroke-width="1"></circle>
-<circle cx="30" cy="50" fill="white" r="1.5" stroke="#D4AF37" stroke-width="1"></circle>
-<circle cx="40" cy="90" fill="white" r="1.5" stroke="#D4AF37" stroke-width="1"></circle>
-<circle cx="50" cy="40" fill="white" r="1.5" stroke="#D4AF37" stroke-width="1"></circle>
-<circle cx="60" cy="20" fill="white" r="1.5" stroke="#D4AF37" stroke-width="1"></circle>
-<circle cx="100" cy="50" fill="white" r="1.5" stroke="#D4AF37" stroke-width="1"></circle>
-</svg>
-</div>
-<div class="mt-4 flex justify-between px-6 text-[10px] text-stone-400 font-bold uppercase tracking-widest">
-<span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span>
-</div>
-</div>
-<div class="bg-card-light dark:bg-card-dark p-8 rounded-xl border border-stone-100 dark:border-stone-800 shadow-sm flex flex-col items-center">
-<h3 class="font-display font-bold text-xl text-stone-900 dark:text-white w-full text-center mb-8">Category vise Order</h3>
-<div class="relative w-48 h-48 mb-8">
-<svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-<circle cx="18" cy="18" fill="transparent" r="15.91549430918954" stroke="#FDA4AF" stroke-dasharray="55 45" stroke-dashoffset="0" stroke-width="4.2"></circle>
-<circle cx="18" cy="18" fill="transparent" r="15.91549430918954" stroke="#D4AF37" stroke-dasharray="45 55" stroke-dashoffset="-55" stroke-width="4.2"></circle>
-</svg>
-<div class="absolute inset-0 flex flex-col items-center justify-center">
-<p class="text-[10px] uppercase font-bold text-stone-400">Total</p>
-<p class="text-2xl font-display font-bold text-stone-900 dark:text-white">100%</p>
-</div>
-</div>
-<div class="w-full space-y-4">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-2">
-<div class="w-3 h-3 rounded-full bg-rose-300"></div>
-<span class="text-sm font-medium text-stone-600 dark:text-stone-400">Perfumes</span>
-</div>
-<span class="text-sm font-bold text-stone-900 dark:text-white">55%</span>
-</div>
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-2">
-<div class="w-3 h-3 rounded-full bg-primary"></div>
-<span class="text-sm font-medium text-stone-600 dark:text-stone-400">Athar</span>
-</div>
-<span class="text-sm font-bold text-stone-900 dark:text-white">45%</span>
-</div>
-</div>
-</div>
-</div>
-</main>
+<body class="bg-background-light text-slate-900 transition-colors duration-200">
+<div class="flex min-h-screen max-w-[1550px] mx-auto shadow-2xl">
+    <%- include('partials/_sidebar', { activePage: 'dashboard' }) %>
+
+    <main class="flex-1 flex flex-col bg-background-light">
+        <header class="h-24 px-10 flex items-center justify-between border-b border-slate-200 bg-white">
+            <h2 class="text-2xl font-bold text-slate-900">Dashboard Overview</h2>
+            <!-- Filter Style from Reports -->
+            <form id="dashboardFilter" action="/admin/dashboard" method="GET" class="flex gap-4">
+                <div class="relative w-48">
+                    <select name="reportFilter" onchange="this.form.submit()" class="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl outline-none appearance-none text-xs font-bold uppercase tracking-widest">
+                        <option value="today" <%= reportFilter === 'today' ? 'selected' : '' %>>Today</option>
+                        <option value="this_week" <%= reportFilter === 'this_week' ? 'selected' : '' %>>This Week</option>
+                        <option value="this_month" <%= reportFilter === 'this_month' ? 'selected' : '' %>>This Month</option>
+                        <option value="this_year" <%= reportFilter === 'this_year' ? 'selected' : '' %>>This Year</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm">expand_more</span>
+                </div>
+            </form>
+        </header>
+
+        <div class="p-10 space-y-8 flex-1">
+            <!-- Simple Top Boxes -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl luxury-shadow border border-slate-100 flex items-center justify-between">
+                    <div><p class="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">Total Orders</p><p class="text-3xl font-display font-bold text-slate-900"><%= totalOrders %></p></div>
+                    <span class="material-symbols-outlined text-primary bg-primary/10 p-3 rounded-xl">shopping_bag</span>
+                </div>
+                <div class="bg-white p-6 rounded-2xl luxury-shadow border border-slate-100 flex items-center justify-between">
+                    <div><p class="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">Total Users</p><p class="text-3xl font-display font-bold text-slate-900"><%= totalUsers %></p></div>
+                    <span class="material-symbols-outlined text-emerald-500 bg-emerald-50 p-3 rounded-xl">group</span>
+                </div>
+                <div class="bg-white p-6 rounded-2xl luxury-shadow border border-slate-100 flex items-center justify-between">
+                    <div><p class="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">Total Sales Revenue</p><p class="text-3xl font-display font-bold text-primary">₹<%= totalSalesAmount.toLocaleString() %></p></div>
+                    <span class="material-symbols-outlined text-primary bg-primary/10 p-3 rounded-xl">payments</span>
+                </div>
+            </div>
+
+            <!-- Graphs -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-2xl luxury-shadow border border-slate-100">
+                    <h3 class="font-display font-bold text-lg mb-6">Revenue Overview</h3>
+                    <canvas id="revenueLineChart" height="200"></canvas>
+                </div>
+                <div class="bg-white p-8 rounded-2xl luxury-shadow border border-slate-100">
+                    <h3 class="font-display font-bold text-lg mb-6">Order Status Summary</h3>
+                    <canvas id="orderBarChart" height="200"></canvas>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Pie Chart -->
+                <div class="bg-white p-8 rounded-2xl luxury-shadow border border-slate-100">
+                    <h3 class="font-display font-bold text-lg mb-6">Top Categories</h3>
+                    <canvas id="categoryPieChart"></canvas>
+                </div>
+                <!-- Top Selling Products -->
+                <div class="lg:col-span-2 bg-white p-8 rounded-2xl luxury-shadow border border-slate-100">
+                    <h3 class="font-display font-bold text-lg mb-6">Top 3 Selling Products</h3>
+                    <div class="space-y-6">
+                        <% topProducts.forEach((prod, index) => { %>
+                            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center font-display font-bold text-primary shadow-sm"><%= index + 1 %></div>
+                                    <img src="<%= prod.image %>" class="w-12 h-12 object-cover rounded-lg border">
+                                    <div><p class="font-bold text-sm"><%= prod.name %></p><p class="text-[10px] text-slate-400 uppercase tracking-widest"><%= prod.totalSold %> Units Sold</p></div>
+                                </div>
+                                <p class="font-bold text-primary">₹<%= prod.revenue.toLocaleString() %></p>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 </div>
 
-</body></html>
+<script>
+    // Revenue Line Chart
+    const revenueCtx = document.getElementById('revenueLineChart').getContext('2d');
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: <%- JSON.stringify(revenueData.map(d => d._id)) %>,
+            datasets: [{
+                label: 'Revenue',
+                data: <%- JSON.stringify(revenueData.map(d => d.total)) %>,
+                borderColor: '#D4AF37',
+                backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Order Bar Chart
+    const orderCtx = document.getElementById('orderBarChart').getContext('2d');
+    new Chart(orderCtx, {
+        type: 'bar',
+        data: {
+            labels: <%- JSON.stringify(orderSummaryData.map(d => d._id)) %>,
+            datasets: [{
+                label: 'Orders',
+                data: <%- JSON.stringify(orderSummaryData.map(d => d.count)) %>,
+                backgroundColor: ['#D4AF37', '#1e293b', '#64748b', '#94a3b8']
+            }]
+        },
+        options: { plugins: { legend: { display: false } } }
+    });
+
+    // Category Pie Chart
+    const pieCtx = document.getElementById('categoryPieChart').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: <%- JSON.stringify(topCategories.map(d => d._id)) %>,
+            datasets: [{
+                data: <%- JSON.stringify(topCategories.map(d => d.count)) %>,
+                backgroundColor: ['#D4AF37', '#FDFBF7', '#1A1A1A', '#64748b', '#94a3b8']
+            }]
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 const mongoose=require('mongoose')
+const crypto = require('crypto');
 
  console.log(mongoose.connection.name)
 
@@ -79,14 +80,21 @@ const userSchema=new mongoose.Schema({
     default:false
   },
   
-    referalCode:{
-      type:String,
-
-    },
+  referralCode: {
+    type: String,
+    unique: true
+  },
    addresses:[addressSchema]
        
 }
 ,{timestamps:true})
+
+userSchema.pre('save', function () {
+  if (!this.referralCode) {
+    
+    this.referralCode = 'JN-' + crypto.randomBytes(3).toString('hex').toUpperCase();
+  }
+});
 
 const User=mongoose.model("user",userSchema)
 module.exports=User

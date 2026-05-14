@@ -39,7 +39,8 @@ const manageProduct=async(req,res)=>{
       status,
       count,
       sort: sortValue,
-      message
+      message,
+      activePage: 'products'
     })
   }catch(error){
     console.log(error)
@@ -50,7 +51,7 @@ const manageProduct=async(req,res)=>{
 const loadAddProduct=async(req,res)=>{
   try {
     const categories=await Category.find({status:'Active'})
-    res.render('addproduct', { categories, product: null });
+    res.render('addproduct', { categories, product: null, activePage: 'products' });
 
     
   } catch (error) {
@@ -129,7 +130,7 @@ const loadEditProduct = async (req, res) => {
     if (!product) throw new Error('Product not found')
     const categories = await Category.find({ status: 'Active' });
 
-    res.render('addProduct', { categories, product });
+    res.render('addProduct', { categories, product, activePage: 'products' });
   } catch (error) {
     console.error("Error loading edit product page:", error);
     res.redirect("/admin/productManagement");

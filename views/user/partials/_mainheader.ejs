@@ -38,7 +38,7 @@
         </nav>
     </div>
     <div class="flex items-center gap-6">
-        <% if (typeof activePage !== 'undefined' && !['checkout', 'orderSucess', 'productdetails', 'profile', 'manageaddress','myOrders','orderDetails'].includes(activePage)) { %>
+        <% if (typeof activePage !== 'undefined' && !['checkout', 'orderSucess', 'productdetails', 'profile', 'manageaddress','myOrders','orderDetails','orderSuccess'].includes(activePage)) { %>
             <form id="header-search-form" action="<%= activePage === 'home' ? '/allfragrence' : '' %>" method="Get" class="hidden md:flex items-center border-b border-primary/30 py-1 ">
                 <button type="submit" class="material-symbols-outlined text-primary text-xl">search</button>
                 <div class="relative flex items-center">

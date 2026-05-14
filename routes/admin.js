@@ -6,7 +6,8 @@ const productController=require('../controller/admin/productController')
 const adminauth=require('../middlewares/adminauth')
 const upload=require('../middlewares/upload')
 const adminOrderController=require('../controller/admin/adminOrderController')
-
+const couponController=require('../controller/admin/couponController')
+const reportController = require('../controller/admin/reportController');
 
 
 
@@ -38,5 +39,17 @@ router.post('/deleteProduct/:id',adminauth.checkSession, productController.delet
 router.get('/orders', adminauth.checkSession, adminOrderController.loadOrders);
 router.get('/orders/:orderId', adminauth.checkSession, adminOrderController.loadOrderDetails);
 router.post('/orders/update-item-status', adminauth.checkSession, adminOrderController.changeItemStatus)
+
+// Coupon Management
+router.get('/coupons', adminauth.checkSession, couponController.loadCouponManagement);
+router.post('/coupons/add', adminauth.checkSession, couponController.addCoupon);
+router.get('/coupons/data/:id', adminauth.checkSession, couponController.getCouponData);
+router.patch('/coupons/edit/:id', adminauth.checkSession, couponController.editCoupon);
+router.delete('/coupons/delete/:id', adminauth.checkSession, couponController.deleteCoupon);
+
+//sales Report
+router.get('/reports',adminauth.checkSession,reportController.loadSalesReport);
+router.get('/reports/export/pdf', adminauth.checkSession, reportController.exportPDF);
+router.get('/reports/export/excel', adminauth.checkSession, reportController.exportExcel);
 
 module.exports=router

@@ -72,6 +72,10 @@
             <% } %>
 
             <% orders.forEach(order => { %>
+                <% 
+                    const orderDate = new Date(order.orderDate);
+                    const isWithinLimit = (Date.now() - orderDate.getTime()) <= (7 * 24 * 60 * 60 * 1000);
+                %>
                 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <div class="bg-gray-50 px-8 py-4 flex justify-between items-center border-b border-gray-100">
                         <div class="flex gap-10">
@@ -106,9 +110,10 @@
                                     <p class="text-[10px] font-bold uppercase tracking-widest mt-1 text-gray-400">Status: <%= item.status %></p>
                                 </div>
                                 <div class="flex gap-3">
-                                    <% if (item.status === 'Pending') { %>
+                                    <% if (item.status === 'Pending' && isWithinLimit) { %>
                                         <button onclick="handleAction('cancel', '<%= order.orderId %>', '<%= item._id %>')" class="text-[10px] font-bold uppercase border border-red-100 text-red-500 px-4 py-2 rounded hover:bg-red-50 transition-colors">Cancel</button>
-                                    <% } else if (item.status === 'Delivered') { %>
+                                    <% } %>
+                                    <% if (item.status === 'Delivered' && isWithinLimit) { %>
                                         <button onclick="handleAction('return', '<%= order.orderId %>', '<%= item._id %>')" class="text-[10px] font-bold uppercase border border-gray-200 px-4 py-2 rounded hover:bg-gray-50 transition-colors">Return</button>
                                     <% } %>
                                     <a href="/profile/myorders/<%= order.orderId %>/<%= item._id %>" class="text-[10px] flex items-center justify-center font-bold uppercase border border-gray-200 text-gray-600 px-4 py-2 rounded hover:bg-gray-50 transition-colors">Details</a>
@@ -157,9 +162,9 @@
 
             const returnReasons = {
                 'Damaged or leaking bottle': 'Damaged or leaking bottle',
-                'Fragrance doesn\'t match description': 'Fragrance doesn\'t match description',
+                
                 'Received wrong item': 'Received wrong item',
-                'Defective sprayer/packaging': 'Defective sprayer/packaging',
+                'Defective packaging': 'Defective packaging',
                 'Changed my mind': 'Changed my mind',
                 'Other': 'Other'
             };

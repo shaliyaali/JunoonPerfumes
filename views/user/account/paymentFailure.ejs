@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed | Junoon Perfumes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af37",
+                        "luxury-black": "#0a0a0a",
+                        "luxury-ivory": "#fbfaf9",
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .gold-gradient { background: linear-gradient(to bottom, #f9f295, #e0aa3e, #b8860b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="bg-[#fbfaf9] text-[#121212] min-h-screen flex flex-col">
+    
+<%- include('partials/_mainheader', { session, wishlistCount, cartCount, categories, search, activePage: 'checkout' }) %>
+
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg text-center">
+        <div>
+            <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-100 mb-6">
+                <span class="material-symbols-outlined text-red-600 text-5xl">error</span>
+            </div>
+            <h2 class="text-3xl font-extrabold text-gray-900 font-display">Payment Failed</h2>
+            <p class="mt-4 text-sm text-gray-500">
+                We couldn't process your payment for Order #<%= orderId %>. Don't worry, your items are still reserved in your account.
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-4 mt-8">
+            <button onclick="retryPayment()" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-primary hover:bg-opacity-90 focus:outline-none transition-all uppercase tracking-widest">
+                Try Again
+            </button>
+            
+            <button onclick="confirmExit()" class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-bold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition-all uppercase tracking-widest">
+                Continue Shopping
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function retryPayment() {
+        // Redirect to the checkout or a specific retry handler
+        window.location.href = '/checkout?retry=<%= orderId %>';
+    }
+
+    function confirmExit() {
+        Swal.fire({
+            title: 'Are you sure you want to exit?',
+            text: "You will be taken back to Junoon website",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#D4AF37',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Continue to payment',
+            cancelButtonText: 'Yes, exit'
+        }).then((result) => {
+            if (!result.isConfirmed) {
+                window.location.href = '/allfragrence';
+            }
+        });
+    }
+</script>
+
+<footer class="bg-black text-white py-6 text-center text-sm">
+    &copy; 2024 Junoon Perfumes. All rights reserved.
+</footer>
+</body>
+</html>

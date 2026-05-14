@@ -1,3 +1,4 @@
+
 const orderService = require('../../services/orderService');
 const order=require('../../model/orderSchema')
 
@@ -10,7 +11,10 @@ const loadOrders = async (req, res) => {
         const endDate=req.query.endDate || '';
 
         const { orders, totalPages, currentPage } = await orderService.getAllOrdersAdmin(page, limit, search,startDate,endDate);
-
+        
+        
+        
+        
         res.render('orderManagement', {
             orders,
             totalPages,
@@ -30,6 +34,7 @@ const loadOrders = async (req, res) => {
 const changeItemStatus = async (req, res) => {
     try {
         const { orderId, itemId, status ,reason} = req.body;
+        
         await orderService.updateOrderItemStatus(orderId, itemId, status,reason);
         res.json({ success: true ,message:'Item status updated'});
     } catch (error) {

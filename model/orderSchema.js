@@ -41,6 +41,11 @@ const orderSchema = new mongoose.Schema({
     required:true,
     unique:true
   },
+  razorpayOrderId: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
   shippingAddress: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user.addresses', // Reference to a subdocument in userSchema
@@ -57,13 +62,13 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Shipped', 'Out for Delivery', 'Delivered', 'Partially Delivered', 'Cancelled', 'Return Requested', 'Returned'],
+    enum: ['Pending', 'Shipped', 'Out for Delivery', 'Delivered', 'Partially Delivered','Cancelled', 'Return Requested', 'Returned'],
     default: 'Pending'
   },
   cancelReason: String,
   paymentMethod: {
     type: String,
-    enum: ['COD', 'Razorpay'],
+    enum: ['COD', 'Razorpay', 'Wallet'],
     required: true
   },
   paymentStatus: {
@@ -78,6 +83,10 @@ const orderSchema = new mongoose.Schema({
   shippingCharge: {
     type: Number,
     default: 0
+  },
+  couponCode: {
+    type: String,
+    default: null
   }
 }, { timestamps: true });
 // Pre-validate hook to generate a unique orderId before validation occurs

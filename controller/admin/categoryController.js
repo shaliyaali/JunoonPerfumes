@@ -33,7 +33,8 @@ res.render('categorymanagement',{
   search,
   status, 
   categoryCount: count,
-  message
+  message,
+  activePage: 'categories'
 }
   )
    

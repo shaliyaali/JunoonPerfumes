@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wallet | Junoon Perfumes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af37",
+                        "luxury-black": "#0a0a0a",
+                        "luxury-ivory": "#fbfaf9",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#121212"
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .sidebar-active { @apply bg-gray-50 dark:bg-gray-800 text-primary border-r-4 border-primary; }
+    </style>
+</head>
+<body class="bg-[#fbfaf9] text-[#121212]">
+    
+    <%- include('partials/_mainheader', { session, wishlistCount, cartCount, categories, search, activePage: 'mywallet' }) %>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="flex flex-col md:flex-row gap-8">
+            
+            <!-- Sidebar -->
+            <%- include('partials/_sidebar', { user, activePage: 'mywallet' }) %>
+
+            <!-- Main Content -->
+            <main class="flex-1">
+                <div class="mb-10">
+                    <h1 class="text-4xl font-serif font-bold mb-2">My Wallet</h1>
+                    <p class="text-gray-500 text-sm">Manage your credits and view transaction history.</p>
+                </div>
+
+                <!-- Wallet Balance Card -->
+                <div class="bg-luxury-black rounded-2xl p-8 mb-10 shadow-2xl relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="material-symbols-outlined text-primary text-3xl">account_balance_wallet</span>
+                            <h2 class="text-gray-400 uppercase tracking-[0.2em] text-xs font-bold">Current Balance</h2>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-5xl font-serif font-bold text-white">₹<%= (wallet.balance || 0).toLocaleString('en-IN') %></span>
+                        </div>
+                    </div>
+                    <!-- Decorative elements -->
+                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl"></div>
+                    <div class="absolute right-10 top-1/2 -translate-y-1/2 opacity-10">
+                        <span class="material-symbols-outlined text-[120px] text-white">payments</span>
+                    </div>
+                </div>
+
+                <!-- Transactions Table -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-6 border-b border-gray-50">
+                        <h3 class="text-lg font-bold">Transaction History</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-gray-50 text-[10px] uppercase tracking-widest font-bold text-gray-500">
+                                    <th class="px-6 py-4">Date</th>
+                                    <th class="px-6 py-4">Description</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                <% if (wallet.transactions && wallet.transactions.length > 0) { %>
+                                    <% wallet.transactions.forEach(transaction => { %>
+                                        <tr class="hover:bg-gray-50/50 transition-colors">
+                                            <td class="px-6 py-4 text-sm text-gray-600">
+                                                <%= new Date(transaction.date).toLocaleDateString('en-GB') %>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm font-medium">
+                                                <%= transaction.description %>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider <%= transaction.type === 'Credit' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
+                                                    <%= transaction.type %>
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm font-bold text-right <%= transaction.type === 'Credit' ? 'text-green-600' : 'text-gray-900' %>">
+                                                <%= transaction.type === 'Credit' ? '+' : '-' %> ₹<%= transaction.amount.toLocaleString('en-IN') %>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-20 text-center text-gray-400 italic">
+                                            No transactions found yet.
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-8 flex justify-center">
+                    <% if (totalPages > 1) { %>
+                        <nav class="flex items-center space-x-2">
+                            <% if (currentPage > 1) { %>
+                                <a href="?page=<%= currentPage - 1 %>" class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:border-primary hover:text-primary transition-all text-gray-400">
+                                    <span class="material-symbols-outlined">chevron_left</span>
+                                </a>
+                            <% } %>
+                            <span class="text-sm font-medium text-gray-600">Page <%= currentPage %> of <%= totalPages %></span>
+                            <% if (currentPage < totalPages) { %>
+                                <a href="?page=<%= currentPage + 1 %>" class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 hover:border-primary hover:text-primary transition-all text-gray-400">
+                                    <span class="material-symbols-outlined">chevron_right</span>
+                                </a>
+                            <% } %>
+                        </nav>
+                    <% } %>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    
+</body>
+</html>

@@ -1,7 +1,7 @@
-const productService=require('../services/productService')
-const Category = require('../model/categorySchema');
-const wishlistService = require('../services/wishlistService');
-const cartService = require('../services/cartService');
+const productService=require('../../services/productService')
+const Category = require('../../model/categorySchema');
+const wishlistService = require('../../services/wishlistService');
+const cartService = require('../../services/cartService');
 
 const loadAllfragrence = async (req, res) => {
   try {

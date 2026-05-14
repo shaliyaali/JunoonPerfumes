@@ -1,9 +1,10 @@
 function generateOTP() {
   return Math.floor(1000 + Math.random() * 9000).toString()
 }
+
 function createOtpSession(req,purpose,payload){
   const otp=generateOTP()
-  console.log('inside create otp',otp)
+  console.log('____ otp________',otp)
   req.session.otp={
     code:otp,
     purpose,
@@ -16,7 +17,7 @@ function createOtpSession(req,purpose,payload){
 }
 
 function verifyOtpSession(req,enteredOtp,expectedPurpose){
-  console.log('inside util/verifyotp')
+  //console.log('inside util/verifyotp')
   const otpData=req.session.otp
   if(!otpData) 
     return {sucess:false,message:"No OTP found"}
