@@ -1,4 +1,5 @@
 const axios = require('axios')
+const https = require('https')
 
 async function validatePincodeMatch(pincode) {
 
@@ -8,7 +9,12 @@ async function validatePincodeMatch(pincode) {
       return {valid:false,message:'invalid pincode format'}
     }
     const response = await axios.get(
-      `https://api.postalpincode.in/pincode/${pincode}`
+      `https://api.postalpincode.in/pincode/${pincode}`,
+      {
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false
+        })
+      }
     )
 
     const result = response.data[0]
@@ -22,17 +28,7 @@ async function validatePincodeMatch(pincode) {
     const apiCity = postOffice.District.toLowerCase()
     const apiState = postOffice.State.toLowerCase()
 
-    // if (
-    //   apiCity !== city.toLowerCase() ||
-    //   apiState !== state.toLowerCase()
-    // ) {
-    //   return {
-    //     valid: false,
-    //     message: "Pincode does not match city/state"
-    //   }
-    // }
-
-    // return { valid: true }
+    
     return {
       city:apiCity ,
       state:apiState,
@@ -41,6 +37,7 @@ async function validatePincodeMatch(pincode) {
     }
 
   } catch (err) {
+    console.error("Pincode API call failed:", err.message || err); // Log the actual error
     return { valid: false, message: "Pincode validation failed" }
   }
 }

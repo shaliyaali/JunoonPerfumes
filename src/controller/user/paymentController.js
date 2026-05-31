@@ -2,18 +2,17 @@ const Razorpay=require('razorpay');
 const crypto=require('crypto');
 const cartService = require('../../services/cartService');
 const orderService = require('../../services/orderService');
-require('dotenv').config();
+const config = require('../../config/config');
 const Coupon=require('../../model/couponSchema');
 const Order = require('../../model/orderSchema');
 const Category = require('../../model/categorySchema');
 const wishlistService = require('../../services/wishlistService');
 const Cart = require('../../model/cartSchema');
 
-
 const razorpayInstance= new Razorpay({
-  key_id:process.env.RAZORPAY_KEY_ID,
-  key_secret:process.env.RAZORPAY_KEY_SECRET,
-})
+  key_id: config.razorpay.keyId,
+  key_secret: config.razorpay.keySecret,
+});
 
 const loadPaymentFailure = async (req, res) => {
     try {
@@ -38,6 +37,7 @@ const loadPaymentFailure = async (req, res) => {
             user: req.session.user
         });
     } catch (error) {
+      console.log(error)
         res.redirect('/');
     }
 };
@@ -45,7 +45,37 @@ const loadPaymentFailure = async (req, res) => {
 const createRazorpayOrder= async (req,res)=>{
   try{
     const userId=req.session.user.id;
-    const { addressId, couponCode } = req.body;
+
+
+        const { addressId, couponCode, orderId } = req.body;
+
+    // If orderId is provided, this is a retry attempt for a failed payment
+    if (orderId) {
+      const existingOrder = await Order.findOne({ orderId, user: userId });
+      if (!existingOrder) {
+        return res.json({ success: false, message: 'Order not found' });
+      }
+
+      // Use the amount already saved in the order (which includes the coupon discount)
+      const options = {
+        amount: Math.round(existingOrder.totalAmount * 100),
+        currency: "INR",
+        receipt: existingOrder.orderId,
+      };
+
+      const rzpOrder = await razorpayInstance.orders.create(options);
+      
+      existingOrder.razorpayOrderId = rzpOrder.id;
+      await existingOrder.save();
+
+      return res.json({
+        success: true,
+        order: rzpOrder,
+        orderId: existingOrder.orderId,
+        key_id: config.razorpay.keyId
+      });
+    }
+
     const cart=await cartService.getCart(userId);
     if(!cart || cart.items.length === 0) //
       return res.json({success:false,message:'cart is empty'}) //
@@ -89,7 +119,7 @@ const createRazorpayOrder= async (req,res)=>{
       success:true,
       order:rzpOrder,
       orderId: newOrder.orderId,
-      key_id: process.env.RAZORPAY_KEY_ID
+      key_id: config.razorpay.keyId
     });
   }catch (error){
     console.error(error);
@@ -97,15 +127,40 @@ const createRazorpayOrder= async (req,res)=>{
   }
 }
 
+
+
+const handlePaymentFailure = async (req, res) => {
+    try {
+        const { razorpay_order_id, error_description } = req.body;
+        
+        const order = await Order.findOne({ razorpayOrderId: razorpay_order_id });
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        
+        order.paymentStatus = 'Failed';
+        if (error_description) {
+            order.cancelReason = `Payment Failed: ${error_description}`;
+        }
+        await order.save();
+
+        res.json({ success: true, message: 'Order status updated to Failed' });
+    } catch (error) {
+        console.error('Failure handler error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
 const verifyRazorpayPayment= async (req,res)=>{
   try{
     const {razorpay_payment_id, razorpay_order_id, razorpay_signature }=req.body;
 
-    const hmac =crypto.createHmac('sha256',process.env.RAZORPAY_KEY_SECRET);
+    const hmac = crypto.createHmac('sha256', config.razorpay.keySecret);
     hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
     const generatedSignature=hmac.digest('hex');
 
-    if(generatedSignature === razorpay_signature){ 
+    if(generatedSignature === razorpay_signature){
       let order = await Order.findOne({ razorpayOrderId: razorpay_order_id });
       
       // Fallback: If not found by Razorpay ID, check by our internal ID stored in the receipt
@@ -143,5 +198,6 @@ const verifyRazorpayPayment= async (req,res)=>{
 module.exports={
   createRazorpayOrder,
   verifyRazorpayPayment,
-  loadPaymentFailure
+  loadPaymentFailure,
+  handlePaymentFailure
 }

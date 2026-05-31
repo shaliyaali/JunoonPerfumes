@@ -90,13 +90,10 @@
                             <div>
                                 <p class="text-[10px] uppercase font-bold text-gray-400">Total</p>
                                 <p class="text-sm font-bold text-[#d4af37]">₹<%= order.totalAmount.toLocaleString() %></p>
+                                
                             </div>
                         </div>
-                        <div class="flex items-center gap-4">
-                            <a href="/orders/download-invoice/<%= order.orderId %>" class="flex items-center gap-1 text-[10px] uppercase font-bold text-gray-400 hover:text-[#d4af37] transition-colors">
-                                <span class="material-symbols-outlined text-lg">download</span> Invoice
-                            </a>
-                        </div>
+                       
                     </div>
                     
                     <div class="p-8 space-y-6">
@@ -117,6 +114,14 @@
                                         <button onclick="handleAction('return', '<%= order.orderId %>', '<%= item._id %>')" class="text-[10px] font-bold uppercase border border-gray-200 px-4 py-2 rounded hover:bg-gray-50 transition-colors">Return</button>
                                     <% } %>
                                     <a href="/profile/myorders/<%= order.orderId %>/<%= item._id %>" class="text-[10px] flex items-center justify-center font-bold uppercase border border-gray-200 text-gray-600 px-4 py-2 rounded hover:bg-gray-50 transition-colors">Details</a>
+
+                                     <% if (item.status !== 'Cancelled' && item.status !== 'Returned') { %>
+                                    <div class="flex items-center gap-4">
+                                    <a href="/orders/download-invoice/<%= order.orderId %>/<%= item._id %>" download="invoice_#<%= order.orderId %>.pdf" class="flex items-center gap-1 text-[10px] uppercase font-bold text-gray-400 hover:text-[#d4af37] transition-colors">
+                                    <span class="material-symbols-outlined text-lg">download</span> Invoice
+                                    </a>
+                                    </div>
+                                    <% } %>
                                 </div>
                             </div>
                         <% }) %>

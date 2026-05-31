@@ -1,22 +1,20 @@
-const express = require("express")
-const app = express()
-const env = require("dotenv").config()
-const path = require('path')
-const expresslayouts = require('express-ejs-layouts')
-const db = require('./src/config/db')
-const userRouter = require('./routes/user')
-const adminRouter = require('./routes/admin')
-const session = require('express-session')
-const nocache = require('nocache')
-//const connectDB = require("./config/db")
-const passport = require('./src/config/passport')
-const flash = require('connect-flash')
-const errorHandler = require('./middlewares/errorHandler');
+const express = require("express");
+const app = express();
+const config = require('./src/config/config');
+const path = require('path');
+const db = require('./src/config/db');
+const userRouter = require('./src/routes/user');
+const adminRouter = require('./src/routes/admin');
+const session = require('express-session');
+const nocache = require('nocache');
+const passport = require('./src/config/passport');
+const flash = require('connect-flash');
+const errorHandler = require('./src/middlewares/errorHandler');
 
 app.use(nocache())
 
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: config.sessionSecret,
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -50,17 +48,17 @@ app.use('/admin', adminRouter)
 
 app.set('view engine', 'ejs')
 app.set('views', [path.join(__dirname, 'views/user'), path.join(__dirname, 'views/admin')])
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "src/public")));
 
 
 app.use(errorHandler);
 
 
-const PORT = process.env.PORT
+const PORT = config.port;
 
 const startServer = async () => {
   try {
-    await db();
+    await db(config.mongoUri);
     app.listen(PORT, () => {
       console.log("_______________server started_________________");
     })

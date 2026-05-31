@@ -60,8 +60,7 @@ async function changeQuantity(productId, variantId, change) {
                 Swal.fire({ icon: 'info', title: 'Quantity Adjusted', text: data.message, toast: true, position: 'top-end', timer: 3000 });
             }
 
-            // Critical: Refresh page or update OOS status UI if needed
-            // For a true "real-time" feel, you could re-run a check here to see if checkout should be disabled
+            
         } else {
             Swal.fire({ icon: 'error', title: 'Update Failed', text: data.message });
         }

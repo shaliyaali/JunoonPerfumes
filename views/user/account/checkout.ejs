@@ -112,7 +112,7 @@
                                 <option value="">Select a coupon</option>
                                 <% if (typeof coupons !== 'undefined' && coupons.length > 0) { %>
                                     <% coupons.forEach(coupon => { %>
-                                        <option value="<%= coupon.code %>">
+                                        <option value="<%= coupon.code %>" <%= (typeof couponCode !== 'undefined' && couponCode === coupon.code) ? 'selected' : '' %>>
                                            <%= coupon.code %> - 
                                             <% if (coupon.offerType === 'Percentage') { %>
                                                 <%= coupon.offerValue %>% OFF (Max: ₹<%= coupon.maxDiscount.toLocaleString() %>)
@@ -136,8 +136,15 @@
                             <div class="flex items-center gap-4 border-b border-gray-100 pb-4">
                                 <img src="<%= item.product.images[0] %>" alt="<%= item.product.name %>" class="w-16 h-16 object-cover rounded-lg">
                                 <div class="flex-1">
-                                    <p class="font-semibold"><%= item.product.name %>(<%= item.stock  %>)</p>
+                                    <p class="font-semibold"><%= item.product.name %></p>
                                     <p class="text-sm text-gray-600">Qty: <%= item.quantity %></p>
+                                    <% if (item.quantity > item.stock) { %>
+                                        <p class="text-[10px] text-red-600 font-bold uppercase mt-1">
+                                            Insufficient Stock (Available: <%= item.stock %>)
+                                        </p>
+                                    <% } else { %>
+                                        <p class="text-[10px] text-green-600 font-medium uppercase mt-1">In Stock</p>
+                                    <% } %>
                                 </div>
                                 <p class="font-bold">₹<%= (item.price * item.quantity).toLocaleString() %></p>
                             </div>
@@ -163,12 +170,11 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full mt-6 py-5 bg-primary text-black rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] border border-primary hover:bg-black hover:text-primary transition-all">
+                    <button type="submit" <%= hasInsufficientStock ? 'disabled' : '' %> 
+                        class="w-full mt-6 py-5 <%= hasInsufficientStock ? 'bg-gray-300 border-gray-300 cursor-not-allowed text-gray-500' : 'bg-primary text-black border-primary hover:bg-black hover:text-primary' %> rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] border transition-all">
                         Place Order
                     </button>
-                    <% if (message) { %>
-                        <p class="text-red-500 text-center mt-4"><%= message %></p>
-                    <% } %>
+                    <input type="hidden" id="server-message" value="<%= message || '' %>">
                 </div>
             </div>
         </form>
@@ -181,9 +187,51 @@
         const displayCouponDiscount = document.getElementById('displayCouponDiscount');
         const couponDiscountRow = document.getElementById('couponDiscountRow');
         const couponMessageElement = document.getElementById('couponMessage');
+
+        // Check if we are in a retry scenario from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const retryOrderId = urlParams.get('retry');
+        const hasInsufficientStock = <%= hasInsufficientStock %>;
+
+        // Unified Toast Notification Logic
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+        });
+
+        // Handle Inventory Issues
+        if (hasInsufficientStock) {
+            Toast.fire({
+                icon: 'error',
+                title: 'Stock Unavailable',
+                text: 'Some items in your cart are no longer available in the requested quantity.'
+            });
+        }
+
+        // Handle General Server Messages (e.g. "Address added successfully")
+        const serverMsg = document.getElementById('server-message').value;
+        if (serverMsg) {
+            Toast.fire({
+                icon: serverMsg.toLowerCase().includes('success') ? 'success' : 'info',
+                title: 'Notification',
+                text: serverMsg
+            });
+        }
+
         document.getElementById('checkoutForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             
+            if (hasInsufficientStock) {
+                return Swal.fire({
+                    icon: 'error',
+                    title: 'Stock Error',
+                    text: 'One or more items in your order are no longer available in the requested quantity.',
+                });
+            }
+
             const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
 
@@ -208,7 +256,8 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             addressId: selectedAddress.value,
-                            couponCode:couponCode
+                            couponCode: couponCode,
+                            orderId: retryOrderId
                         })
                     });
 
@@ -242,12 +291,10 @@
 
                     const rzp = new Razorpay(options);
                     rzp.on('payment.failed', function (response) {
-                        Swal.fire('Payment Failed', response.error.description, 'error');
+                        // Redirect to failure page using the internal orderId, not the Razorpay ID
+                        window.location.href = `/payment-failure/${data.orderId}`;
                     });
                     rzp.open();
-                    rzp.on('payment.failed', function (response) {
-                        window.location.href=`/payment-failure/${data.order.id}`;
-                        });
                     
                     
 

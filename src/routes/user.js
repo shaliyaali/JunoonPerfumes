@@ -55,8 +55,8 @@ router.post('/cart/update', userauth.checkSession, userController.updateCartQuan
 router.post('/cart/remove', userauth.checkSession, userController.removeCartItem)
 //checkout
 router.get('/checkout', userauth.checkSession, userController.loadCheckout)
-router.post('/place-order', userauth.checkSession, userController.placeOrder)
-router.get('/order-success/:orderId', userauth.checkSession, userController.loadOrderSuccess)
+router.post('/place-order', userauth.checkSession, orderController.placeOrder)
+router.get('/order-success/:orderId', userauth.checkSession, orderController.loadOrderSuccess)
 router.post('/create-razorpay-order',userauth.checkSession,paymentController.createRazorpayOrder)
 
 
@@ -64,13 +64,13 @@ router.get('/payment-failure/:orderId', userauth.checkSession, paymentController
 router.post('/verify-razorpay-payment',userauth.checkSession,paymentController.verifyRazorpayPayment)
 
 //my orders
-router.get('/profile/myorders', userauth.checkSession, userController.loadMyOrders)
-router.get('/profile/myorders/:orderId/:itemId', userauth.checkSession, userController.loadOrderDetails)
-router.post('/orders/cancel-item', userauth.checkSession, userController.cancelOrderItem)
-router.post('/orders/return-item', userauth.checkSession, userController.returnOrderItem)
-router.get('/orders/download-invoice/:orderId', userauth.checkSession, userController.downloadInvoice)
+router.get('/profile/myorders', userauth.checkSession, orderController.loadMyOrders)
+router.get('/profile/myorders/:orderId/:itemId', userauth.checkSession, orderController.loadOrderDetails)
+router.post('/orders/cancel-item', userauth.checkSession, orderController.cancelOrderItem)
+router.post('/orders/return-item', userauth.checkSession, orderController.returnOrderItem)
+router.get('/orders/download-invoice/:orderId/:itemId', userauth.checkSession, orderController.downloadInvoice)
 //coupon
-router.post('/apply-coupon', userauth.checkSession, userController.applyCouponAjax)
+router.post('/apply-coupon', userauth.checkSession, orderController.applyCouponAjax)
 module.exports=router
 
 //wallet

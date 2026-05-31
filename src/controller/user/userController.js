@@ -1,12 +1,12 @@
-const PDFDocument = require('pdfkit');
+
 
 const userService = require('../../services/userService')
 const nodemailer = require('nodemailer')
 require('dotenv').config()
-const { createOtpSession,getRemainingTime } = require('../../utils/otpManager')
-const { verifyOtpSession, clearOtpSession } = require('../../utils/otpManager')
+const { createOtpSession,getRemainingTime } = require('../../config/utils/otpManager')
+const { verifyOtpSession, clearOtpSession } = require('../../config/utils/otpManager')
 const bcrypt = require('bcrypt')
-const { validatePincodeMatch } = require('../../utils/pincodeValidator')
+const { validatePincodeMatch } = require('../../config/utils/pincodeValidator')
 const passport = require('passport')
 const wishlistService = require('../../services/wishlistService')
 const productService = require('../../services/productService')
@@ -240,31 +240,70 @@ const loadCheckout = async (req, res, next) => {
     const cart = await cartService.getCart(userId);
     const wallet = await Wallet.findOne({ user: userId });
 
-    if (!cart || cart.items.length === 0) {
-      req.session.message = 'Your cart is empty. Please add items before checking out.';
-      return res.redirect('/cart');
-    }
-
-    // Filter out items where product might be null (deleted products)
-    cart.items = cart.items.filter(item => item.product !== null);
-    if (cart.items.length === 0) {
-        req.session.message = 'Your cart contains unavailable items. Please review your cart.';
-        return res.redirect('/cart');
-    }
-
-    // Calculate totals (subtotal, potential shipping, discounts)
+    const retryOrderId = req.query.retry;
+    let items = [];
     let subtotal = 0;
-    for (const item of cart.items) {
-        subtotal += item.price * item.quantity;
+    let shippingCharge = 0;
+    let couponDiscount = 0;
+    let totalAmount = 0;
+    let couponCode = null;
+    let hasInsufficientStock = false;
+
+    if (retryOrderId) {
+        const existingOrder = await Order.findOne({ orderId: retryOrderId, user: userId }).populate('items.product');
+        if (!existingOrder) return res.redirect('/checkout');
+
+        // Use items and amounts from the existing failed order
+        items = existingOrder.items.map(item => {
+            const currentStock = item.product ? (item.product.variants.find(v => v.size === item.variantSize)?.stock || 0) : 0;
+            if (item.quantity > currentStock) hasInsufficientStock = true;
+            return {
+                product: item.product,
+                quantity: item.quantity,
+                price: item.price,
+                stock: currentStock
+            };
+        });
+        subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+        shippingCharge = existingOrder.shippingCharge || 0;
+        couponDiscount = existingOrder.couponDiscount || 0;
+        totalAmount = existingOrder.totalAmount;
+        couponCode = existingOrder.couponCode;
+    } else {
+        if (!cart || cart.items.length === 0) {
+            req.session.message = 'Your cart is empty. Please add items before checking out.';
+            return res.redirect('/cart');
+        }
+        cart.items = cart.items.filter(item => item.product !== null);
+        if (cart.items.length === 0) {
+            req.session.message = 'Your cart contains unavailable items. Please review your cart.';
+            return res.redirect('/cart');
+        }
+
+        // Map cart items to include current stock and check for insufficiency
+        items = cart.items.map(item => {
+            const variant = item.product.variants.find(v => v._id.toString() === item.variantId.toString());
+            const currentStock = variant ? variant.stock : 0;
+            if (item.quantity > currentStock) hasInsufficientStock = true;
+            const itemData = typeof item.toObject === 'function' ? item.toObject() : item;
+            return {
+                ...itemData,
+                stock: currentStock
+            };
+        });
+
+        subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+        shippingCharge = 0;
+        couponDiscount = 0;
+        totalAmount = subtotal;
     }
-    const shippingCharge = 0; 
-    const couponDiscount = 0;
 
     // Find coupons already used by this user
     const usedCoupons = await Order.find({ 
         user: userId, 
         couponCode: { $ne: null },
-        status: { $ne: 'Cancelled' } // Optional: allow reuse if previous order was cancelled
+        status: { $ne: 'Cancelled' },
+        orderId: { $ne: retryOrderId }
     }).distinct('couponCode');
 
     const categories=await Category.find({status:'Active'})
@@ -275,11 +314,10 @@ const loadCheckout = async (req, res, next) => {
         minPurchase: { $lte: subtotal },
         code: { $nin: usedCoupons }
     });
-    const totalAmount = subtotal 
   
     res.render('account/checkout', {
       user,
-      cart,
+      cart: { items },
       addresses: user.addresses,
       subtotal, totalAmount, shippingCharge, couponDiscount,
       message,
@@ -288,314 +326,18 @@ const loadCheckout = async (req, res, next) => {
       categories,
       search:" ",
       activePage:'checkout',
+      wallet: wallet || { balance: 0 },
+      couponCode,
       coupons,
-      wallet: wallet || { balance: 0 }
+      hasInsufficientStock
     });
   } catch (error) {
     next(error);
   }
 };
 
-const placeOrder = async (req, res, next) => {
-  try {
-    const userId = req.session.user.id;
-    const { selectedAddress, paymentMethod, couponCode } = req.body;
 
-    if (!selectedAddress || !paymentMethod) {
-      req.session.message = 'Please select a shipping address and payment method.';
-      return res.redirect('/checkout');
-    }
 
-    // 1. Recalculate Subtotal from Cart (Security: ignore client-side totals)
-    const cart = await cartService.getCart(userId);
-    if (!cart || cart.items.length === 0) {
-      return res.redirect('/cart');
-    }
-
-    const subtotal=cart.items.reduce((acc,item)=> acc + (item.price * item.quantity),0)
-    const shippingCharge = 0;
-    let couponDiscount =0;
-
-    if(couponCode) {
-      const coupon = await Coupon.findOne({
-        code :couponCode,
-        status: 'Active',
-        expiryDate: {$gte :new Date()}
-      });
-
-      if (coupon && subtotal >= coupon.minPurchase) {
-        if (coupon.offerType === 'Percentage') {
-          couponDiscount = Math.min((subtotal * coupon.offerValue) / 100, coupon.maxDiscount || Infinity);
-        } else {
-          couponDiscount = coupon.offerValue;
-        }
-      }
-    }
-    const newOrder = await orderService.createOrder(userId, selectedAddress, paymentMethod, couponDiscount, shippingCharge, couponCode);
-
-    // Clear cart for COD/Wallet as payment is immediate/confirmed
-    await Cart.findOneAndUpdate({ user: userId }, { $set: { items: [] } });
-
-    //req.session.message = 'Order placed successfully!';
-    res.redirect(`/order-success/${newOrder.orderId}`);
-
-  } catch (error) {
-    next(error);
-  }
-};
-
-const applyCouponAjax = async (req, res) => {
-  try {
-    const userId = req.session.user.id;
-    const { couponCode } = req.body;
-    const cart = await cartService.getCart(userId);
-    const subtotal = cart.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    
-    let couponDiscount = 0;
-    let couponMessage = '';
-    
-    const coupon = await Coupon.findOne({ 
-      code: couponCode, 
-      status: 'Active', 
-      expiryDate: { $gte: new Date() } 
-    });
-    
-    if (coupon) {
-       // Security check: Check if user has already used this specific coupon
-        const alreadyUsed = await Order.findOne({ 
-            user: userId, 
-            couponCode: couponCode,
-            status: { $ne: 'Cancelled' } 
-        });
-
-        if (alreadyUsed) {
-            return res.json({ success: false, couponDiscount: 0, couponMessage: 'You have already used this coupon.' });
-        }
-
-      if (subtotal >= coupon.minPurchase) {
-        if (coupon.offerType === 'Percentage') {
-          couponDiscount = Math.min((subtotal * coupon.offerValue) / 100, coupon.maxDiscount || Infinity);
-        } else {
-          couponDiscount = coupon.offerValue;
-        }
-        couponMessage = 'Coupon applied successfully!';
-      } else {
-        couponMessage = `Minimum purchase of ₹${coupon.minPurchase} required.`;
-      }
-    } else {
-      couponMessage = 'Invalid or expired coupon.';
-    }
-
-    const totalAmount = subtotal - couponDiscount;
-    res.json({ success: couponDiscount > 0, subtotal, shippingCharge: 0, couponDiscount, totalAmount, couponMessage });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-const loadOrderSuccess = async (req, res, next) => {
-  try {
-    const orderId = req.params.orderId; 
-    const { wishlistCount, cartCount ,categories} = await getCommonHeaderData(req);
-    const order = await orderService.getOrderById(orderId);
-
-    if (!order || order.user._id.toString() !== req.session.user.id) {
-      req.session.message = 'Order not found or you do not have permission to view it.';
-      return res.redirect('/');
-    }
-    
-
-    res.render('account/orderSuccess', { order, session: req.session , wishlistCount, cartCount,categories,search:"",activePage:'orderSuccess'});
-  } catch (error) {
-    next(error);
-  }
-};
-
-const loadMyOrders = async (req, res, next) => {
-  try {
-    
-    const { wishlistCount, cartCount, categories } = await getCommonHeaderData(req);
-    const user=await userService.getUserById(req.session.user.id)
-    const search = (req.query.search || '').trim();
-    const startDate = req.query.startDate || '';
-    const endDate = req.query.endDate || '';
-    const page=parseInt(req.query.page)|| 1;
-    const limit=4;
-    const {orders,totalPages,currentPage} = await orderService.getOrdersByUser(req.session.user.id, search, page, limit, startDate, endDate);
-   
-    res.render('account/myOrders', { user, wishlistCount, cartCount, categories, orders, search, totalPages, currentPage, session: req.session, activePage:'myorders', startDate, endDate });
-  } catch (error) {
-    next(error);
-  }
-};
-const loadOrderDetails= async(req,res,next)=>{
-  try {
-    const { orderId,itemId} = req.params;
-    
-    const { wishlistCount, cartCount, categories } = await getCommonHeaderData(req);
-    const user=await userService.getUserById(req.session.user.id)
-    const userId=req.session.user.id;
-    const order = await orderService.getOrderByIdAndUser(orderId,userId);
-    if(!order){
-      return res.redirect('/profile/myorders');
-    }
-    
-    const item= order.items.id(itemId);
-    const address=order.user.addresses.id(order.shippingAddress);
-
-    // Calculate proportional coupon discount for this specific item
-    const orderSubtotal = order.items.reduce((acc, i) => acc + (i.price * i.quantity), 0);
-    const itemTotal = item.price * item.quantity;
-    const itemCouponDiscount = orderSubtotal > 0 ? Math.round((itemTotal / orderSubtotal) * (order.couponDiscount || 0)) : 0;
-    const finalItemAmount = itemTotal - itemCouponDiscount;
-
-    res.render('account/orderDetails',{
-      order,
-      item,
-      address,
-      session:req.session,
-      wishlistCount,
-      cartCount,
-      categories,
-      itemTotal,
-      itemCouponDiscount,
-      finalItemAmount,
-      search: "",
-      activePage:'orderDetails',
-      user
-    })
-  } catch (error) {
-    next(error);
-  }
-
-}
-
-// const cancelOrder = async (req, res) => {
-//   try {
-//     const { orderId, reason } = req.body;
-//     // Reuse service logic - it already handles stock restoration
-//     await orderService.updateOrderStatus(orderId, 'Cancelled');
-//     // Update the reason specifically
-//     await Order.updateOne({ orderId }, { cancelReason: reason });
-    
-//     res.json({ success: true, message: 'Order cancelled successfully' });
-//   } catch (error) {
-//     res.status(400).json({ success: false, message: error.message });
-//   }
-// };
-
-const cancelOrderItem = async (req, res) => {
-  try {
-    const { orderId, itemId, reason } = req.body;
-    await orderService.updateOrderItemStatus(orderId, itemId, 'Cancelled', reason);
-    res.json({ success: true, message: 'Item cancelled successfully' });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-};
-
-const returnOrderItem = async (req, res) => {
-  try {
-    const { orderId, itemId, reason } = req.body;
-    if (!reason) throw new Error('Return reason is mandatory');
-    await orderService.updateOrderItemStatus(orderId, itemId, 'Return Requested', reason);
-    
-    res.json({ success: true, message: 'Return request submitted ' });
-  }
-  catch(error){
-    res.status(400).json({ success: false, message: error.message });
-  }
-}
-
-const downloadInvoice = async (req, res) => {
-  try {
-    const orderId = req.params.orderId;
-
-    //  Fetch order
-    const order = await Order.findOne({orderId}).populate("user");
-
-    if (!order) {
-      return res.status(404).send("Order not found");
-    }
-
-    const address = order.user.addresses.id(order.shippingAddress) 
-
-    // Create PDF
-    const doc = new PDFDocument();
-
-    //  Headers
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
-
-    //  Pipe
-    doc.pipe(res);
-
-    // ---- Your existing content ----
-    doc.fontSize(12).font('Helvetica-Bold').text('Billed To:', 50, 210);
-    doc.fontSize(10).font('Helvetica')
-      .text(order.user.name, 50, 225)
-      .text(order.user.email, 50, 240);
-
-    if (address) {
-      doc.fontSize(12).font('Helvetica-Bold').text('Shipped To:', 300, 210);
-      doc.fontSize(10).font('Helvetica')
-        .text(address.name, 300, 225)
-        .text(`${address.house}, ${address.street}`, 300, 240)
-        .text(`${address.city}, ${address.state} - ${address.pincode}`, 300, 255)
-        .text(`Phone: ${address.phone}`, 300, 270);
-    }
-
-    // Items
-    const tableTop = 330;
-    doc.font('Helvetica-Bold');
-    doc.text('Item Description', 50, tableTop);
-    doc.text('Size', 250, tableTop);
-    doc.text('Qty', 350, tableTop, { width: 50, align: 'center' });
-    doc.text('Price', 400, tableTop, { width: 70, align: 'right' });
-    doc.text('Amount', 480, tableTop, { width: 70, align: 'right' });
-
-    doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
-
-    let i = 0;
-    order.items.forEach(item => {
-      const y = tableTop + 30 + (i * 25);
-      doc.font('Helvetica');
-      doc.text(item.productName, 50, y, { width: 190 });
-      doc.text(item.variantSize, 250, y);
-      doc.text(item.quantity.toString(), 350, y, { width: 50, align: 'center' });
-      doc.text(`INR ${item.price.toLocaleString()}`, 400, y, { width: 70, align: 'right' });
-      doc.text(`INR ${(item.price * item.quantity).toLocaleString()}`, 480, y, { width: 70, align: 'right' });
-      i++;
-    });
-
-    const subtotal = order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    const summaryY = tableTop + 50 + (i * 25);
-
-    doc.moveTo(350, summaryY).lineTo(550, summaryY).stroke();
-
-    doc.font('Helvetica').text('Subtotal:', 350, summaryY + 15, { width: 100, align: 'right' });
-    doc.text(`INR ${subtotal.toLocaleString()}`, 480, summaryY + 15, { width: 70, align: 'right' });
-
-    doc.text('Shipping Charge:', 350, summaryY + 30, { width: 100, align: 'right' });
-    doc.text(`INR ${order.shippingCharge.toLocaleString()}`, 480, summaryY + 30, { width: 70, align: 'right' });
-
-    if (order.couponDiscount > 0) {
-      doc.text('Discount:', 350, summaryY + 45, { width: 100, align: 'right' });
-      doc.text(`- INR ${order.couponDiscount.toLocaleString()}`, 480, summaryY + 45, { width: 70, align: 'right' });
-    }
-
-    doc.font('Helvetica-Bold').fontSize(12)
-      .text('Total Paid:', 350, summaryY + 70, { width: 100, align: 'right' });
-
-    doc.text(`INR ${order.totalAmount.toLocaleString()}`, 480, summaryY + 70, { width: 70, align: 'right' });
-
-    doc.end();
-
-  } catch (error) {
-    console.error('Invoice Generation Error:', error);
-    res.status(500).send('Error generating invoice.');
-  }
-};
 const wishlistToBag = async (req, res) => {
     try {
         const { productId, variantId, quantity } = req.body;
@@ -1301,4 +1043,4 @@ const removeCartItem = async (req, res, next) => {
         next(error);
     }
 };
-module.exports = { loadRegister, registerUser, loadhome, pageNotFound, verifyOtp, loadLogin, loadOtp, resendOtp, userLogin, loadProfile, updateProfile, editEmail, verifyEmailOtp, loadForgetPassword, passwordReset, verifyResetOtp, resetPassword ,changePassword,logoutUser,addAddress,editAddress,deleteAddress,loadManageAddress,googleCallback,getPincodeDetails, loadWishlist, toggleWishlist, loadProductDetails, addToCart,loadCart,updateCartQuantity,removeCartItem, loadCheckout, placeOrder, loadOrderSuccess, loadMyOrders, cancelOrderItem, returnOrderItem, downloadInvoice,wishlistToBag ,loadOrderDetails, applyCouponAjax, loadRefer}
+module.exports = { getCommonHeaderData, loadRegister, registerUser, loadhome, pageNotFound, verifyOtp, loadLogin, loadOtp, resendOtp, userLogin, loadProfile, updateProfile, editEmail, verifyEmailOtp, loadForgetPassword, passwordReset, verifyResetOtp, resetPassword ,changePassword,logoutUser,addAddress,editAddress,deleteAddress,loadManageAddress,googleCallback,getPincodeDetails, loadWishlist, toggleWishlist, loadProductDetails, addToCart,loadCart,updateCartQuantity,removeCartItem, loadCheckout,wishlistToBag , loadRefer}

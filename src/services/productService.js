@@ -1,12 +1,22 @@
 const category=require('../model/categorySchema')
 const product=require('../model/productSchema')
 
-const getProducts=async(query,page,limit,sort = { createdAt: -1 },search)=>{
-  // If sorting by totalStock (sum of variants), we must use an aggregation pipeline
-  if (sort.totalStock) {
+const getProducts=async(query,page,limit,sort = { createdAt: -1 })=>{
+  
+  if (sort.totalStock||sort.minPrice||query.minPrice){
+    const schemaQuery={...query};
+    const computedQuery={};
+
+    if(query.minPrice){
+      computedQuery.minPrice=query.minPrice
+      delete schemaQuery.minPrice;
+    }
+
     return await product.aggregate([
-      { $match: query },
-      { $addFields: { totalStock: { $sum: "$variants.stock" } } },
+      { $match: schemaQuery},
+      { $addFields: { totalStock: { $sum: "$variants.stock" }, minPrice: { $min: "$variants.salePrice"}
+     } },
+     {$match:computedQuery},
       {
         $lookup: {
           from: "categories", 
@@ -15,7 +25,7 @@ const getProducts=async(query,page,limit,sort = { createdAt: -1 },search)=>{
           as: "category"
         }
       },
-      { $unwind: "$category" },
+      { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
       { $sort: sort },
       { $skip: (page - 1) * limit },
       { $limit: limit }
@@ -26,10 +36,23 @@ const getProducts=async(query,page,limit,sort = { createdAt: -1 },search)=>{
   return await product.find(query)
   .populate('category')
   .sort(sort)
+  .skip((page - 1) * limit)
   .limit(limit)
-  .skip((page -1) * limit)
 }
 const countProducts=async(query)=>{
+  if(query.minPrice){
+    const schemaQuery={...query};
+    delete schemaQuery.minPrice;
+
+    const result=await product.aggregate([
+      { $match: schemaQuery},
+      { $addFields: { minPrice: { $min: "$variants.salePrice"}
+     } },
+      {$match :{minPrice:query.minPrice}},
+      {$count:"count"}
+    ])
+    return result.length > 0 ? result[0].count : 0;
+  }
   return await product.countDocuments(query)
 }
 

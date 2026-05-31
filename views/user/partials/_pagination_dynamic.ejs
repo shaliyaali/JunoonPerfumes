@@ -1,0 +1,24 @@
+<% if (totalPages > 1) { %>
+    <nav class="flex items-center space-x-2">
+        <% if (currentPage > 1) { %>
+            <button onclick="updateProducts(<%= currentPage - 1 %>)" class="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 hover:border-primary hover:text-primary transition-all text-slate-400">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+        <% } %>
+
+        <div class="flex items-center space-x-2 px-4">
+            <% for(let i = 1; i <= totalPages; i++) { %>
+                <% const isActive = currentPage === i; %>
+                <button onclick="updateProducts(<%= i %>)" class="w-10 h-10 flex items-center justify-center rounded-lg font-medium text-sm transition-colors <%= isActive ? 'bg-primary text-white font-bold shadow-lg shadow-primary/20' : 'hover:bg-slate-100 text-slate-500' %>">
+                    <%= i.toString().padStart(2, '0') %>
+                </button>
+            <% } %>
+        </div>
+
+        <% if (currentPage < totalPages) { %>
+            <button onclick="updateProducts(<%= currentPage + 1 %>)" class="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 hover:border-primary hover:text-primary transition-all text-slate-400">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+        <% } %>
+    </nav>
+<% } %>
