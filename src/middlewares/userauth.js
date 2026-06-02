@@ -47,7 +47,7 @@ const checkSession = async (req, res, next) => {
     ]);
 
     res.locals.wishlistCount = wishlistCount || 0;
-    res.locals.cartCount = cart ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+    res.locals.cartCount = (cart && cart.items) ? cart.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
     res.locals.search = req.query.search || ''; // Ensure search is always defined
     res.locals.activePage = ''; // Provide a default to prevent "not defined" errors
     res.locals.categories = categories; // Set categories in res.locals

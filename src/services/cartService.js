@@ -47,7 +47,7 @@ const getCart = async (userId, searchQuery = null) => {
     if (searchQuery && searchQuery.name && searchQuery.name.$regex) {
         const regex = new RegExp(searchQuery.name.$regex, 'i');
         updatedItems = updatedItems.filter(item => 
-            item.product && regex.test(item.product.name)
+            item.product && item.product.name && regex.test(item.product.name)
         );
     }
 
@@ -127,6 +127,7 @@ const updateQuantity = async (userId, productId, variantId, change) => {
         item.product.toString() === productId.toString() && 
         item.variantId.toString() === variantId.toString()
     );
+    if (itemIndex === -1) throw new Error('Item not found in cart');
 
     const item=cart.items[itemIndex];
     const product=await Product.findById(productId);
