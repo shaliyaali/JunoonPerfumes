@@ -108,6 +108,8 @@ const loadSalesReport = async (req, res, next) => {
             orders, 
             search: search || '', 
             reportFilter: reportFilter || 'today', 
+            periodStart,
+            periodEnd,
             startDate: startDate || '', 
             endDate: endDate || '', 
             currentPage,
