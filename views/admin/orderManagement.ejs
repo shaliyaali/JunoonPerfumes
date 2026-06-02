@@ -73,8 +73,8 @@
                                 <td class="px-8 py-5 font-bold text-primary text-sm"><%= order.orderId %></td>
                                 <td class="px-8 py-5 text-sm text-slate-500"><%= new Date(order.orderDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
                                 <td class="px-8 py-5">
-                                    <div class="text-sm font-semibold"><%= order.user.name %></div>
-                                    <div class="text-[10px] text-slate-400 uppercase tracking-tight"><%= order.user.email %></div>
+                                    <div class="text-sm font-semibold"><%= order.user ? order.user.name : 'Deleted User' %></div>
+                                    <div class="text-[10px] text-slate-400 uppercase tracking-tight"><%= order.user ? order.user.email : 'N/A' %></div>
                                 </td>
                                 <td class="px-8 py-5 font-bold">₹<%= order.totalAmount.toLocaleString() %></td>
                                 
