@@ -91,11 +91,11 @@
           </div>
         <% } %>
       </div>
-      <% const hasInvalidItem = cart.items.some(item => item.status === 'out of stock');%>
+      <% const hasInvalidItem = cart && cart.items ? cart.items.some(item => item.status === 'out of stock') : false; %>
       <div class="lg:w-1/3">
         <% 
           let subtotal = 0;
-          if (cart && cart.items) {
+          if (cart && cart.items && cart.items.length > 0) {
             subtotal = cart.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
           }
         %>
