@@ -32,4 +32,8 @@ const isInWishlist = async (userId, productId, variantId) => {
     return !!item;
 };
 
-module.exports = { toggleWishlist, getWishlistByUser, isInWishlist };
+const getWishlistCount = async (userId) => {
+    return await Wishlist.countDocuments({ user: userId });
+};
+
+module.exports = { toggleWishlist, getWishlistByUser, isInWishlist, getWishlistCount };

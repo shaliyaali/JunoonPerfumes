@@ -85,4 +85,8 @@ const editCategory=async(id,name,offer,slug,status)=>{
   return updatedCategory;
 }
 
-module.exports = { getCategoriesWithProductCount,countCategories,addCategory,softDeleteCategory,editCategory };
+const getAllActiveCategories = async () => {
+  return await Category.find({ status: 'Active' }).sort({ name: 1 });
+};
+
+module.exports = { getCategoriesWithProductCount, countCategories, addCategory, softDeleteCategory, editCategory, getAllActiveCategories };

@@ -105,13 +105,14 @@ const loadSalesReport = async (req, res, next) => {
         const totalData = summary[0] || { totalOrdersCount: 0, totalSalesAmount: 0, totalDiscount: 0 };
 
         res.render('reports', {
-            orders, // Keep orders for the table
-            search: search || '', // Keep search for input value
-            reportFilter: reportFilter || 'today', // Keep filter for select value
-            startDate: startDate || '', // Keep start date for input value
-            endDate: endDate || '', // Keep end date for input value
+            orders, 
+            search: search || '', 
+            reportFilter: reportFilter || 'today', 
+            startDate: startDate || '', 
+            endDate: endDate || '', 
             currentPage,
             totalPages,
+            totalData, 
             activePage: 'reports'
         });
 
@@ -126,6 +127,20 @@ const exportPDF = async (req, res, next) => {
         const { query, periodStart, periodEnd } = await getReportData(req.query);
         const orders = await Order.find(query).populate('user', 'name email').sort({ orderDate: -1 });
 
+        // Calculate summary for PDF
+        const summary = await Order.aggregate([
+            { $match: query },
+            {
+                $group: {
+                    _id: null,
+                    totalOrders: { $sum: 1 },
+                    totalSales: { $sum: "$totalAmount" },
+                    totalDiscount: { $sum: "$couponDiscount" }
+                }
+            }
+        ]);
+        const totals = summary[0] || { totalOrders: 0, totalSales: 0, totalDiscount: 0 };
+
         const doc = new PDFDocument({ margin: 30, size: 'A4' });
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=sales_report.pdf');
@@ -137,6 +152,14 @@ const exportPDF = async (req, res, next) => {
         doc.fontSize(10).text(`Generated On: ${new Date().toLocaleString()}`);
         doc.text(`Report Period: ${periodStart.toLocaleDateString('en-GB')} - ${periodEnd.toLocaleDateString('en-GB')}`);
         doc.moveDown();
+
+        // Summary Section
+        doc.fontSize(12).font('Helvetica-Bold').text('Summary');
+        doc.fontSize(10).font('Helvetica');
+        doc.text(`Total Orders: ${totals.totalOrders}`);
+        doc.text(`Total Sales: INR ${totals.totalSales.toLocaleString()}`);
+        doc.text(`Total Discounts: INR ${totals.totalDiscount.toLocaleString()}`);
+        doc.moveDown(2);
 
         // Table Header
         const startY = doc.y;
@@ -170,6 +193,20 @@ const exportExcel = async (req, res, next) => {
         const { query, periodStart, periodEnd } = await getReportData(req.query);
         const orders = await Order.find(query).populate('user', 'name email').sort({ orderDate: -1 });
 
+        // Calculate summary for Excel
+        const summary = await Order.aggregate([
+            { $match: query },
+            {
+                $group: {
+                    _id: null,
+                    totalOrders: { $sum: 1 },
+                    totalSales: { $sum: "$totalAmount" },
+                    totalDiscount: { $sum: "$couponDiscount" }
+                }
+            }
+        ]);
+        const totals = summary[0] || { totalOrders: 0, totalSales: 0, totalDiscount: 0 };
+
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sales Report');
 
@@ -177,6 +214,12 @@ const exportExcel = async (req, res, next) => {
         worksheet.addRow(['Junoon Perfumes - Sales Report']).font = { bold: true, size: 16 };
         worksheet.addRow([`Period: ${periodStart.toLocaleDateString('en-GB')} - ${periodEnd.toLocaleDateString('en-GB')}`]);
         worksheet.addRow([`Generated On: ${new Date().toLocaleString()}`]);
+        worksheet.addRow([]);
+        
+        worksheet.addRow(['Summary']).font = { bold: true };
+        worksheet.addRow([`Total Orders`, totals.totalOrders]);
+        worksheet.addRow([`Total Sales`, totals.totalSales]);
+        worksheet.addRow([`Total Discounts`, totals.totalDiscount]);
         worksheet.addRow([]);
 
         // Table Header
