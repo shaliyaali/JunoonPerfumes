@@ -27,7 +27,12 @@ const orderItemSchema = new mongoose.Schema({
     enum: ['Pending', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Return Requested', 'Return Rejected', 'Returned'],
     default: 'Pending'
   },
-  reason: String
+  reason: String,
+  paymentStatus :{
+    type:String,
+    enum:['Pending','Completed','Failed','Refunded'],
+    default:'Pending'
+  }
 });
 
 const orderSchema = new mongoose.Schema({

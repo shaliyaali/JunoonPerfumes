@@ -18,16 +18,41 @@ async function handleAddToCart(productId, variantId, quantity = 1) {
         const data = await response.json();
         if (data.success) {
             const cartBadge = document.getElementById('cart-count');
+            
             if (cartBadge) {
                 cartBadge.textContent = data.cartCount;
                 cartBadge.classList.remove('hidden');
             }
-            Swal.fire({ icon: 'success', title: 'Added to Cart', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
+            Swal.fire({ 
+                icon: 'success', 
+                title: 'Sucess!',
+                text: data.message,
+               toast: true, 
+               position: 'top-end', 
+               showConfirmButton: false, 
+               timer: 3000 });
         } else {
-            Swal.fire({ icon: 'error', title: 'Action Failed', text: data.message });
+            Swal.fire({ 
+                icon: 'error',
+                title: 'Error!',
+                text: data.message|| 'failed to add to cart',
+                toast:true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000 });
         }
     } catch (error) {
         console.error('Cart error:', error);
+        Swal.fire({
+            icon:"error",
+            title: 'Error',
+            text:'An unexpected error occured',
+            toast:'true',
+            position:'top-end',
+            showConfirmButton:false,
+            timer:3000
+
+        })
     }
 }
 

@@ -167,7 +167,7 @@ const toggleWishlist = async (req, res) => {
     }
 };
 
-// Add to Cart from product listing/details
+
 const addToCart = async (req, res, next) => {
     try {
         const { productId, variantId, quantity } = req.body;
@@ -195,8 +195,7 @@ const loadCart = async (req, res, next) => {
 
     const user = await userService.getUserById(req.session.user.id);
     const cart = await cartService.getCart(req.session.user.id,query);
-    //console.log('____________cart_____:', cart)
-
+   
     const wishlist = await wishlistService.getWishlistByUser(req.session.user.id);
     const wishlistItems = wishlist.filter(item =>  item.product !== null );
 

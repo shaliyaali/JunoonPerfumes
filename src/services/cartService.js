@@ -67,7 +67,7 @@ const addToCart = async (userId, productId, variantId, quantity = 1) => {
 
     if (variant.stock <= 0) throw new Error('Out of stock');
 
-    // Offer Logic: Product vs Category (apply whichever is greater)    
+    // Offer Logic: Product vs Category
     const productOffer = product.offer || 0;
     const categoryOffer = (product.category && product.category.offer) ? product.category.offer : 0;
     const bestOffer = Math.max(productOffer, categoryOffer);
@@ -83,27 +83,29 @@ const addToCart = async (userId, productId, variantId, quantity = 1) => {
         item.product.toString() === productId.toString() && 
         item.variantId.toString() === variantId.toString()
     );
-    const maxAllowedQuantity =Math.min(5,variant.stock)
+    // This is the absolute maximum a user can ever have in their cart for this item
+    const totalAllowedInCart = Math.min(5, variant.stock);
     let finalQuantityToAdd=parseInt(quantity)
     let message='Added to Shopping Bag '
-
+    
     if (existingItemIndex > -1) {
         const currentQuantity = cart.items[existingItemIndex].quantity;
         let requestedTotalQuantity = currentQuantity + finalQuantityToAdd;
 
-        if (requestedTotalQuantity > maxAllowedQuantity){
-            finalQuantityToAdd=maxAllowedQuantity - currentQuantity
+        // Compare total sum against the physical stock/business limit
+        if (requestedTotalQuantity > totalAllowedInCart){
+            finalQuantityToAdd = totalAllowedInCart - currentQuantity;
             if(finalQuantityToAdd < 0) finalQuantityToAdd = 0;
-            requestedTotalQuantity= currentQuantity + finalQuantityToAdd;
-            message =`Added ${finalQuantityToAdd} items.Maximum ${maxAllowedQuantity} units available`
+            requestedTotalQuantity = currentQuantity + finalQuantityToAdd;
+            message = `Added ${finalQuantityToAdd} items. Maximum ${totalAllowedInCart} units allowed.`;
         }
 
         cart.items[existingItemIndex].quantity = requestedTotalQuantity;
         cart.items[existingItemIndex].price = finalUnitPrice; // Update to current best price
     } else {
-        if(finalQuantityToAdd > maxAllowedQuantity){
-            finalQuantityToAdd=maxAllowedQuantity;
-            message=`Added ${finalQuantityToAdd} items. Maximum ${maxAllowedQuantity}`
+        if(finalQuantityToAdd > totalAllowedInCart){
+            finalQuantityToAdd = totalAllowedInCart;
+            message = `Added ${finalQuantityToAdd} items. Maximum ${totalAllowedInCart} units allowed.`;
         }
 
         cart.items.push({
@@ -171,10 +173,6 @@ const updateQuantity = async (userId, productId, variantId, change) => {
     }
     }
     
-   
-    
-
-
 const removeItem = async (userId, productId, variantId) => {
     const cart = await Cart.findOne({ user: userId });
     if (!cart) throw new Error('Cart not found');
