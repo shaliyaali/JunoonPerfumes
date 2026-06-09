@@ -28,23 +28,22 @@ const createOrder = async (
     throw new Error("Shipping address not found.");
   }
 
-  // // 1. Calculate Total Amount First
-  // const subtotal = cart.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-  // let totalAmount = Math.max(0, subtotal - couponDiscount);
-  let totalAmount = 0;
-
+  // 1. Calculate Subtotal from cart items
+  const subtotal = cart.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  // 2. Calculate the final total amount for the order, applying coupon and shipping
+  let finalOrderTotal = Math.max(0, subtotal - couponDiscount + shippingCharge);
 
   // 2. Determine Initial Payment Status
   let paymentStatus = "Pending";
 
   if (paymentMethod === "Wallet") {
     const wallet = await Wallet.findOne({ user: userId });
-    if (!wallet || wallet.balance < totalAmount) {
+    if (!wallet || wallet.balance < finalOrderTotal) {
       throw new Error("Insufficient wallet balance to complete this purchase.");
     }
-    wallet.balance -= totalAmount;
+    wallet.balance -= finalOrderTotal;
     wallet.transactions.push({
-      amount: totalAmount,
+      amount: finalOrderTotal,
       type: "Debit",
       description: `Purchase payment for Order`,
       date: new Date(),
@@ -77,8 +76,6 @@ const createOrder = async (
       { $inc: { "variants.$.stock": -cartItem.quantity } },
     );
 
-    totalAmount += cartItem.price * cartItem.quantity;
-
     orderItems.push({
       product: product._id,
       variantId: variant._id,
@@ -95,7 +92,7 @@ const createOrder = async (
     user: userId,
     shippingAddress: shippingAddress._id, // Store the _id of the subdocument
     items: orderItems,
-    totalAmount: totalAmount,
+    totalAmount: finalOrderTotal,
     paymentMethod: paymentMethod,
     couponDiscount: couponDiscount,
     shippingCharge: shippingCharge,

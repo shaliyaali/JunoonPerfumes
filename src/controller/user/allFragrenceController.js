@@ -15,13 +15,13 @@ const loadAllfragrence = async (req, res) => {
     // 2. Build the query object for products
     const query = { status: 'Active' };
 
-    if (category) {
-      const categoryIds = category.split(',');
+    if (category && typeof category === 'string' && category.trim() !== '') {
+      const categoryIds = category.split(',').map(id => id.trim()).filter(id => id !== '');
       query.category = { $in: categoryIds };
     }
 
-    if (note) {
-      const notes = note.split(',');
+    if (note && typeof note === 'string' && note.trim() !== '') {
+      const notes = note.split(',').map(n => n.trim()).filter(n => n !== '');
       query.note = { $in: notes };
     }
 

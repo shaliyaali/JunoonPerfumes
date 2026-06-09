@@ -101,7 +101,7 @@
     <% if(typeof categories !== 'undefined') { %>
         <% categories.forEach(cat => { %>
             <label class="flex items-center gap-3 cursor-pointer group">
-                <input name="category" value="<%= cat._id %>" <%= category.split(',').includes(cat._id.toString()) ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none category-checkbox" type="checkbox"/>
+                <input name="category" value="<%= cat._id %>" <%= (typeof category !== 'undefined' && category && category.split(',').filter(id => id.trim() !== '').includes(cat._id.toString())) ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none category-checkbox" type="checkbox"/>
                 <span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]"><%= cat.name %></span>
             </label>
         <% }) %>
@@ -115,27 +115,27 @@
                     </p>
 <div class="space-y-6">
 <label class="flex items-center gap-3 cursor-pointer group">
-<input name="note" value="Floral" <%= note.split(',').includes('Floral') ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
+<input name="note" value="Floral" <%= (typeof note !== 'undefined' && note && note.split(',').includes('Floral')) ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
 <span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">FLORAL</span>
 </label>
 <label class="flex items-center gap-3 cursor-pointer group">
-<input name="note" value="Woody" <%= note.split(',').includes('Woody') ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
+<input name="note" value="Woody" <%= (typeof note !== 'undefined' && note && note.split(',').includes('Woody')) ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
 <span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">WOODY</span>
 </label>
 <label class="flex items-center gap-3 cursor-pointer group">
-<input name="note" value="Fresh" <%= note.split(',').includes('Fresh') ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
+<input name="note" value="Fresh" <%= (typeof note !== 'undefined' && note && note.split(',').includes('Fresh')) ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
 <span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">FRESH</span>
 </label>
 <label class="flex items-center gap-3 cursor-pointer group">
-<input name="note" value="oriental" <%= note.split(',').includes('oriental') ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
+<input name="note" value="oriental" <%= (typeof note !== 'undefined' && note && note.split(',').includes('oriental')) ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
 <span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">ORIENTAL</span>
 </label>
 <label class="flex items-center gap-3 cursor-pointer group">
-<input name="note" value="Musky" <%= note.split(',').includes('Musky') ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
+<input name="note" value="Musky" <%= (typeof note !== 'undefined' && note && note.split(',').includes('Musky')) ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
 <span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">MUSKY</span>
 </label>
 <label class="flex items-center gap-3 cursor-pointer group">
-<input name="note" value="Spicy" <%= note.split(',').includes('Spicy') ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
+<input name="note" value="Spicy" <%= (typeof note !== 'undefined' && note && note.split(',').includes('Spicy')) ? 'checked' : '' %> class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="checkbox"/>
 <span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">SPICY</span>
 </label>
 </div>
@@ -148,15 +148,15 @@
     </p>
 <div class="space-y-4">
     <label class="flex items-center gap-3 cursor-pointer group">
-        <input class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="radio" name="price" value="0-1000" <%= price === '0-1000' ? 'checked' : '' %>/>
+        <input class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="radio" name="price" value="0-1000" <%= (typeof price !== 'undefined' && price === '0-1000') ? 'checked' : '' %>/>
         <span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">Below ₹1,000</span>
     </label>
     <label class="flex items-center gap-3 cursor-pointer group">
-        <input class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="radio" name="price" value="1000-5000" <%= price === '1000-5000' ? 'checked' : '' %>/>
+        <input class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="radio" name="price" value="1000-5000" <%= (typeof price !== 'undefined' && price === '1000-5000') ? 'checked' : '' %>/>
         <span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">₹1,000 - ₹5,000</span>
     </label>
     <label class="flex items-center gap-3 cursor-pointer group">
-        <input class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="radio" name="price" value="5000-above" <%= price === '5000-above' ? 'checked' : '' %>/>
+        <input class="w-4 h-4 border-gray-300 text-primary focus:ring-primary rounded-none" type="radio" name="price" value="5000-above" <%= (typeof price !== 'undefined' && price === '5000-above') ? 'checked' : '' %>/>
         <span class="text-sm text-gray-600 group-hover:text-primary transition-colors uppercase tracking-widest text-[11px]">Above ₹5,000</span>
     </label>
 </div>
@@ -356,8 +356,12 @@
                 productCount.textContent = data.product.length;
                 updateHeaderCounts(data.cartCount, data.wishlistCount);
                 
-                // Update URL without refreshing
-                window.history.pushState({}, '', `/allfragrence?${params.toString().replace('&ajax=true', '')}`);
+                // Cleanly update URL without refreshing
+                const displayParams = new URLSearchParams(params);
+                displayParams.delete('ajax');
+                const newUrl = window.location.pathname + '?' + displayParams.toString();
+                window.history.pushState({}, '', newUrl);
+
             } catch (error) {
                 console.error('Error fetching products:', error);
             }
@@ -384,11 +388,12 @@
                 const maxOffer=Math.max(pOffer,cOffer);
                 const categoryName = prod.category ? prod.category.name : 'Perfume';
                 const image = prod.images && prod.images.length > 0 ? prod.images[0] : 'https://via.placeholder.com/400x500';
-                const isHidden = wishlistIds.includes(prod._id.toString()) ? 'hidden' : '';
                 const isInWishlist=wishlistIds.includes(prod._id.toString());
                 const btnColor = isInWishlist ? 'text-primary' : 'text-gray-400';
                 const fillStyle = isInWishlist ? 'font-variation-settings: "FILL" 1' : '';
-                
+
+                // Safely get variant ID for wishlist
+                const firstVariantId = (prod.variants && prod.variants.length > 0) ? prod.variants[0]._id : '';
 
                 return `
                     <div class="group flex flex-col bg-white border border-gray-100 product-card-shadow transition-all duration-500">
@@ -405,13 +410,13 @@
                                ${maxOffer > 0 ? `<span class="bg-primary text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider">${maxOffer}% OFF</span>` 
 
                                     : '<div></div>'}
-                                <button type="button" onclick="event.stopPropagation(); toggleWishlist('${prod._id}', '${prod.variants[0]._id}')" class="${btnColor} transition-colors wishlist-btn-${prod._id}">
+                                <button type="button" onclick="event.stopPropagation(); toggleWishlist('${prod._id}', '${firstVariantId || ''}')" class="${btnColor} transition-colors wishlist-btn-${prod._id}">
                                     <span class="material-symbols-outlined" ${fillStyle}>favorite</span>
                                     </button>
                             </div>
                         </div>
                         <div class="p-8 flex flex-col flex-1 text-center">
-                            <p class="text-[9px] text-primary font-bold uppercase tracking-[0.3em] mb-3">Junoon Perfumes</p>
+                            <p class="text-[9px] text-primary font-bold uppercase tracking-[0.3em] mb-3">${categoryName}</p>
                             <h4 class="text-xl font-serif font-medium text-gray-900 mb-2 tracking-wide">${prod.name}</h4>
                             <p class="text-[10px] text-gray-500 mb-6 font-medium uppercase tracking-widest italic">${prod.tagline || ''}</p>
                             <div class="mt-auto space-y-4">
@@ -485,7 +490,12 @@
             updateProducts();
         });
 
-        sortFilter.addEventListener('change', updateProducts);
+        // Make all inputs reactive for a "works together" feel
+        sortFilter.addEventListener('change', () => updateProducts(1));
+        document.querySelectorAll('input[name="category"], input[name="note"], input[name="price"]')
+            .forEach(input => {
+                input.addEventListener('change', () => updateProducts(1));
+            });
 
         headerSearchForm.addEventListener('submit', (e) => {
             e.preventDefault();

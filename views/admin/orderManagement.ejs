@@ -40,13 +40,20 @@
                     <input type="text" name="search" value="<%= search %>" class="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-background-dark border-none rounded-xl focus:ring-2 focus:ring-primary outline-none" placeholder="Search by Order ID or Customer Name...">
                 </div>
                 <div class="flex gap-4 items-center">
+                    <%
+                        const today = new Date();
+                        const yyyy = today.getFullYear();
+                        const mm = String(today.getMonth() + 1).padStart(2, '0');
+                        const dd = String(today.getDate()).padStart(2, '0');
+                        const todayFormatted = `${yyyy}-${mm}-${dd}`;
+                    %>
                     <div class="flex flex-col">
                         <label class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 ml-1">From</label>
-                        <input type="date" name="startDate" value="<%= typeof startDate !== 'undefined' ? startDate : '' %>" class="px-4 py-3 bg-slate-50 dark:bg-background-dark border-none rounded-xl focus:ring-2 focus:ring-primary outline-none text-xs">
+                        <input type="date" id="startDate" name="startDate" value="<%= typeof startDate !== 'undefined' ? startDate : '' %>" max="<%= todayFormatted %>" class="px-4 py-3 bg-slate-50 dark:bg-background-dark border-none rounded-xl focus:ring-2 focus:ring-primary outline-none text-xs">
                     </div>
                     <div class="flex flex-col">
                         <label class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1 ml-1">To</label>
-                        <input type="date" name="endDate" value="<%= typeof endDate !== 'undefined' ? endDate : '' %>" class="px-4 py-3 bg-slate-50 dark:bg-background-dark border-none rounded-xl focus:ring-2 focus:ring-primary outline-none text-xs">
+                        <input type="date" id="endDate" name="endDate" value="<%= typeof endDate !== 'undefined' ? endDate : '' %>" max="<%= todayFormatted %>" class="px-4 py-3 bg-slate-50 dark:bg-background-dark border-none rounded-xl focus:ring-2 focus:ring-primary outline-none text-xs">
                     </div>
                     <div class="flex items-end">
                         <button type="submit" class="h-[46px] bg-primary text-white px-6 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-black transition-colors">Filter</button>
@@ -139,6 +146,40 @@
     //         }
     //     }
     // }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const today = new Date().toISOString().split('T')[0];
+
+        if (startDateInput && endDateInput) {
+            const syncConstraints = () => {
+                if (startDateInput.value) {
+                    endDateInput.min = startDateInput.value;
+                }
+                if (endDateInput.value) {
+                    startDateInput.max = endDateInput.value;
+                } else {
+                    startDateInput.max = today;
+                }
+            };
+
+            const validateDates = () => {
+                if (startDateInput.value && endDateInput.value) {
+                    if (new Date(startDateInput.value) > new Date(endDateInput.value)) {
+                        startDateInput.setCustomValidity('From date cannot be after To date.');
+                    } else {
+                        startDateInput.setCustomValidity('');
+                    }
+                }
+            };
+
+            startDateInput.addEventListener('change', () => { syncConstraints(); validateDates(); });
+            endDateInput.addEventListener('change', () => { syncConstraints(); validateDates(); });
+
+            syncConstraints();
+        }
+    });
 </script>
 </body>
 </html>

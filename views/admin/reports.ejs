@@ -87,13 +87,20 @@
 
                 <!-- Custom Date Range -->
                 <div id="customRangeGroup" class="<%= reportFilter === 'custom' ? 'flex' : 'hidden' %> flex-col md:flex-row gap-4 items-center bg-slate-50 dark:bg-slate-800/30 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <%
+                        const today = new Date();
+                        const yyyy = today.getFullYear();
+                        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+                        const dd = String(today.getDate()).padStart(2, '0');
+                        const todayFormatted = `${yyyy}-${mm}-${dd}`;
+                    %>
                     <div class="flex items-center gap-3">
                         <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">From</label>
-                        <input type="date" name="startDate" value="<%= startDate %>" class="px-4 py-2 bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-lg outline-none text-sm">
+                        <input type="date" id="startDate" name="startDate" value="<%= startDate %>" max="<%= todayFormatted %>" class="px-4 py-2 bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-lg outline-none text-sm">
                     </div>
                     <div class="flex items-center gap-3">
                         <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">To</label>
-                        <input type="date" name="endDate" value="<%= endDate %>" class="px-4 py-2 bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-lg outline-none text-sm">
+                        <input type="date" id="endDate" name="endDate" value="<%= endDate %>" max="<%= todayFormatted %>" class="px-4 py-2 bg-white dark:bg-card-dark border border-slate-200 dark:border-slate-800 rounded-lg outline-none text-sm">
                     </div>
                 </div>
             </form>
@@ -171,9 +178,16 @@
         if (value === 'custom') {
             customRangeGroup.classList.remove('hidden');
             customRangeGroup.classList.add('flex');
+            document.getElementById('startDate').required = true;
+            document.getElementById('endDate').required = true;
         } else {
             customRangeGroup.classList.add('hidden');
             customRangeGroup.classList.remove('flex');
+            const start = document.getElementById('startDate');
+            const end = document.getElementById('endDate');
+            start.required = false;
+            end.required = false;
+            start.setCustomValidity('');
             document.getElementById('reportForm').submit();
         }
     }
@@ -189,6 +203,44 @@
         url.pathname = `/admin/reports/export/${format}`;
         window.location.href = url.toString();
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const reportFilter = document.getElementById('reportFilter');
+        const today = new Date().toISOString().split('T')[0];
+
+        if (startDateInput && endDateInput) {
+            const syncConstraints = () => {
+                if (startDateInput.value) endDateInput.min = startDateInput.value;
+                if (endDateInput.value) {
+                    startDateInput.max = endDateInput.value;
+                } else {
+                    startDateInput.max = today;
+                }
+            };
+
+            const validateDates = () => {
+                if (startDateInput.value && endDateInput.value) {
+                    if (new Date(startDateInput.value) > new Date(endDateInput.value)) {
+                        startDateInput.setCustomValidity('From date cannot be after To date.');
+                    } else {
+                        startDateInput.setCustomValidity('');
+                    }
+                }
+            };
+
+            startDateInput.addEventListener('change', () => { syncConstraints(); validateDates(); });
+            endDateInput.addEventListener('change', () => { syncConstraints(); validateDates(); });
+
+            // Initial setup
+            syncConstraints();
+            if (reportFilter && reportFilter.value === 'custom') {
+                startDateInput.required = true;
+                endDateInput.required = true;
+            }
+        }
+    });
 </script>
 </body>
 </html>
