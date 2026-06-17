@@ -52,7 +52,9 @@ const loadCouponManagement= async (req,res)=>{
       if (minPurchase === undefined || minPurchase < 0) throw new Error('Invalid minimum purchase');
       if (!expiryDate || new Date(expiryDate) < new Date().setHours(0,0,0,0)) throw new Error('Expiry date cannot be in the past');
      // console.log(minPurchase,offerValue)
-      if(minPurchase <= offerValue) throw new Error(' Minimum purchase should be less than offer Price')
+      if (parseFloat(minPurchase) <= parseFloat(offerValue)) {
+        throw new Error('Minimum purchase must be greater than the offer value');
+      }
 
       await couponService.addCoupon(req.body)
       req.session.message="coupon added sucessfully";
@@ -75,6 +77,9 @@ const loadCouponManagement= async (req,res)=>{
       if (offerValue !== undefined && offerValue <= 0) throw new Error('Invalid offer value');
       if (minPurchase !== undefined && minPurchase < 0) throw new Error('Invalid minimum purchase');
       if (expiryDate && new Date(expiryDate) < new Date().setHours(0,0,0,0)) throw new Error('Expiry date cannot be in the past');
+      if (minPurchase !== undefined && offerValue !== undefined && parseFloat(minPurchase) <= parseFloat(offerValue)) {
+        throw new Error('Minimum purchase must be greater than the offer value');
+      }
 
       await couponService.updateCoupon(id,req.body);
       res.json({success: true,message:'coupon updated sucessfully'})

@@ -10,13 +10,16 @@ function showError(input, message) {
   }
 
   error.textContent = message;
-  input.classList.add("border-red-500");
+  error.classList.remove("hidden");
+  input.classList.add("ring-1", "ring-red-500");
 }
 
 function clearError(input) {
   const error = input.parentElement.querySelector(".error-msg");
-  if (error) error.remove();
-  input.classList.remove("border-red-500");
+  if (error) {
+      error.classList.add("hidden");
+  }
+  input.classList.remove("ring-1", "ring-red-500");
 }
 
 function validateEmail(value) {
@@ -35,5 +38,6 @@ function validatePhone(value) {
 }
 
 function validatePassword(value) {
-  return value.length >= 8;
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  return regex.test(value);
 }

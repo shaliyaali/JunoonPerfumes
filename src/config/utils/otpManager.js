@@ -24,7 +24,7 @@ function verifyOtpSession(req,enteredOtp,expectedPurpose){
   if(otpData.purpose !== expectedPurpose)
     return {sucess:false,message:"Invalid otp purpose"}
   if(Date.now() > otpData.expiresAt)
-    return {sucess:false,message:"OTP expaired"}
+    return {sucess:false,message:"OTP expired"}
   if(enteredOtp !== otpData.code)
     return {sucess:false,message:"Invalid OTP"}
 

@@ -55,7 +55,7 @@
 <div>
 <label class="block text-sm font-medium mb-1.5 ml-1">Email ID</label>
 <input class="w-full bg-background-light dark:bg-zinc-800 border-none rounded-lg h-12 px-4 focus:ring-1 focus:ring-primary" placeholder="email@example.com" type="email" name="email" id="email"/>
- <p class="text-red-500 text-xs mt-1 hidden" id="emailError"></p>
+ <p class="text-red-500 text-xs mt-1 error-msg hidden" id="emailError"></p>
 </div>
 <div class="relative">
 <div class="flex justify-between items-center mb-1.5 ml-1">
@@ -63,8 +63,8 @@
 <a class="text-xs text-junoon-gray hover:text-primary transition-colors" href="/forget-password">Forgot password?</a>
 </div>
 <input class="w-full bg-background-light dark:bg-zinc-800 border-none rounded-lg h-12 px-4 pr-12 focus:ring-1 focus:ring-primary" type="password" name="password" id="password"/>
- <p class="text-red-500 text-xs mt-1 hidden" id="passwordError"></p>
-<span class="material-symbols-outlined absolute right-4 top-9 text-junoon-gray cursor-pointer select-none" onclick="togglePassword()">visibility</span>
+ <p class="text-red-500 text-xs mt-1 error-msg hidden" id="passwordError"></p>
+<span class="material-symbols-outlined absolute right-4 top-9 text-junoon-gray cursor-pointer select-none" onclick="togglePassword(this)">visibility</span>
 </div>
 
 <button class="w-full bg-primary hover:bg-opacity-90 text-white font-bold h-12 rounded-lg transition-all serif-font text-lg tracking-wide uppercase">Log In</button>
@@ -104,6 +104,7 @@
 </div>
 </body>
 
+<script src="/js/validators.js"></script>
 <script>
     const message=document.getElementById('message').value
     if(message){
@@ -115,82 +116,43 @@
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 
-const emailError = document.getElementById("emailError");
-const passwordError = document.getElementById("passwordError");
-
 // ================= EMAIL VALIDATION =================
-function validateEmail() {
-    const value = emailInput.value.trim();
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!value) {
-        showError(emailInput, emailError, "Email is required");
+function checkEmail() {
+    if (!validateEmail(emailInput.value)) {
+        showError(emailInput, "Please enter a valid email address");
         return false;
     }
-
-    if (!regex.test(value)) {
-        showError(emailInput, emailError, "Invalid email format");
-        return false;
-    }
-
-    hideError(emailInput, emailError);
+    clearError(emailInput);
     return true;
 }
-
 
 // ================= PASSWORD VALIDATION =================
-function validatePassword() {
-    const value = passwordInput.value;
-
-    if (!value) {
-        showError(passwordInput, passwordError, "Password is required");
+function checkPassword() {
+    if (!passwordInput.value) {
+        showError(passwordInput, "Password is required");
         return false;
     }
-
-    if (value.length < 6) {
-        showError(passwordInput, passwordError, "Password must be at least 6 characters");
-        return false;
-    }
-
-    hideError(passwordInput, passwordError);
+    clearError(passwordInput);
     return true;
 }
 
-// ================= ERROR HANDLING =================
-function showError(inputElement, errorElement, message) {
-    errorElement.textContent = message;
-    errorElement.classList.remove("hidden");
-    inputElement.classList.add("border", "border-danger-muted");
-}
-
-function hideError(inputElement, errorElement) {
-    errorElement.textContent = "";
-    errorElement.classList.add("hidden");
-    inputElement.classList.remove("border", "border-danger-muted");
-}
-
-
 // ================= LIVE VALIDATION =================
-emailInput.addEventListener("input", validateEmail);
-passwordInput.addEventListener("input", validatePassword);
-
+emailInput.addEventListener("input", checkEmail);
+passwordInput.addEventListener("input", checkPassword);
 
 // ================= FORM SUBMIT =================
 form.addEventListener("submit", function(e) {
-
     const isValid =
-        validateEmail() & // Use & to ensure all validations run
-        validatePassword();
+        checkEmail() &&
+        checkPassword();
 
     if (!isValid) {
         e.preventDefault();
     }
-
 });
 
 // ================= PASSWORD TOGGLE =================
-function togglePassword() {
-    const icon = event.target;
+function togglePassword(icon) {
     if (passwordInput.type === "password") {
         passwordInput.type = "text";
         icon.textContent = "visibility_off";

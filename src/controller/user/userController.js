@@ -423,9 +423,9 @@ const loadForgetPassword = async (req, res) => {
   res.render('auth/forgetpassword', { message })
 }
 
-const registerUser = async (req, res, next) => {
+const registerUser = async (req, res) => {
  try {
-  const message = req.session.message
+ // const message = req.session.message
   delete req.session.message
 
   const { name, email, password, cpassword, referralCode } = req.body
@@ -440,6 +440,11 @@ const registerUser = async (req, res, next) => {
     return res.render('auth/signup', { message: "Invalid email format" })
   }
 
+  // Strong password validation: min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!passwordRegex.test(password)) {
+    return res.render('auth/signup', { message: "Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character." });
+  }
  
   if (password !== cpassword) {
     return res.render('auth/signup', { message: "Passwords do not match" })
@@ -629,6 +634,17 @@ const updateProfile = async (req, res, next) => {
   try {
     const userid = req.session.user.id
     const { name, phone } = req.body
+
+    const nameRegex = /^[A-Za-z ]{3,50}$/;
+    if (!nameRegex.test(name)) {
+      return res.status(400).json({ success: false, message: "Name must be 3–50 letters only" });
+    }
+
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ success: false, message: "Enter valid 10-digit phone number" });
+    }
+
     await userService.updateProfile(userid, name, phone)
     req.session.user.name = name
     req.session.user.phone = phone
@@ -650,6 +666,11 @@ const editEmail = async (req, res) => {
       return res.render('account/profile', {
         message: "Google users cannot change email"
       })
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      return res.redirect('/profile');
     }
 
     //same email
@@ -726,6 +747,13 @@ const passwordReset = async (req, res) => {
 
     const { email } = req.body
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.render('auth/forgetpassword', {
+        message: "Invalid email format"
+      })
+    }
+
     const user = await userService.findByEmail(email)
 
     if (!user) {
@@ -787,7 +815,7 @@ const verifyResetOtp = (req, res) => {
 const resetPassword = async (req, res) => {
 
   try {
-    console.log('inside reset password')
+   
     const { password, confirmPassword } = req.body
 
     if (password !== confirmPassword) {
@@ -800,6 +828,12 @@ const resetPassword = async (req, res) => {
 
     if (!otpData || otpData.purpose !== "reset-password") {
       return res.redirect('/forget-password')
+    }
+
+    // Strong password validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.render('auth/resetpassword', { message: "Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character." });
     }
 
     const userId = otpData.payload.userId
@@ -845,6 +879,13 @@ const changePassword = async (req, res) => {
       return res.render('account/profile', {
         message: "New passwords do not match"
       })
+    }
+
+    // Strong password validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      const user = await userService.getUserById(sessionUser.id);
+      return res.render('account/profile', { user, message: "New password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character." });
     }
 
     const user = await userService.getUserById(sessionUser.id)

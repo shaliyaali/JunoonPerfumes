@@ -119,8 +119,10 @@
                             Add to Shopping Bag
                         </button>
                         <button type="button" 
-                                onclick="toggleWishlist('<%= product._id %>', currentVariantId)" 
-                                class="wishlist-btn-<%= product._id %> w-16 border border-gray-200 rounded-xl flex items-center justify-center hover:text-primary transition-all">
+                                onclick="toggleWishlist('<%= product._id %>', currentVariantId)"
+                                <% const isMainProductInWishlist = typeof wishlistIds !== 'undefined' && wishlistIds.includes(product._id.toString()) %>
+                                class="wishlist-btn-<%= product._id %> w-16 border border-gray-200 rounded-xl flex items-center justify-center hover:text-primary transition-all <%= isMainProductInWishlist ? 'text-primary' : 'text-gray-400' %>"
+                                style="<%= isMainProductInWishlist ? "font-variation-settings: 'FILL' 1" : '' %>">
                             <span class="material-symbols-outlined">favorite</span>
                         </button>
                     </div>

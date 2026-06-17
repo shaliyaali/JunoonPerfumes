@@ -53,6 +53,11 @@ const addCategory=async(req,res)=>{
     req.session.message = "Category name is required";
     return res.redirect('/admin/categoryManagement');
   }
+
+  if (name.trim().length < 3) {
+    req.session.message = "Category name must be at least 3 characters long";
+    return res.redirect('/admin/categoryManagement');
+  }
  
   const slug = slugify(name, { lower: true, strict: true });
   const categoryOffer = parseFloat(offer) || 0;
@@ -91,6 +96,10 @@ const editCategory=async(req,res,next)=>{
     
     if (!name || name.trim() === "") {
       return res.status(400).json({ success: false, message: "Category name is required" });
+    }
+
+    if (name.trim().length < 3) {
+      return res.status(400).json({ success: false, message: "Category name must be at least 3 characters long" });
     }
 
     const slug = slugify(name, { lower: true, strict: true });

@@ -86,32 +86,32 @@
                     <input
                         class="w-full bg-background-light dark:bg-zinc-800 border-none rounded-lg h-12 px-4 focus:ring-1 focus:ring-primary"
                         placeholder="Enter your name" type="text" name="name" id="name" />
-                    <p class="text-red-500 text-xs mt-1 hidden" id="nameError"></p>
+                    <p class="text-red-500 text-xs mt-1 error-msg hidden" id="nameError"></p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1.5 ml-1">Email ID</label>
                     <input
                         class="w-full bg-background-light dark:bg-zinc-800 border-none rounded-lg h-12 px-4 focus:ring-1 focus:ring-primary"
                         placeholder="email@example.com" type="email" name="email" id="email" />
-                        <p class="text-red-500 text-xs mt-1 hidden" id="emailError"></p>
+                        <p class="text-red-500 text-xs mt-1 error-msg hidden" id="emailError"></p>
                 </div>
                 <div class="relative">
                     <label class="block text-sm font-medium mb-1.5 ml-1">Password</label>
                     <input
                         class="w-full bg-background-light dark:bg-zinc-800 border-none rounded-lg h-12 px-4 focus:ring-1 focus:ring-primary"  type="password" name="password" id="password" />
-                    <p class="text-red-500 text-xs mt-1 hidden" id="passwordError"></p>
+                    <p class="text-red-500 text-xs mt-1 error-msg hidden" id="passwordError"></p>
                    
                     <span
-                        class="material-symbols-outlined absolute right-4 top-9 text-junoon-gray cursor-pointer">visibility</span>
-                    <!-- <p class="text-[10px] text-junoon-gray mt-1 ml-1 uppercase tracking-wider">Minimum 8 characters</p> -->
+                        class="material-symbols-outlined absolute right-4 top-9 text-junoon-gray cursor-pointer select-none" onclick="togglePassword('password', this)">visibility</span>
+                    <p class="text-[10px] text-junoon-gray mt-1 ml-1 uppercase tracking-wider">Min. 8 chars, with uppercase, number & symbol</p>
                 </div>
                 <div class="relative">
                     <label class="block text-sm font-medium mb-1.5 ml-1">Confirm Password</label>
                     <input
                         class="w-full bg-background-light dark:bg-zinc-800 border-none rounded-lg h-12 px-4 focus:ring-1 focus:ring-primary" type="password" name="cpassword" id="cpassword"/>
-                    <p class="text-red-500 text-xs mt-1 hidden" id="cpasswordError"></p>
+                    <p class="text-red-500 text-xs mt-1 error-msg hidden" id="cpasswordError"></p>
                     <span
-                        class="material-symbols-outlined absolute right-4 top-9 text-junoon-gray cursor-pointer">visibility</span>
+                        class="material-symbols-outlined absolute right-4 top-9 text-junoon-gray cursor-pointer select-none" onclick="togglePassword('cpassword', this)">visibility</span>
                 </div>
 
                 <div>
@@ -163,6 +163,7 @@
 
 
 </body>
+ <script src="/js/validators.js"></script>
  <script>
     const message = document.getElementById('message').value
     if (message) {
@@ -188,108 +189,67 @@ const confirmPasswordError = document.getElementById("cpasswordError");
 
 
 // ================= NAME VALIDATION =================
-function validateName() {
-    const value = nameInput.value.trim();
-    const regex = /^[A-Za-z ]{3,}$/;
-
-    if (!value) {
-        showError(nameError, "Name is required");
+function checkName() {
+    if (!validateName(nameInput.value)) {
+        showError(nameInput, "Name must be 3-50 letters (alphabets only)");
         return false;
     }
-
-    if (!regex.test(value)) {
-        showError(nameError, "Name must be at least 3 letters and only alphabets");
-        return false;
-    }
-
-    hideError(nameError);
+    clearError(nameInput);
     return true;
 }
-
 
 // ================= EMAIL VALIDATION =================
-function validateEmail() {
-    const value = emailInput.value.trim();
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!value) {
-        showError(emailError, "Email is required");
+function checkEmail() {
+    if (!validateEmail(emailInput.value)) {
+        showError(emailInput, "Please enter a valid email address");
         return false;
     }
-
-    if (!regex.test(value)) {
-        showError(emailError, "Invalid email format");
-        return false;
-    }
-
-    hideError(emailError);
+    clearError(emailInput);
     return true;
 }
 
-
 // ================= PASSWORD VALIDATION =================
-function validatePassword() {
-    const value = passwordInput.value;
-
-    if (!value) {
-        showError(passwordError, "Password is required");
+function checkPassword() {
+    if (!validatePassword(passwordInput.value)) {
+        showError(passwordInput, "Password must be 8+ chars with uppercase, number & symbol");
         return false;
     }
-
-    if (value.length < 6) {
-        showError(passwordError, "Password must be at least 6 characters");
-        return false;
-    }
-
-    hideError(passwordError);
+    clearError(passwordInput);
     return true;
 }
 
 
 // ================= CONFIRM PASSWORD =================
-function validateConfirmPassword() {
+function checkConfirmPassword() {
     if (!confirmPasswordInput.value) {
-        showError(confirmPasswordError, "Confirm your password");
+        showError(confirmPasswordInput, "Confirm your password");
         return false;
     }
 
     if (confirmPasswordInput.value !== passwordInput.value) {
-        showError(confirmPasswordError, "Passwords do not match");
+        showError(confirmPasswordInput, "Passwords do not match");
         return false;
     }
 
-    hideError(confirmPasswordError);
+    clearError(confirmPasswordInput);
     return true;
 }
 
-
-// ================= ERROR HANDLING =================
-function showError(element, message) {
-    element.textContent = message;
-    element.classList.remove("hidden");
-}
-
-function hideError(element) {
-    element.textContent = "";
-    element.classList.add("hidden");
-}
-
-
 // ================= LIVE VALIDATION =================
-nameInput.addEventListener("input", validateName);
-emailInput.addEventListener("input", validateEmail);
-passwordInput.addEventListener("input", validatePassword);
-confirmPasswordInput.addEventListener("input", validateConfirmPassword);
+nameInput.addEventListener("input", checkName);
+emailInput.addEventListener("input", checkEmail);
+passwordInput.addEventListener("input", checkPassword);
+confirmPasswordInput.addEventListener("input", checkConfirmPassword);
 
 
 // ================= FORM SUBMIT =================
 form.addEventListener("submit", function(e) {
 
     const isValid =
-        validateName() &
-        validateEmail() &
-        validatePassword() &
-        validateConfirmPassword();
+        checkName() &&
+        checkEmail() &&
+        checkPassword() &&
+        checkConfirmPassword();
 
     if (!isValid) {
         e.preventDefault();
@@ -297,7 +257,17 @@ form.addEventListener("submit", function(e) {
 
 });
 
-
+// ================= PASSWORD TOGGLE =================
+function togglePassword(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+        input.type = "text";
+        icon.textContent = "visibility_off";
+    } else {
+        input.type = "password";
+        icon.textContent = "visibility";
+    }
+}
 
 </script>
 

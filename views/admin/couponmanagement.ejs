@@ -269,7 +269,7 @@
         // Coupon Code: min 6 chars, include digit
         const codeRegex = /^(?=.*\d).{6,}$/;
         if (!codeRegex.test(code)) {
-            document.getElementById('error-code').textContent = 'Minimum 6 characters including digits';
+            document.getElementById('error-code').textContent = 'Minimum 6 characters including digits and charecters';
             document.getElementById('error-code').classList.remove('hidden');
             isValid = false;
         }
@@ -291,10 +291,17 @@
             document.getElementById('error-max').classList.remove('hidden');
             isValid = false;
         }
+        
 
         if (!expiry) {
             document.getElementById('error-expiry').textContent = 'Expiry date is required';
             document.getElementById('error-expiry').classList.remove('hidden');
+            isValid = false;
+        }
+        
+        if (parseFloat(minPurchase) <= parseFloat(offerValue)) {
+            document.getElementById('error-min').textContent = 'Minimum purchase must be greater than the offer value';
+            document.getElementById('error-min').classList.remove('hidden');
             isValid = false;
         }
 
@@ -351,7 +358,7 @@
     // Handle notifications
     const msg = document.getElementById('success-message').value;
     if (msg) {
-        Swal.fire({ icon: 'success', title: 'Notification', text: msg, toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+        Swal.fire({  title: 'Notification', text: msg, toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
     }
 </script>
 </body>

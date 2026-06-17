@@ -123,30 +123,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // async function updateStatus(orderId, newStatus) {
-    //     const result = await Swal.fire({
-    //         title: 'Update Status?',
-    //         text: `Change order status to ${newStatus}?`,
-    //         icon: 'question',
-    //         showCancelButton: true,
-    //         confirmButtonColor: '#D4AF37'
-    //     });
-
-    //     if (result.isConfirmed) {
-    //         try {
-    //             const response = await fetch('/admin/orders/update-status', {
-    //                 method: 'POST',
-    //                 headers: { 'Content-Type': 'application/json' },
-    //                 body: JSON.stringify({ orderId, status: newStatus })
-    //             });
-    //             const data = await response.json();
-    //             if (data.success) location.reload();
-    //         } catch (err) {
-    //             Swal.fire('Error', 'Failed to update status', 'error');
-    //         }
-    //     }
-    // }
-
+   
     document.addEventListener('DOMContentLoaded', () => {
         const startDateInput = document.getElementById('startDate');
         const endDateInput = document.getElementById('endDate');

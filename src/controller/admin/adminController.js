@@ -1,10 +1,10 @@
 
-const Admin = require("../../model/adminSchema");
+//const Admin = require("../../model/adminSchema");
 const User = require("../../model/userSchema");
 const adminService = require('../../services/adminService');
 const Order=require('../../model/orderSchema');
-const Product = require('../../model/productSchema');
-const Category = require('../../model/categorySchema');
+//const Product = require('../../model/productSchema');
+//const Category = require('../../model/categorySchema');
 
 
 

@@ -104,7 +104,7 @@
               <!-- Edit Mode -->
               <input id="nameInput" name="name" type="text" value="<%= user.name %>"
                 class="hidden w-full border px-3 py-2 rounded-md">
-              <p class="text-red-500 text-xs mt-1 hidden" id="nameInputError"></p>
+              <p class="text-red-500 text-xs mt-1 error-msg hidden" id="nameInputError"></p>
             </div>
 
             <div>
@@ -116,7 +116,7 @@
 
               <input id="phoneInput" name="phone" type="text" value="<%= user.phone %>"
                 class="hidden w-full border px-3 py-2 rounded-md">
-              <p class="text-red-500 text-xs mt-1 hidden" id="phoneInputError"></p>
+              <p class="text-red-500 text-xs mt-1 error-msg hidden" id="phoneInputError"></p>
             </div>
 
           </div>
@@ -158,7 +158,7 @@
               <input
                 class="w-full bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-700 rounded-md px-4 py-3 focus:ring-primary focus:border-primary transition mb-4"
                 placeholder="Enter new email" type="email" name="newEmail" id="newemail" required />
-              <p class="text-red-500 text-xs mt-1 hidden" id="newemailError"></p>
+              <p class="text-red-500 text-xs mt-1 error-msg hidden" id="newemailError"></p>
 
               <div class="flex space-x-3">
 
@@ -217,7 +217,7 @@
                     <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
                       onclick="togglePassword('currentPassword', this)">visibility</span>
                   </div>
-                  <p class="text-red-500 text-xs mt-1 hidden" id="currentpasswordError"></p>
+                  <p class="text-red-500 text-xs mt-1 error-msg hidden" id="currentpasswordError"></p>
                 </div>
 
                 <div class="relative">
@@ -230,7 +230,7 @@
                     <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
                       onclick="togglePassword('newPassword', this)">visibility</span>
                   </div>
-                  <p class="text-red-500 text-xs mt-1 hidden" id="newpasswordError"></p>
+                  <p class="text-red-500 text-xs mt-1 error-msg hidden" id="newpasswordError"></p>
                 </div>
 
                 <div class="relative">
@@ -243,7 +243,7 @@
                     <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 select-none"
                       onclick="togglePassword('confirmPassword', this)">visibility</span>
                   </div>
-                  <p class="text-red-500 text-xs mt-1 hidden" id="confirmPasswordError"></p>
+                  <p class="text-red-500 text-xs mt-1 error-msg hidden" id="confirmPasswordError"></p>
                 </div>
 
               </div>
@@ -345,6 +345,7 @@
 
 </body>
 
+<script src="/js/validators.js"></script>
 <script>
 
   const message = document.getElementById('message').value
@@ -360,46 +361,34 @@
   const phoneError = document.getElementById("phoneInputError");
 
   if (profileForm) {
-
-    function validateName() {
-      const value = nameInput.value.trim();
-      const regex = /^[A-Za-z ]{3,50}$/;
-
-      if (!regex.test(value)) {
-        nameError.textContent = "Name must be 3–50 letters only";
-        nameError.classList.remove("hidden");
-        nameInput.classList.add("border-red-500");
+    function checkName() {
+      if (!validateName(nameInput.value)) {
+        showError(nameInput, "Name must be 3–50 letters only");
         return false;
       }
-
-      nameError.classList.add("hidden");
-      nameInput.classList.remove("border-red-500");
+      clearError(nameInput);
       return true;
     }
 
-    function validatePhone() {
-      const value = phoneInput.value.trim();
-      const regex = /^[6-9]\d{9}$/;
-
-      if (!regex.test(value)) {
-        phoneError.textContent = "Enter valid 10-digit phone number";
-        phoneError.classList.remove("hidden");
-        phoneInput.classList.add("border-red-500");
+    function checkPhone() {
+      if (!validatePhone(phoneInput.value)) {
+        showError(phoneInput, "Enter valid 10-digit phone number");
         return false;
       }
-
-      phoneError.classList.add("hidden");
-      phoneInput.classList.remove("border-red-500");
+      clearError(phoneInput);
       return true;
     }
 
-    nameInput.addEventListener("input", validateName);
-    phoneInput.addEventListener("input", validatePhone);
+    nameInput.addEventListener("input", checkName);
+    phoneInput.addEventListener("input", checkPhone);
 
     profileForm.addEventListener("submit", async function (e) {
       e.preventDefault();
-      
-      if (!validateName() || !validatePhone()) return;
+
+      const isNameValid = checkName();
+      const isPhoneValid = checkPhone();
+
+      if (!isNameValid || !isPhoneValid) return;
 
       try {
         const response = await fetch('/updateprofile', {
@@ -462,33 +451,18 @@
   const emailForm = document.querySelector('form[action="/edit-email"]');
 
   if (emailForm) {
-
     const emailInput = emailForm.querySelector('input[name="newEmail"]');
-    const emailError = document.createElement("p");
-
-    emailError.className = "text-red-500 text-xs mt-1 hidden";
-    emailInput.after(emailError);
-
-    function validateEmail() {
-      const value = emailInput.value.trim();
-      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      if (!regex.test(value)) {
-        emailError.textContent = "Enter valid email address";
-        emailError.classList.remove("hidden");
-        emailInput.classList.add("border-red-500");
+    function checkEmail() {
+      if (!validateEmail(emailInput.value)) {
+        showError(emailInput, "Enter valid email address");
         return false;
       }
-
-      emailError.classList.add("hidden");
-      emailInput.classList.remove("border-red-500");
+      clearError(emailInput);
       return true;
     }
-
-    emailInput.addEventListener("input", validateEmail);
-
+    emailInput.addEventListener("input", checkEmail);
     emailForm.addEventListener("submit", function (e) {
-      if (!validateEmail()) {
+      if (!checkEmail()) {
         e.preventDefault();
       }
     });
@@ -505,50 +479,41 @@
     const newPasswordError = document.getElementById("newpasswordError");
     const confirmPasswordError = document.getElementById("confirmPasswordError");
 
-    function validateCurrentPassword() {
+    function checkCurrentPassword() {
       if (currentPassword.value.trim() === "") {
-       currentPasswordError.textContent = "Current password is required";
-        currentPasswordError.classList.remove("hidden");
-        currentPassword.classList.add("border-red-500");
+        showError(currentPassword, "Current password is required");
         return false;
       }
-      currentPasswordError.classList.add("hidden");
-      currentPassword.classList.remove("border-red-500");
+      clearError(currentPassword);
       return true;
     }
 
-    function validateNewPassword() {
-      if (newPassword.value.length < 6) {
-        newPasswordError.textContent = "Password must be at least 8 characters";
-        newPasswordError.classList.remove("hidden");
-        newPassword.classList.add("border-red-500");
+    function checkNewPassword() {
+      if (!validatePassword(newPassword.value)) {
+        showError(newPassword, "Password must be 8+ chars with uppercase, number & symbol");
         return false;
       }
-      newPasswordError.classList.add("hidden");
-      newPassword.classList.remove("border-red-500");
+      clearError(newPassword);
       return true;
     }
 
-    function validateConfirmPassword() {
-      if (confirmPassword.value !== newPassword.value) {
-        confirmPasswordError.textContent = "Passwords do not match";
-        confirmPasswordError.classList.remove("hidden");
-        confirmPassword.classList.add("border-red-500");
+    function checkConfirmPassword() {
+      if (confirmPassword.value === "" || confirmPassword.value !== newPassword.value) {
+        showError(confirmPassword, "Passwords do not match");
         return false;
       }
-      confirmPasswordError.classList.add("hidden");
-      confirmPassword.classList.remove("border-red-500");
+      clearError(confirmPassword);
       return true;
     }
 
-    currentPassword.addEventListener("input", validateCurrentPassword);
-    newPassword.addEventListener("input", validateNewPassword);
-    confirmPassword.addEventListener("input", validateConfirmPassword);
+    currentPassword.addEventListener("input", checkCurrentPassword);
+    newPassword.addEventListener("input", checkNewPassword);
+    confirmPassword.addEventListener("input", checkConfirmPassword);
 
     passwordForm.addEventListener("submit", function(e) {
-      const isCurrentValid = validateCurrentPassword();
-      const isNewValid = validateNewPassword();
-      const isConfirmValid = validateConfirmPassword();
+      const isCurrentValid = checkCurrentPassword();
+      const isNewValid = checkNewPassword();
+      const isConfirmValid = checkConfirmPassword();
 
       if (!isCurrentValid || !isNewValid || !isConfirmValid) {
         e.preventDefault();

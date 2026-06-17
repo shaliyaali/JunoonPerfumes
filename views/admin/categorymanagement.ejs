@@ -281,12 +281,13 @@
         // Basic validation for category name
         const nameVal = nameInput.value.trim();
         
-        if (!nameVal) {
+        if (!nameVal || nameVal.length < 3) {
             e.preventDefault();
+            closeModal();
             Swal.fire({
                 icon: 'error',
                 title: 'Validation Error',
-                text: 'Category name cannot be empty or contain only whitespace.',
+                text: !nameVal ? 'Category name cannot be empty.' : 'Category name must be at least 3 characters long.',
                 confirmButtonColor: '#D4AF37'
             });
             return; // Stop further execution
